@@ -25,6 +25,7 @@ require Exporter;
 @EXPORT = qw(Eval isNonNull isTrue isFalse mapOid runTime quoteString mergeHash);
 
 use Common::Log;
+use Digest::MD5;
 
 # This is used to help not-strictly-numeric instances sneak through
 # the eval. This is a hack and should probably be solved better
@@ -172,6 +173,15 @@ sub mergeHash {
             $hashRef1->{$curKey} = $hashRef2->{$curKey};
         }
     }
+}
+
+# Munge an overly long datasource name to fit RRD's constraints
+sub mungeDsName {
+    my $name = lc shift;
+    return $name if length($name) < 19;
+    my $md5 = Digest::MD5::md5_base64($name);
+    $md5 =~ tr/A-Z0-9//cd;
+    return substr($name, 0, 15) . substr($md5, 0, 4);
 }
 
 1;

@@ -79,6 +79,9 @@ BEGIN {
     if (!defined($isCollector)) {
         $isCollector = 0;
     }
+    if (!defined($gLongDSName)) {
+        $gLongDSName = 0;
+    }
 }
 
 1;
