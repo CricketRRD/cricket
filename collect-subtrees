@@ -43,6 +43,10 @@ $gBase = "$ENV{'HOME'}/config";
 $gKeepLogs = 20;
 $gUser = getlogin || getpwuid($<);	# idiom from perlfunc manpage
 
+# Uncomment '$subtreeTimes' line to collect time-based statistics 
+# stored in .time logs in the cricket-logs directory.
+#my $subtreeTimes = 1;
+
 open(S, "<$gCF") ||
 	die("Could not read $gCF file.\n");
 
@@ -105,6 +109,9 @@ foreach $s (@ARGV) {
 	rollLogs($s);
 	$logfile = "$gLogDir/$s.0";
 	$timelogfile = "$gLogDir/$s.times";
+	if(-f $timelogfile && -s $timelogfile >=  50000 && $subtreeTimes == 1) {
+		rename $timelogfile, "$timelogfile.old"
+	}
 	$args = "-base $gBase " . join(" ", @{$subtreeRef});
 	system("$gInstallRoot/collector $args > $logfile 2>&1");
 
@@ -115,10 +122,6 @@ foreach $s (@ARGV) {
 	# so that cron sends them to the admin.
 
 	if (open(L, "<$logfile")) {
-		# Uncomment '$subtreeTimes' line to collect time-based statistics 
-		# stored in .time logs in the cricket-logs directory.
-
-		#$subtreeTimes = 1;
 		(open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!") unless (!$subtreeTimes == 1);
 		while (<L>) {
 			# keep 5 lines of history
