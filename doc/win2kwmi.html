@@ -53,7 +53,7 @@
 			<ul>
 				<li>
 					<a
-					href="http://velocity.activestate.com/code/">ActiveState
+					href="http://www.activestate.com/perl/">ActiveState
 					Package Repository</a> or <a
 					href="http://www.cpan.org">CPAN</a>
 					<ul>
@@ -79,9 +79,7 @@
 					href="http://www.sleepycat.com">www.sleepycat.com</a>)
 				</li>
 				<li>
-					ActivePerl (<a
-					href="http://www.activestate.com">www.activestate.com</a
-					>)
+					ActivePerl (<a href="http://www.activestate.com">www.activestate.com</a>)
 				</li>
 			</ul>
 		</div>
@@ -165,8 +163,8 @@
 				many of its specific suggestions are obsolete given the
 				cricket-conf.pl configuration scheme introduced with Cricket
 				1.0.3.&nbsp; The remainder of the document refers to the
-				installation directory as &lt;install dir> (gInstallRoot in
-				the code). The cricket subdirectory of &lt;install dir>
+				installation directory as &lt;install dir&gt; (gInstallRoot in
+				the code). The cricket subdirectory of &lt;install dir&gt;
 				contains the Cricket source code (gConfigRoot in the code).
 			</p>
 			<div>
@@ -192,8 +190,7 @@
 				DB_File, Digest-MD5, and TimeDate are available at the
 				ActiveState Perl Package Archive for both 5xx and 6xx
 				ActiveState builds. They can be installed via the utility <a
-				href="http://velocity.activestate.com/docs/ActivePerl/faq/
-				ActivePerl-faq2.html">ppm</a>. You will need to compile the
+				href="http://aspn.activestate.com/ASPN/Reference/Products/ActivePerl/faq/ActivePerl-faq2.html">ppm</a>. You will need to compile the
 				source for the RRDs package after installing ActiveState.
 				The source of RRDs is available from <a
 				href="http://www.rrdtool.org/">www.rrdtool.org</a>. After
@@ -209,7 +206,7 @@
 			<div>
 				<p>
 					a. Create a virtual directory called crickethome. Set
-					the local directory to &lt;install dir>.
+					the local directory to &lt;install dir&gt;.
 				</p>
 				<p>
 					b. Register *.cgi files to be processed by the Perl
@@ -222,7 +219,7 @@
 				</p>
 				<p>
 					c. Enable permissions on the cricket subdirectory of
-					&lt;install dir>. Again, right-click properties. Grant
+					&lt;install dir&gt; Again, right-click properties. Grant
 					read and set Execute Permissions to "Scripts and
 					Executables".
 				</p>
@@ -247,8 +244,8 @@
 					similar to the following (substituting paths on your
 					system as appropriate):
 				</p>
-				<p>c:\Perl\bin\perl &lt;install dir>/cricket/collect-subtrees</p>
-				<p>Set the "Start in" field to &lt;install dir></p>
+				<p>c:\Perl\bin\perl &lt;install dir&gt;/cricket/collect-subtrees</p>
+				<p>Set the "Start in" field to &lt;install dir&gt;</p>
 				<p>
 					c. Select the Schedule tab. Schedule the task daily;
 					then click the Advanced button. Don't choose an End
@@ -263,7 +260,7 @@
 			</div>
 			<p>
 				9. Create and compile a Cricket config tree. Configure the
-				subtree-sets file (in &lt;install dir>\cricket). Refer to <a
+				subtree-sets file (in &lt;install dir&gt;\cricket). Refer to <a
 				href="reference.html">Cricket documentation</a> and the next
 				section on this document, <a href="#wbemodbc">Monitoring WMI
 				Counters</a>. After successful compilation, you may choose
@@ -272,10 +269,9 @@
 			<p>10. Enable the scheduled task you created in step (8).</p>
 			<p>
 				11. After a few minutes, check log files in &lt;install
-				dir>/cricket-logs to verify everything is running okay. Test
+				dir&gt;/cricket-logs to verify everything is running okay. Test
 				the grapher on the monitoring machine with the URL: <a
-				href="http://localhost/crickethome/cricket/grapher.cgi">http
-				://localhost/crickethome/cricket/grapher.cgi</a>
+				href="http://localhost/crickethome/cricket/grapher.cgi">http://localhost/crickethome/cricket/grapher.cgi</a>
 			</p>
 		</div>
 
