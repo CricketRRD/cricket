@@ -359,7 +359,8 @@ sub retrieveData {
 	while (($type, $dsList) = each %targetDataSources) {
 		if (defined ($main::gDSFetch{$type})) {
 			push(@mixedResults,
-				 &{$main::gDSFetch{$type}}($dsList, $name, $target));
+				map { $_ = $type . ":" . $_ }
+					&{$main::gDSFetch{$type}}($dsList, $name, $target));
 		} else {
 			Warn("Could not find a fetcher with type $type to " .
 					"fetch data for $tname.");
@@ -370,12 +371,15 @@ sub retrieveData {
 
 	my($line, @results);
 	foreach $line (@mixedResults) {
-		my($index, $value) = split(/:/, $line, 2);
+		my($type, $index, $value) = split(/:/, $line, 3);
 
 		# only take the first token from the line... that
 		# way, they can put in-line comments in the returned data.
-		$value =~ s/^\s*//;
-		($value) = split(/\s+/, $value, 2);
+		# do this only for 'exec' and 'file' data sources
+		if (lc($type) ne 'snmp') {
+			$value =~ s/^\s*//;
+			($value) = split(/\s+/, $value, 2);
+		}
 
 		$results[$index] = $value;
 	}
