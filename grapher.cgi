@@ -592,7 +592,7 @@ sub doHTMLPage {
 				print "</td><td><center>\n";
 				print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
 				if ($enableHoltWinters) {
-				   print "<i>Holt Winters:</i><p>\n", join("<br>\n", @hwlinks);
+				   print "<p><i>Aberrant Behavior Detection:</i><p>\n", join("<br>\n", @hwlinks);
 				}
 				print "</center></td>\n";
 				print "</tr></table>\n";
