@@ -667,7 +667,7 @@ sub doHTMLPage {
 
         if ($searchCrit) {
             @children = ();
-	    my %children;
+            my %children;
             foreach $subtree ($name) {
                 if ($gCT->nodeExists($subtree)) {
                     $gCT->visitLeafs($subtree, \&searchHandleTarget,
@@ -677,7 +677,7 @@ sub doHTMLPage {
                 }
 
             }
-	    @children = keys %children if (scalar keys %children);
+            @children = keys %children if (scalar keys %children);
         }
 
         my($targs, $t, @targets, @dirs);
@@ -847,6 +847,7 @@ sub doHTMLPage {
             }
             print "</table><p>\n";
         }
+        $Common::global::gEnableSearch ||= 0;
         if ($Common::global::gEnableSearch) {
             urlTarget($gQ, $name);
             print "<FORM ACTION=\"",makeUrl($gQ),"\" METHOD=\"get\">\n";
