@@ -411,7 +411,7 @@ sub retrieveData {
 		}
 		my($fetchedKey) = pop @results;
 		my($wrongInst);
-	
+
 		if ($match =~ /^\s*\/(.*)\/\s*$/) {
 			$match = $1;
 			$wrongInst = ($fetchedKey !~ /$match/i);
