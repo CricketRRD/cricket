@@ -795,12 +795,15 @@ sub doHTMLPage {
                     foreach $v (split(/\s*,\s*/, $views)) {
                         my($vname, $junk) = split(/\s*:\s*/, $v);
 
+                        my $viewRef = $ct->configHash($name, 'view', lc $vname);
+                        my $vdesc = $viewRef->{'label'};
+                        $vdesc ||= $vname;
                         # put it in just long enough to get a URL out
                         $gQ->param('view', $vname);
                         my($me) = makeUrl($gQ);
                         $gQ->delete('view');
 
-                        $links .= "<a href=\"$me\">[&nbsp;$vname&nbsp;]</a>\n";
+                        $links .= "<a href=\"$me\">[&nbsp;$vdesc&nbsp;]</a>\n";
                     }
 
                     print "<tr><td>$itemName<br>" .
