@@ -231,7 +231,7 @@ sub doHTMLPage {
 
             # put the view into the target dict, so it's
             # there if they want to use it.
-            my($view) = lc $gQ->param('view');
+            my($view) = lc $gQ->param('view') if defined($gQ->param('view'));
             if (defined($view)) {
                 $targRef->{'auto-view'} = $view;
             }
