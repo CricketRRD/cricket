@@ -116,6 +116,8 @@ sub perfmonFetch {
 		my ($perfTimeOnly,$perfFreqOnly);
 
 		my($server, $myobject, $mycounter, $myinstance, $myoptions) = split(/:/, $ilRef);
+
+		$myobject =~ s/=/:/g;
 	
 		my @options = split(/,/, $myoptions);
 
@@ -194,9 +196,11 @@ sub perfmonFetch {
 			my $gDenn = $pr1->{'PerfTime100nSec'};
 			my $gDen  = $pr1->{'PerfTime'};
 			my $gTb   = $pr1->{'PerfFreq'};
+			my $oldvalue;
 
 			if($pr1->{'Objects'}->{$level2}->{'NumInstances'} > 0) {
 				foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Instances'}}) {
+					my $oldvalue;
 					my $ir1 = $pr1->{'Objects'}->{$level2}->{'Instances'}->{$level4};
 					foreach my $level5 (sort keys %{$ir1->{'Counters'}}) {
 						my $cr1 = $ir1->{'Counters'}->{$level5};
@@ -205,7 +209,12 @@ sub perfmonFetch {
 						if(lc($saneCounterName) eq lc($mycounter)) {
 							if(lc($saneInstanceName) eq lc($myinstance) || !defined $myinstance) {
 								$value = getCounter($cr1,$index,$ilRef,$noscale,$fractop);
-								$matches++;
+								if($value ne "skip") {
+									$oldvalue = $value;
+									$matches++;
+								} else {
+									$value = $oldvalue;
+								}
 							}
 						}
 					}
@@ -214,9 +223,15 @@ sub perfmonFetch {
 			foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Counters'}}) {
 				my $cr1 = $pr1->{'Objects'}->{$level2}->{'Counters'}->{$level4};
 				my $saneCounterName = $counter->{$server}->{$cr1->{'CounterNameTitleIndex'}};
+				
 				if(lc($saneCounterName) eq lc($mycounter)) {
 					$value = getCounter($cr1,$index,$ilRef,$noscale,$fractop);
-					$matches++;
+					if($value ne "skip") {
+						$oldvalue = $value;
+						$matches++;
+					} else {
+						$value = $oldvalue;
+					}
 				}
 			}
 		}
@@ -241,8 +256,10 @@ sub getCounter {
 	my $scaler = $cr1->{'DefaultScale'};
 	my $ctype = Win32::PerfLib::GetCounterType($cr1->{'CounterType'});
 
-	next if(defined $fractop eq "base" && $ctype =~ /FRACTION/);
-	next if(defined $fractop eq "fraction" && $ctype =~ /BASE/);
+	if(defined($fractop)) {
+		return "skip" if($fractop eq "base" && $ctype =~ /FRACTION/);
+		return "skip" if($fractop eq "fraction" && $ctype =~ /BASE/);
+	}
 
 	Debug("ds$index COUNTER_TYPE is $ctype");
 
