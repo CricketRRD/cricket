@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <title>Modifying the Polling Rate</title>
+    <link rel="style" type="text/css" href="../style.css" />
+  </head>
+  <body>
+    <h1>Modifying the Polling Rate</h1>
+    <p class="intro">
+      This document provides some help for getting Jeff Allen's
+      <a href="http://cricket.sf.net/">Cricket</a>
+      <abbr title="Simple Network Management Protocol">SNMP</abbr>
+      monitoring package to use a custom poll interval such as one minute
+      instead of five. This is a revised version of Theresa Hilding's
+      excellent guide which was written in 2000.
+    </p>
+    <p class="note">
+      Modifying <abbr title="Round Robin Database">RRD</abbr> or
+      <abbr title="Round Robin Archive">RRA</abbr> parameters can render your
+      archived data useless. Be carefull and read this entire document before
+      you start making changes!
+    </p>
+    <div>
+      <h2>Add new RRA definitions</h2>
+      <p>
+        The first thing is to create new RRA definitions. The current defaults
+        are in the toplevel &ldquo;Defaults&rdquo; file. I left those as is
+        and created a new subtree <code class="inline">/router-1min</code>
+        with the new RRA definitions in the <code
+          class="inline">/router-1min</code> &ldquo;Defaults&rdquo; file. The
+        definitions are completely dependent on what type of data you want to
+        keep and how long you want to store it. See the RRDTool create
+        function documentation for details.
+      </p>
+      <code class="block">
+  # one point every minute for 2 days 
+  rra     1minAve         AVERAGE:0.5:1:1880 
+
+  # one point every 30 minutes for 1 week, both average and maximum
+  rra     30minAves1      AVERAGE:0.5:30:336 
+  rra     30minMaxs1      MAX:0.5:30:336 
+
+  # one point every 2 hours for 50 days, both average and maximum 
+  rra     2hrAves1        AVERAGE:0.5:120:600 
+  rra     2hrMaxs1        MAX:0.5:120:600 
+
+  # one point every day for 600 days, both average and maximum 
+  rra     1dayAves1       AVERAGE:0.5:1440:600 
+  rra     1dayMaxs1       MAX:0.5:1440:600 
+      </code>
+    </div>
+    <div>
+      <h2>Add the new RRA definitions to the targetType Dictionary.</h2>
+      <p>
+        Add the new rra definitions to the targetType dictionary for the
+        target you want to monitor.
+      </p>
+      <p>
+        Here is my definition from my <code class="inline">/router-1min</code>
+        &ldquo;Defaults&rdquo; file. For this particular router interface I am
+        interested only in &ldquo;<code
+          class="inline">ifInOctets</code>&rdquo; and &ldquo;<code
+          class="inline">ifOutOctets</code>&rdquo; at 1 minute intervals. The
+        actual datasource definitions for &ldquo;<code
+          class="inline">ifInOctets</code>&rdquo; and &ldquo;<code
+          class="inline">ifOutOctets</code>&rdquo; are still
+        in the rootlevel Defaults file.
+      </p>
+      <code class="block">
+  targetType      1min-router-interface 
+    ds   = "inInOctets, inOutOctets" 
+    view = "Octets: inInOctets ifOutOctets"
+    rra  = "1minAve, 30minAves1, 30minMaxs1, 2hrAves1,
+            2hrMaxs1, 1dayAves1, 1dayMaxs1" 
+      </code>
+    </div>
+    <div>
+      <h2>Modify rrd-poll-interval in the target dictionary</h2>
+      <p>
+        This is from my <code class="inline">/router-1min</code>
+        &ldquo;Defaults&rdquo; file.
+      </p>
+      <code class="block">
+  Target  --default-- 
+    inst              = map(interface-name) 
+    snmp-community    = secret 
+    snmp-host         = %router% 
+    target-type       = 1min-router-interface 
+    rrd-poll-interval = 60 
+      </code>
+    </div>
+    <div>
+      <h2>Modify your crontab</h2>
+      <p>Modify cron update times to run every minute of the hour.</p>
+    </div>
+    <p>Hopefully that's it.  Enjoy.</p>
+  </body>
+</html>
