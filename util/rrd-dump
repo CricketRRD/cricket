@@ -5,10 +5,8 @@
 # when I was developing it, and possibly useful now too
 
 BEGIN {
-	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . "..";
 	eval "require '$programdir/cricket-conf.pl'";
-	eval "require '$programdir/../cricket-conf.pl'"
-					unless $Common::global::gInstallRoot;
 	eval "require '/usr/local/etc/cricket-conf.pl'"
 					unless $Common::global::gInstallRoot;
 	$Common::global::gInstallRoot ||= $programdir;

@@ -19,10 +19,8 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 BEGIN {
-	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . "..";
 	eval "require '$programdir/cricket-conf.pl'";
-	eval "require '$programdir/../cricket-conf.pl'"
-					unless $Common::global::gInstallRoot;
 	eval "require '/usr/local/etc/cricket-conf.pl'"
 					unless $Common::global::gInstallRoot;
 	$Common::global::gInstallRoot ||= $programdir;
