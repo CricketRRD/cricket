@@ -77,13 +77,11 @@ sub mapInstance {
 	# through here for the first time... see retrieveData
 	# the the "second coming" of mapInstance.
 
-	my($metaRef);
+	my($metaRef) = $rrd->getMeta();
 	if (defined($target->{'--verify-mapkey--'})) {
-		# fake an empty meta hash to force the SNMP walk,
+		# Lose the cached last-inst to force the SNMP walk,
 		# since evidently the cached one didn't work.
-		$metaRef = {};
-	} else {
-		$metaRef = $rrd->getMeta();
+		delete($metaRef->{'last-inst'});
 	}
 
 	# if cached, try to use it, but warn the retriever it needs to
