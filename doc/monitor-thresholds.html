@@ -3,10 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
     <title>Monitor Thresholds</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
-    <h1>Understanding and Utilizing Cricket Monitor Thresholds</h1>
+    <h1>Understanding and Using Monitor Thresholds</h1>
     <p>
       Although designed as a real-time data collection and trending
       tool, real-time alerts (or alarms) are a natural extended
@@ -20,25 +20,24 @@
       alerting mechanism, then Cricket can meet your needs.
     </p>
     <p>
-      In Cricket, the alert mechanism is called a monitor threshold.
-      Monitor thresholds are set (or enabled) for specific data
-      sources through the monitor-thresholds target dictionary tag.
-      After the data collection pass, Cricket processes each monitor
-      threshold by retrieving the most recent value of a data source
-      from the RRD file and applying some criteria specific to the
-      monitor threshold type. This criteria generates either a pass or
-      fail condition. Depending on the setting of the
-      persistent-alarms tag for the target, Cricket executes a
-      specified action.
+      In Cricket, the alert mechanism is called a <dfn>Monitor
+      Threshold</dfn>. Monitor thresholds are set (or enabled) for specific
+      data sources through the &ldquo;<code>monitor-thresholds</code>&rdquo;
+      target dictionary tag. After the data collection pass, Cricket processes
+      each monitor threshold by retrieving the most recent value of a data
+      source from the RRD file and applying some criteria specific to the
+      monitor threshold type. This criteria generates either a pass or fail
+      condition. Depending on the setting of the persistent-alarms tag for the
+      target, Cricket executes a specified action.
     </p>
     <p>
-      Note that the most recent value of a data source from the RRD
-      file will not necessarily agree with the most recent value
-      fetched from by the collector because RRDtool
-      interpolates.&nbsp; For those familiar with RRD tool internals,
-      the "most recent value" is retreived from the first RRA in the
-      file with a consolidation function of AVERAGE. The order of RRAs
-      in the file is specified by the rra tag in the targetType
+      Note that the most recent value of a data source from the RRD file will
+      not necessarily agree with the most recent value fetched from by the
+      collector because RRDtool interpolates. For those familiar with RRD tool
+      internals, the &ldquo;most recent value&rdquo; is retreived from the
+      first RRA in the file with a consolidation function of
+      &ldquo;<code>AVERAGE</code>&rdquo;. The order of RRAs in the file is
+      specified by the &ldquo;<code>rra</code>&rdquo; tag in the targetType
       dictionary.
     </p>
     <p>
@@ -49,176 +48,248 @@
       construct of the Cricket grapher).
     </p>
 
-    
-<div> 
-  <h2>Syntax</h2>
-  <p> monitor-thresholds = "&lt;monitor-threshold> [, &lt;monitor-threshold> ...]" 
-  </p>
-  <p> <img src="monitor.gif" width="791" height="41"></p>
-  <div> 
-    <p><font color="#000066">&lt;data source&gt;</font> := a data source defined 
-      for the target; Case sensitive.</p>
-    </div>
-  <p><font color="#000066">&lt;monitor type&gt;</font> := One of the six supported 
-    types: exact, value, relation, hunt, quotient, or failures. Case insensitive.</p>
-  <p> <font color="#000066">&lt;monitor type args&gt;</font> := a colon-delimited 
-    list of arguments specific to each monitor type. Case sensitive</p>
-  <p><font color="#000066">&lt;ACTION&gt;</font> := One of six supported actions: 
-    SNMP, MAIL, EXEC, FUNC, META or FILE. Case insensitive.</p>
-  <p><font color="#000066">&lt;action args&gt;</font> := a colon-delimited list 
-    of arguments specific to each action. Case sensitive in most cases.</p>
-  <p><font color="#000066">&lt;SPAN&gt;</font> := Spanning keyword: SPAN. Case 
-    insensitive.</p>
-  <p><font color="#000066">&lt;span-length&gt;</font> := Number of time spans 
-    a thresholds should fail before triggering an action. Number.</p>
-  </div>
-<div> 
-  <h2>Format Examples</h2>
-  <p>Please consider these as examples on using monitor thresholds, not best practices.</p>
-  <pre>
+    <div>
+      <h2>Syntax</h2>
+      <code class="block">
+monitor-thresholds = "&lt;monitor-threshold> [, &lt;monitor-threshold> ...]"
+      </code>
+      <p><img src="monitor.gif" width="791" height="41"></p>
+      <dl> 
+        <dt><var>data source</dt>
+        <dd>A data source defined for the target; Case sensitive.</p>
+        <dt><var>monitor type</var></dt>
+        <dd>
+          <p>One of the six supported types:</p>
+          <ul class="inline">
+            <li>exact</li>
+            <li>value</li>
+            <li>relation</li>
+            <li>hunt</li>
+            <li>quotient</li>
+            <li>failures</li>
+          </ul>
+          <p>Case insensitive.</p>
+        </dd>
+        <dt>monitor type args</dt>
+        <dd>
+          A colon-delimited list of arguments specific to each monitor type.
+          Case sensitive.
+        </dd>
+        <dt>ACTION</dt>
+        <dd>
+          <p>One of six supported actions:</p>
+          <ul class="inline">
+            <li>SNMP</li>
+            <li>MAIL</li>
+            <li>EXEC</li>
+            <li>FUNC</li>
+            <li>META</li>
+            <li>FILE</li>
+          </ul>
+          <p>Case insensitive.</p>
+        </dd>
+        <dt>action args</dt>
+        <dd>
+          A colon-delimited list of arguments specific to each action.
+          Case sensitive in most cases.
+        </dd>
+        <dt>SPAN</dt>
+        <dd>
+          Spanning keyword: SPAN. Case insensitive.
+        </dd>
+        <dt>span-length</dt>
+        <dd>
+          Number of time spans a thresholds should fail before triggering
+          an action. Number.
+        </dd>
+      </dl>
+
+      <div>
+        <h2>Format Examples</h2>
+        <p>
+          Please consider these as examples on using monitor thresholds,
+          not best practices.
+        </p>
+        <code class="block">
 target --default--
-&nbsp;&nbsp;&nbsp; mail-pgm = /usr/bin/mailx
-&nbsp;&nbsp;&nbsp; trap-address = 127.0.0.1
-&nbsp;&nbsp;&nbsp; persistent-alarms = true
+  mail-pgm          = /usr/bin/mailx
+  trap-address      = 127.0.0.1
+  persistent-alarms = true
 
 target network-link-1
-&nbsp;&nbsp;&nbsp; monitor-thresholds =
-&nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 250000 : SNMP,
-&nbsp;&nbsp;&nbsp; ifInOctets : quotient : >80pct : : %rrd-max-octets% : SNMP,
-&nbsp;&nbsp;&nbsp;&nbsp; ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,
-&nbsp;&nbsp;&nbsp;&nbsp; ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"
+  monitor-thresholds =
+    "ifInOctets : value : n : 25000 : SNMP,
+     ifInOctets : quotient : &lt;80pct : : %rrd-max-octets% : SNMP,
+     ifInOctets : relation : &lt;10 pct : : : 300 : MAIL : %mail-pgm% : me\\\@mydomain.com,
+     ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"
 
 target pop-2
-&nbsp;&nbsp;&nbsp; persistent-alarms = false
-&nbsp;&nbsp;&nbsp; monitor-thresholds = "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
+  persistent-alarms = false
+  monitor-thresholds = "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
 
 target router-chassis
-&nbsp;&nbsp;&nbsp; persistent-alarms = false
-&nbsp;&nbsp;&nbsp; monitor-thresholds = 
+  persistent-alarms  = false
+  monitor-thresholds = 
     "cpu1min : value : n : 60 : META : router-cpu : yellow,
-&nbsp;&nbsp;&nbsp;&nbsp; cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
-&nbsp;&nbsp;&nbsp;&nbsp; mem5minUsed : quotient : &gt;60pct : : processorRam: META"
+     cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
+     mem5minUsed : quotient : &gt;60pct : : processorRam: META"
+      </code>
+      <p class="note">
+        Note: Make sure to include spaces or tabs leading each line related
+        to a target as above. Or Cricket will not process the line.
+      </p>
+      <div>
+        <h2>Explaining the Examples </h2>
+          <code class="block">
+target network-link-1
+  monitor-thresholds =
+    "ifInOctets : value : n : 250000 : SNMP,
+     ifInOctets : quotient : &lt;80pct : : %rrd-max-octets% : SNMP,
+     ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,
+     ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"
+          </code>
+          <p>
+            The first target, &ldquo;<code>network-link-1</code>&rdquo;,
+            has three monitor thresholds.
+          </p>
+          <ul>
+          <li> 
+            The first generates an SNMP trap whenever the utilized bandwidth,
+            &ldquo;<code>ifInOctets</code>&rdquo;, exceeds 2Mbps (2.000.000
+            bits / 8 = 250.000 octets). It is important to note that all
+            entries defined in the &ldquo;<code>--default--</code>&rdquo;
+            section will be inhereted by each target. In this case,
+            &ldquo;<code>persistent-alarms = true</code>&rdquo;, has a direct
+            impact when the action will be executed.
+          </li>
+          <li>
+            The second generates an SNMP trap whenever the utilized bandwidth,
+            ifInOctets, exceeds 80% of it's maximum capacity,
+            %rrd-max-octets%. %rrd-max-octets% is a cricket variable that is
+            replaced at runtime with it's real value. 
+          </li>
+          <li> 
+            The third monitor threshold, checks to see if the current
+            bandwidth, &ldquo;<code>ifInOctets</code>&rdquo;, has a value that
+            is within 10% of the value recorded for the last interval (300
+            seconds ago; assuming an
+            &ldquo;<code>rrd-poll-interval</code>&rdquo; of 300 seconds). It
+            computes
+            &ldquo;<code>abs(ifInOctets_now - ifInOctets_then) / ifInOctets</code>&rdquo;
+            and compares this with 10% (0.1). If traffic levels have increased
+            more than 10% over the interval, it invokes &ldquo;<code>mailx</code>&rdquo;
+            to send a mail message to &ldquo;<code>me@mydomain.com</code>&rdquo;
+            (note the escaped backslash and escaped &ldquo;<code>@</code>&rdquo;).
+            This action will also be executed everytime the threshold is
+            crossed due to the inherited
+            &ldquo;<code>persistent-alarms</code>&rdquo;.
+          </li>
+          <li> 
+            The fourth monitor threshold checks to see if input errors,
+            &ldquo;<code>ifInErrors</code>&rdquo;, exceed 0.1% of input
+            packets, &ldquo;<code>ifInUcastPackets</code>&rdquo;. If
+            errors exceed this threshold, Cricket generates an SNMP trap.
+          </li>
+        </ul>
+        <code class="block">
+target pop-2
+  persistent-alarms  = false
+  monitor-thresholds = 
+    "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
+        </code>
+        <p>
+          The second target, &ldquo;<code>pop-2</code>&rdquo;, has a single
+          monitor threshold.
+        </p>
+        <ul>
+          <li> 
+            Cricket will append an entry to the file
+            &ldquo;<code>/var/log/cricket-alerts</code>&rdquo; when a non-zero
+            number of users, &ldquo;<code>popUsers</code>&rdquo;, are on
+            &ldquo;<code>pop-2</code>&rdquo; yet &ldquo;<code>pop-1</code>&rdquo;
+            has not reached 40 users. Once &ldquo;<code>pop-1</code>&rdquo;
+            reaches 40 users, or &ldquo;<code>pop-2</code>&rdquo; returns to a
+            zero user count, the entry will be cleared from
+            the file. A target can always redefine a variable that was set in
+            the &ldquo;<code>--default--</code>&rdquo; section or inherited
+            from lower in the config tree. In this case
+            &ldquo;<code>persistent-alarms</code>&rdquo; are reset to the
+            default value of &ldquo;<code>false</code>&rdquo;. Hence, the
+            &ldquo;<code>FILE</code>&rdquo; action will be executed to set the
+            alarm when the alarm condition is first detected and once to clear
+            the alarm when the alarm condition is cleared.
+          </li>
+        </ul>
 
-</pre>
-  <p> Note: Make sure to include spaces/tabs leading each line related to a target 
-    as above. Or else Cricket will not process the line.</p>
-  <h2>Explaining the Examples </h2>
-  <pre>target network-link-1
-&nbsp;&nbsp;&nbsp; monitor-thresholds =
-&nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 250000 : SNMP,
-&nbsp;&nbsp;&nbsp; ifInOctets : quotient : >80pct : : %rrd-max-octets% : SNMP,
-&nbsp;&nbsp;&nbsp;&nbsp; ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,
-&nbsp;&nbsp;&nbsp;&nbsp; ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"</pre>
-  <p> The first target, <i>network-link-1</i>, has three monitor thresholds.</p>
-</div>
-<ul>
-  <li> 
-    <div>The first generates an SNMP trap whenever the utilized bandwidth, ifInOctets, 
-      exceeds 2 Mbps (2000000bits /8 = 250000 octets). It is important to note 
-      that all entries defined in the --default-- section will be inhereted by 
-      each target. In this case, persistent-alarms = true, has a direct impact 
-      when the action will be executed.</div>
-  </li>
-  <li> 
-    <div>The second generates an SNMP trap whenever the utilized bandwidth, ifInOctets, 
-      exceeds 80% of it's maximum capacity, %rrd-max-octets%. %rrd-max-octets% is
-      a cricket variable that is replaced at runtime with it's real value. 
+        <code class="block">
+target router-chassis
+  persistent-alarms = false
+  monitor-thresholds = 
+    "cpu1min : value : n : 60 : META : router-cpu : yellow,
+     cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
+     mem5minUsed : quotient : &gt;60pct : : processorRam: META"
+         </code>
+         <p>
+          The third target, &ldquo;<code>router-chassis</code>&rdquo;,
+          has a three monitor thresholds. 
+        </p>
+        <ul>
+          <li> 
+            The first two make use of the value monitor type to establish
+            thresholds on cpu usage. More than one identical monitor type can
+            be applied against the same datasource. In both cases, the
+            &ldquo;<code>META</code>&rdquo; action is called with different
+            arguments.
+          </li>
+          <li>
+            In the second value monitor, the keyword
+            &ldquo;<code>SPAN</code>&rdquo; indicates there is an additional
+            condition where the monitor threshold will only trigger an alarm
+            when three consecutive monitor threshold tests fail. At the first
+            threshold test pass, the alarm will be cleared.
+          </li>
+          <li> 
+            The last monitor type will calculate
+            &ldquo;<code>mem5minUsed</code>&rdquo; datasource divided by the
+            &ldquo;<code>processorRAM</code>&rdquo; datasource and if the
+            percentage is greater than 60% it will trigger a
+            &ldquo;<code>META</code>&rdquo; action. Note that no additional
+            arguments have been added to the &ldquo;<code>META</code>&rdquo;
+            action, this is by design, read the Actions section for details on
+            how to use this and other actions.
+          </li>
+        </ul>
       </div>
-  </li>
-  <li> 
-    <div>The third monitor threshold, checks to see if the current bandwidth, 
-      ifInOctets, has a value that is within 10% of the value recorded for the 
-      last interval (300 seconds ago; assuming an rrd-poll-interval of 300 seconds). 
-      It computes abs(ifInOctets_now - ifInOctets_then)/ifInOctets then and compares 
-      this with 10% (0.1). If traffic levels have increased more than 10% over 
-      the interval, it invokes mailx to send a mail message to me@mydomain.com 
-      (note the escaped backslash and escaped '@'). This action will also be executed 
-      everytime the threshold is crossed due to the inherited persistent-alarms.</div>
-  </li>
-  <li> 
-    <div>The fourth monitor threshold checks to see if input errors, ifInErrors, 
-      exceed 0.1% of input packets, ifInUcastPackets. If errors exceed this threshold, 
-      Cricket generates an SNMP trap. </div>
-  </li>
-</ul>
-<div> 
-  <pre>
-target pop-2
-&nbsp;&nbsp;&nbsp; persistent-alarms = false
-&nbsp;&nbsp;&nbsp; monitor-thresholds = 
-     "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
-   </pre>
-  <p> The second target, <i>pop-2</i>, has a single monitor threshold. </p>
+    <div>
 </div>
-<ul>
-  <li> 
-    <div>Cricket will append an entry to the file /var/log/cricket-alerts when 
-      a non-zero number of users, popUsers, are on pop-2 yet pop-1 has not reached 
-      40 users. Once pop-1 reaches 40 users, or&nbsp; pop-2 returns to a zero 
-      user count, the entry will be cleared from the file. A target can always 
-      redefine a variable that was set in the --default-- section or inhereted 
-      from lower in the config tree. In this case persistent-alarms are reset 
-      to the default value of false. Hence, the FILE action will be executed to 
-      set the alarm when the alarm condition is first detected and once to clear 
-      the alarm when the alarm condition is cleared.</div>
-  </li>
-</ul>
-<div> 
-  <pre>
-target router-chassis
-&nbsp;&nbsp;&nbsp; persistent-alarms = false
-&nbsp;&nbsp;&nbsp; monitor-thresholds = 
-    "cpu1min : value : n : 60 : META : router-cpu : yellow,
-&nbsp;&nbsp;&nbsp;&nbsp; cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
-&nbsp;&nbsp;&nbsp;&nbsp; mem5minUsed : quotient : &gt;60pct : : processorRam: META"
-   </pre>
-  <p> The third target, <i>router-chassis</i>, has a three monitor thresholds. 
-  </p>
-</div>
-<ul>
-  <li> 
-    <div>The first two make use of the value monitor type to establish thresholds 
-      on cpu usage. More than one identical monitor type can be applied against 
-      the same datasource. In both cases, the META action is called with different 
-      arguments.</div>
-  </li>
-  <li>In the second value monitor, the keyword SPAN indicates there is an additional 
-    condition where the monitor threshold will only trigger an alarm when three 
-    consecutive monitor threshold tests fail. At the first threshold test pass, 
-    the alarm will be cleared. </li>
-  <li> 
-    <div>The last monitor type will calculate mem5minUsed datasource divided by 
-      the processorRAM datasource and if the percentage is greater than 60% it 
-      will trigger a META action. Note that no additional arguments have been 
-      added to the META action, this is by design, read the Actions section for 
-      details on how to use this and other actions. </div>
-  </li>
-</ul>
-<div>
+    <div>
       <h2>Persistent Alarms</h2>
       <p>
-        By default, the target tag persistent-alarms is set to
-        false. With this setting, the first time a monitor threshold
-        criteria fails, the action is executed.&nbsp; Specifically,
-        the Alarm() subroutine in the Monitor.pm module is invoked;
-        the action and its arguments are passed as arguments. If the
-        criteria continues to fail (at subsequent data collection
-        passes), the action is not executed again. After one or more
-        failures, the first time the monitor threshold criteria
-        passes, the action is executed. In this case, the Clear()
-        subroutine in the Monitor.pm module is invoked, with
-        appropriate action and action arguments.&nbsp; Thus the
-        default behavior is like a switch that toggles states when
-        the result of the monitor threshold criteria changes.
+        By default, the target tag
+        &ldquo;<code>persistent-alarms</code>&rdquo; is set to false. With
+        this setting, the first time a monitor threshold criteria fails, the
+        action is executed. Specifically, the
+        &ldquo;<code>Alarm()</code>&rdquo; subroutine in the
+        &ldquo;<code>Monitor.pm</code>&rdquo; module is invoked; the action
+        and its arguments are passed as arguments. If the criteria continues
+        to fail (at subsequent data collection passes), the action is not
+        executed again. After one or more failures, the first time the monitor
+        threshold criteria passes, the action is executed. In this case, the
+        &ldquo;<code>Clear()</code>&rdquo; subroutine in the
+        &ldquo;<code>Monitor.pm</code>&rdquo; module is invoked, with
+        appropriate action and action arguments. Thus the default behavior is
+        like a switch that toggles states when the result of the monitor
+        threshold criteria changes.
       </p>
       <p>
-        If the target tag persistent-alarms is true, the action is
-        executed (the Alarm subroutine is invoked) every time the
-        monitor threshold criteria fails. An action (and Clear
-        subroutine) is still executed once the first time the
-        criteria passes after a string of failures. With
-        persistent-alarms set to true, monitor threshold behavior is
-        like a bell. It keeps ringing until the problem stops.
+        If the target tag &ldquo;<code>persistent-alarms</code>&rdquo; is
+        true, the action is executed (the &ldquo;<code>Alarm()</code>&rdquo;
+        subroutine is invoked) every time the monitor threshold criteria
+        fails. An action (and &ldquo;<code>Clear()</code>&rdquo; subroutine)
+        is still executed once the first time the criteria passes after a
+        string of failures. With &ldquo;<code>persistent-alarms</code>&rdquo;
+        set to true, monitor threshold behavior is like a bell. It keeps
+        ringing until the problem stops.
       </p>
     </div>
 
@@ -228,155 +299,204 @@ target router-chassis
         The monitor type determines the criteria used to check a
         monitor threshold.
       </p>
-      
-  <p> exact : </p>
-  <p>These monitors are the simplest to use and configure, and allow you to monitor 
-    a datasource for an exact match. This is useful in cases where an enumerated 
-    (or boolean) SNMP object instruments a condition where a transition to a specific 
-    state requires attention. For example, a datasource might return either true(1) 
-    or false(2), depending on whether or not a power supply has failed. The exact 
-    monitor expects one argument; the value on which the monitor will trigger. 
-    For example, <tt>monitor-thresholds = "dsPowerFail:exact:1"</tt> would cause 
-    Cricket to send a trap when the last value of the "dsPowerFail" datasource 
-    in the RRD file for this target is 1. </p>
-  <pre>    dsPowerFail : exact : 1 : &lt;ACTION&gt; : ...
-    dsTempAlarm : exact : 1 : &lt;ACTION&gt; : ...
-  </pre>
-      
-  <p> value : </p>
-  <p>The next simplest monitor type, value monitor thresholds take two arguments, 
-    a minimum and maximum value. If the data source strays outside of this interval, 
-    the monitor threshold criteria fails. To omit the minimum or maximum value, 
-    use the character "n". </p>
-  <pre>    temperature : value : 30 : 90 : &lt;ACTION&gt; : ...
-    ifInOctets : value : n : 250000 : &lt;ACTION&gt; : ...
- </pre>
-  <p>relation : </p>
-  <p>Relation monitor thresholds are very flexible. A relation monitor considers 
-    the difference between two data sources (possibly from different targets), 
-    or alternatively, the difference between two temporally distinct values for 
-    the same data source. The first data source is the data source for which the 
-    relation monitor threshold is defined. The difference can be expressed as 
-    absolute value, or as a percentage of the second data source (comparison) 
-    value. This difference is compared to a threshold argument with either the 
-    greater than or less than operator. The criteria fails when the expression 
-    (&lt;absolute or relative difference> &lt;either greater-than or less-than> 
-    &lt;threshold>) evaluates to false. The four colon-delimited arguments for 
-    a relation monitor are: </p>
-      
-  <ol>
-    <li> The threshold number, optionally preceded by the greater than (>) or 
-      less than (&lt;) symbol, and optionally followed by the string "pct". If 
-      omitted, greater than is used by default and the expression, difference 
-      > threshold, is evaluated.&nbsp; "&lt;10 pct", ">1000", "50 pct", and "500" 
-      are all examples of valid thresholds. </li>
-    <li> The name of the comparison target. The comparison target must either 
-      share the same path with the first target or be fully-qualified. This argument 
-      is optional and if omitted the first target is also taken as the comparison 
-      target. </li>
-    <li> The name of the comparison data source, variable, integer or floating point value. 
-      In the case of a data source it must belong to the comparison target. 
-      This argument is optional and if omitted the monitor 
-      threshold data source name is also taken as the comparison data source name. 
-      Integer and floating point values can be signed or unsigned. 
-      ie: -1.05, 5, 10.1, +5
-    </li>
-    <li> The temporal offset in seconds to go back in the RRD file that is being 
-      fetched from for comparison. Note that a data source value must exist in 
-      the RRD file for that exact offset. Choose a multiple of the RRD file step 
-      size. This argument is optional and if omitted, it is set to 0. </li>
-  </ol>
-  <p>quotient : </p>
-  <p>Quotient monitor thresholds are similar to relation monitor thresholds, except 
-    that they consider the quotient of two data sources, or alternatively, the 
-    same data source at two different time points. For a quotient monitor threshold, 
-    Cricket computes the value of the first data source as a percentage of the 
-    value second data source (such as 10 is 50% of 20). This percentage is then 
-    compared to a threshold argument with either the greater than or less than 
-    operator. The criteria fails when the expression (&lt;percentage> &lt;either 
-    greater-than or less-than> &lt;threshold>) evaluates to true. The four colon-delimited 
-    arguments for a quotient monitor are: </p>
-      <ol>
-        <li>
-          The threshold number, optionally preceded by the
-          greater than (>) or less than (&lt;) symbol followed
-          by the string&nbsp; "pct". If omitted, greater than
-          is used by default and the expression, difference >
-          threshold, is evaluated.
-        </li>
-        <li>
-          The name of the comparison target. 
-          The comparison target must either share the same path with the
-          first target or be fully-qualified. This argument is
-          optional and if omitted the first target is also
-          taken as the comparison targete.
-        </li>
-        <li>
-          The name of the comparison data source, variable, integer
-          or floating point value.  This data source must belong
-          to the comparison target. This argument is optional
-          and if omitted the monitor threshold data source name
-          is also taken as the comparison data source name. 
-          ie: -1.05, 5, 10.1, +5
-        </li>
-        <li>
-          The temporal offset in seconds to go back in the RRD
-          file that is being fetched from for comparison. Note
-          that a data source value must exist in the RRD file
-          for that exact offset. Choose a multiple of the RRD
-          file step size. This argument is optional and if
-          omitted, it is set to 0.
-        </li>
-      </ol>
-      
-  <p> hunt: </p>
-  <p>The hunt monitor threshold is designed for the situation where the data source 
-    serves as an overflow for another data source; that is, if one data source 
-    (the parent) is at or near capacity, then traffic will begin to appear on 
-    this (the monitored) data source.&nbsp; One application of hunt monitor thresholds 
-    is to identify premature rollover in a set of modem banks configured to hunt 
-    from one to the next.&nbsp; Specifically, the criteria of the hunt monitor 
-    threshold fails if the value of the monitored data source is non-zero and 
-    the current value of the parent data source falls below a specified capacity 
-    threshold. The three colon-delimited arguments for a hunt monitor are: </p>
-      <ol>
-        <li>
-          The threshold of the parent data source. Generally
-          this should be slightly less than the maximum
-          capacity of the target.
-        </li>
-        <li>
-          The name of the parent target. The parent target
-          must either share the same path with the monitored
-          target or be fully-qualified. This argument is
-          optional and if omitted the monitored target is also
-          taken as the parent target.
-        </li>
-        <li>
-          The name of the parent data source. This data source
-          must belong to the parent target. This argument is
-          optional and if omitted the monitor threshold data
-          source name is also take as the comparison data
-          source name.
-        </li>
-      </ol>
-      
-  <p> failures: </p>
-  <p>The failures monitor threshold is integrated with aberrant behavior detection 
-    in RRDtool. This monitor checks the FAILURES RRA for the target and datasource. 
-    If the current value is 1, this indicates aberrant behavior. Aberrant behavior 
-    detection must be enabled for the target, which requires RRDtool 1.1.x. This 
-    threshold may be conditioned on the current value of the datasource. In this 
-    case, the threshold is only triggered when both the FAILURES RRA is 1 and 
-    the current value of the data source is within a specified range. This range 
-    is specified via two colon-delimited arguments; the first is the min or "n" 
-    to specify no lower bound and the second is the max or "n" to specify no upper 
-    bound. </p>
-    </div>
+      <div>
+        <h3>&ldquo;<code>exact</code>&rdquo;</h3>
+        <p>
+          These monitors are the simplest to use and configure, and allow you
+          to monitor a datasource for an exact match. This is useful in cases
+          where an enumerated (or boolean) SNMP object instruments a condition
+          where a transition to a specific state requires attention. For
+          example, a datasource might return either true <!--(1)--> or
+          false <!--(2)-->,
+          depending on whether or not a power supply has failed. The exact
+          monitor expects one argument; the value on which the monitor will
+          trigger. For example,
+          &ldquo;<code>monitor-thresholds = "dsPowerFail:exact:1"</code>&rdquo;
+          would cause Cricket to send a trap when
+          the last value of the &ldquo;<code>dsPowerFail</code>&rdquo;
+          datasource in the RRD file for
+          this target is &ldquo;<code>1</code>&rdquo;.
+        </p>
+        <code class="block">
+dsPowerFail : exact : 1 : &lt;ACTION&gt; : [&hellip;]
+dsTempAlarm : exact : 1 : &lt;ACTION&gt; : [&hellip;]
+        </code>
+      </div>
+      <div>
+        <h3>&ldquo;<code>value</code>&rdquo;</h3>
+        <p>
+          The next simplest monitor type, value monitor thresholds take two
+          arguments, a minimum and maximum value. If the data source strays
+          outside of this interval, the monitor threshold criteria fails. To
+          omit the minimum or maximum value, use the character
+          &ldquo;<code>n</code>&rdquo;.
+        </p>
+        <code class="block">
+temperature : value : 30 :     90 : &lt;ACTION&gt; : [&hellip;]
+ ifInOctets : value :  n : 250000 : &lt;ACTION&gt; : [&hellip;]
+        </code>
+      </div>
+
+      <div>
+        <h3>&ldquo;<code>relation</code>&rdquo;</h3>
+        <p>
+          Relation monitor thresholds are very flexible. A relation monitor
+          considers the difference between two data sources (possibly from
+          different targets), or alternatively, the difference between two
+          temporally distinct values for the same data source. The first data
+          source is the data source for which the relation monitor threshold
+          is defined. The difference can be expressed as absolute value, or as
+          a percentage of the second data source (comparison) value. This
+          difference is compared to a threshold argument with either the
+          greater than or less than operator. The criteria fails when the
+          expression &ldquo;<code class="inline">&lt;absolute or relative
+          difference> &lt;either greater-than or less-than>
+          &lt;threshold></code>&rdquo; evaluates to false. The
+          four colon-delimited arguments for a relation monitor are:
+        </p>
+        <ol>
+          <li>
+            The threshold number, optionally preceded by the greater than
+            (&ldquo;<code>&gt;</code>&rdquo;) or less than
+            (&ldquo;<code>&lt;</code>&rdquo;) symbol, and optionally followed
+            by the string &ldquo;<code>pct</code>&rdquo;. If omitted, greater
+            than is used by default and the expression
+            &ldquo;<code>difference > threshold</code>&rdquo; is evaluated.
+            &ldquo;<code>&lt;10 pct</code>&rdquo;,
+            &ldquo;<code>>1000</code>&rdquo;, &ldquo;<code>50 pct</code>&rdquo;,
+            &ldquo;<code>></code>&rdquo; and &ldquo;<code>500</code>&rdquo;
+            are all examples of valid thresholds.
+          </li>
+          <li>
+            The name of the comparison target. The comparison target must
+            either share the same path with the first target or be
+            fully-qualified. This argument is optional and if omitted the
+            first target is also taken as the comparison target.
+          </li>
+          <li>
+            The name of the comparison data source, variable, integer or
+            floating point value. In the case of a  data source must
+            belong to the comparison target. This argument is optional and if
+            omitted the monitor threshold data source name is also taken as
+            the comparison data source name. Integer and floating point
+            values can be signed or unsigned.
+            e.g. <code class="inline">-1.05, 5, 10.1, +5</code>.
+          </li>
+          <li>
+            The temporal offset in seconds to go back in the RRD file that is
+            being fetched from for comparison. Note that a data source value
+            must exist in the RRD file for that exact offset. Choose a
+            multiple of the RRD file step size. This argument is optional and
+            if omitted, it is set to &ldquo;<code>0</code>&rdquo;.
+          </li>
+        </ol>
+      </div>
+      <div>
+        <h3>&ldquo;<code>quotient</code>&rdquo;</h3>
+        <p>
+          Quotient monitor thresholds are similar to relation monitor
+          thresholds, except that they consider the quotient of two data
+          sources, or alternatively, the same data source at two different
+          time points. For a quotient monitor threshold, Cricket computes the
+          value of the first data source as a percentage of the value second
+          data source (such that 10 is 50% of 20). This percentage is then
+          compared to a threshold argument with either the greater than or
+          less than operator. The criteria fails when the expression
+          &ldquo;<code class="inline">&lt;percentage&gt; &lt;either
+          greater-than or less-than&gt; &lt;threshold&gt;</code>&rdquo;
+          evaluates to true. The four colon-delimited
+          arguments for a quotient monitor are:
+        </p>
+        <ol>
+          <li>
+            The threshold number, optionally preceded by the greater than
+            (&ldquo;<code>&gt;</code>&rdquo;) or less than
+            (&ldquo;<code>&lt;</code>&rdquo;) symbol followed by the string
+            &ldquo;<code>pct</code>&rdquo;. If omitted, greater than is used
+            by default and the expression &ldquo;<code
+              class="inline">difference > threshold</code>&rdquo; is evaluated.
+          </li>
+          <li>
+            The name of the comparison target. The comparison target must
+            either share the same path with the first target or be
+            fully-qualified. This argument is optional and if omitted the
+            first target is also taken as the comparison target.
+          </li>
+          <li>
+            The name of the comparison data source variable, integer or
+            floating point value. This data source must belong to the
+            comparison target. This argument is optional and if omitted the
+            monitor threshold data source name is also taken as the
+            comparison data source name.
+            e.g. <code class="inline">-1.05, 5, 10.1, +5</code>.
+          </li>
+          <li>
+            The temporal offset in seconds to go back in the RRD file that is
+            being fetched from for comparison. Note that a data source value
+            must exist in the RRD file for that exact offset. Choose a
+            multiple of the RRD file step size. This argument is optional and
+            if omitted, it is set to &ldquo;<code>0</code>&rdquo;.
+          </li>
+        </ol>
+      </div>
+      <div>
+        <h3>&ldquo;<code>hunt</code>&rdquo;</h3>
+        <p>
+          The hunt monitor threshold is designed for the situation where the
+          data source serves as an overflow for another data source; that is,
+          if one data source (the parent) is at or near capacity, then traffic
+          will begin to appear on this (the monitored) data source. One
+          application of hunt monitor thresholds is to identify premature
+          rollover in a set of modem banks configured to hunt from one to the
+          next. Specifically, the criteria of the hunt monitor threshold
+          fails if the value of the monitored data source is non-zero and the
+          current value of the parent data source falls below a specified
+          capacity threshold. The three colon-delimited arguments for a hunt
+          monitor are:
+        </p>
+        <ol>
+          <li>
+            The threshold of the parent data source. Generally this should be
+            slightly less than the maximum capacity of the target.
+          </li>
+          <li>
+            The name of the parent target. The parent target must either share
+            the same path with the monitored target or be fully-qualified.
+            This argument is optional and if omitted the monitored target is
+            also taken as the parent target.
+          </li>
+          <li>
+            The name of the parent data source. This data source must belong
+            to the parent target. This argument is optional and if omitted the
+            monitor threshold data source name is also take as the comparison
+            data source name.
+          </li>
+        </ol>
+      </div>
+      <div>
+        <h3>&ldquo;<code>failures</code>&rdquo;</h3>
+        <p>
+          The failures monitor threshold is integrated with aberrant behavior
+          detection in RRDtool. This monitor checks the
+          &ldquo;<code>FAILURES</code>&rdquo; RRA for the target and
+          datasource. If the current value is &ldquo;<code>1</code>&rdquo;,
+          this indicates aberrant behavior. Aberrant behavior detection must
+          be enabled for the target, which requires RRDtool 1.1.x. This
+          threshold may be conditioned on the current value of the datasource.
+          In this case, the threshold is only triggered when both the
+          &ldquo;<code>FAILURES</code>&rdquo; RRA is
+          &ldquo;<code>1</code>&rdquo; and the current value of the data
+          source is within a specified range. This range is specified via two
+          colon-delimited arguments; the first is the min or
+          &ldquo;<code>n</code>&rdquo; to specify no lower bound and the
+          second is the max or &ldquo;<code>n</code>&rdquo; to specify no
+          upper bound.
+        </p>
+      </div>
+    <div>
 
     <div>
-      
-  <h2>Alarm Actions</h2>
+      <h2>Alarm Actions</h2>
       <p>
         After the monitor threshold is checked for the current
         value, Cricket may execute one of several actions.&nbsp;

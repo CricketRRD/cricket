@@ -3,9 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
     <title>Understanding Instance Mapping</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
-    <h1>Understanding Instance Mapping </h1>
+    <h1>Understanding Instance Mapping</h1>
     <p>
       Cricket has a nifty feature called instance mapping. Basically it's
       meant to take the busywork out of monitoring SNMP devices. In this
@@ -15,83 +16,85 @@
     <div>
       <h2>The Problem</h2>
       <p>
-          In the SNMP world, when something is stored in a table, each
-          table row has a number. These numbers, called instance
-          numbers, are used to reference the rows. Since routers
-          typically have lots of interfaces, they are stored in a
-          table, indexed by these instance numbers. I can ask a router
-          to give me the traffic measurements from row number 4, and
-          it will know what I mean and go do it. However, when we
-          humans think about router interfaces, we don't think about
-          instance numbers. We think about some other identifier for
-          the row, like the interface name or the IP address. 
+        In the SNMP world, when something is stored in a table, each table row
+        has a number. These numbers, called instance numbers, are used to
+        reference the rows. Since routers typically have lots of interfaces,
+        they are stored in a table, indexed by these instance numbers. I can
+        ask a router to give me the traffic measurements from row number 4,
+        and it will know what I mean and go do it. However, when we humans
+        think about router interfaces, we don't think about instance numbers.
+        We think about some other identifier for the row, like the interface
+        name or the IP address.
       </p>
       <p>
-        Interface mapping lets you configure Cricket to talk to
-        devices based on one of the other keys in this table. The
-        mapping part comes in when Cricket turns the key you give it
-        into an instance number. It does this in an efficient way,
-        which is guaranteed to be right no matter what kind of row
-        re-arranging goes on on the router. (It seems cruel, but
-        they are allowed to re-arrange their rows at any time. This
-        would presumably <b>not</b> be part of what makes SNMP
-        "simple".)
+        Interface mapping lets you configure Cricket to talk to devices based
+        on one of the other keys in this table. The mapping part comes in when
+        Cricket turns the key you give it into an instance number. It does
+        this in an efficient way, which is guaranteed to be right no matter
+        what kind of row re-arranging goes on on the router. (It seems cruel,
+        but they are allowed to re-arrange their rows at any time. This would
+        presumably <em>not</em> be part of what makes SNMP
+        &ldquo;simple&rdquo;.)
       </p>
     </div>
     
     <div>
-      <h2> What does this mean to me? </h2>
+      <h2>What does this mean to me?</h2>
       <p>
         Nothing, as long as you are using the sample config tree's
-        router-interface subtree. It comes ready to automatically do
-        interface mapping using the interfaces name as a key. When
-        you use <tt>listInterfaces</tt> to make an interfaces file,
-        it will set the "interface-name" tag for you, and Cricket
+        &ldquo;<code>router-interface</code>&rdquo; subtree. It comes ready to
+        automatically do interface mapping using the interfaces name as a key.
+        When you use &ldquo;<code>listInterfaces</code>&rdquo; to make an
+        interfaces file, it will set the
+        &ldquo;<code>interface-name</code>&rdquo; tag for you, and Cricket
         will use that to do the instance mapping automatically.
       </p>
       <p>
-        On the other hand, if you want to setup Cricket to use a
-        different key (say, the IP address, or maybe the
-        human-readable descriptions Cisco routers support), or to
-        monitor something else via SNMP that lives in tables, then
-        you need to read on and understand the <tt>map</tt>
-        dictionary, and how it is used to control the interface
-        mapping algorithm.
+        On the other hand, if you want to setup Cricket to use a different key
+        (say, the IP address, or maybe the human-readable descriptions Cisco
+        routers support), or to monitor something else via SNMP that lives in
+        tables, then you need to read on and understand the
+        &ldquo;<code>map</code>&rdquo; dictionary, and how it is used to
+        control the interface mapping algorithm.
       </p>
     </div>
     
     <div>
       <h2>The Icky Details</h2>
       <p>
-        When Cricket comes across an instance number which looks
-        like <tt>map(interface-name)</tt>, then it knows that
-        instead of using a hard-coded instance number, or an
-        instance set, it will be using the instance mapping code to
-        find the instance number. It uses the part inside the
-        parenthesis ("interface-name" in the case above) to find an
-        entry in the <tt>map</tt> dictionary that it can use to help
-        map the given key to an instance number.
+        When Cricket comes across an instance number which looks like
+        &ldquo;<code>map(interface-name)</code>&rdquo;, then it knows that
+        instead of using a hard-coded instance number, or an instance set, it
+        will be using the instance mapping code to find the instance number.
+        It uses the part inside the parenthesis
+        (&ldquo;<code>interface-name</code>&rdquo; in the case above) to find
+        an entry in the &ldquo;<code>map</code>&rdquo; dictionary that it can
+        use to help map the given key to an instance number.
       </p>
       <p>
-        There are two interesting tags in a <tt>map</tt> entry that
-        control this process. The first is the <tt>baseOID</tt>,
-        which tells Cricket which column of which table it is going
-        to be looking through to find the match. For the
-        interface-name map, this is set to "ifDescr". Cricket will
-        look up the name "ifDescr" in the OID table, and will use
-        the resulting OID as the base-oid for an SNMP walk of the
-        table. The other interesting tag is <tt>match</tt>, which is
-        a string that the fetched column will be compared to. This
-        string is expanded with respect to the target dictionary, so
-        you can use the "%tag%" syntax there. In the sample config,
-        we compare the ifDescr column of the interface table to
-        "%interface-name%", which gets expanded to the current value
-        of the the tag <tt>interface-name</tt> in the current
-        target. If the string starts and ends with the slash
-        character, then it is used as a Perl regular expression and
-        a case-insensitive RE match is done, instead of a simple
-        string match. Use this feature only when necessary. A string
-        match is preferable, since it has less overhead.
+        There are two interesting tags in a &ldquo;<code>map</code>&rdquo;
+        entry that control this process. The first is the
+        &ldquo;<code>baseOID</code>&rdquo;, which tells Cricket which column
+        of which table it is going to be looking through to find the match.
+        For the &ldquo;<code>interface-name</code>&rdquo; map, this is set to
+        &ldquo;<code>ifDescr</code>&rdquo;. Cricket will look up the name
+        &ldquo;<code>ifDescr</code>&rdquo; in the OID table, and will use the
+        resulting OID as the base-oid for an SNMP walk of the table.
+      </p>
+      <p>
+        The other interesting tag is &ldquo;<code>match</code>&rdquo;, which
+        is a string that the fetched column will be compared to. This string
+        is expanded with respect to the target dictionary, so you can use the
+        &ldquo;<code>%tag%</code>&rdquo; syntax there. In the sample config,
+        we compare the &ldquo;<code>ifDescr</code>&rdquo; column of the
+        interface table to &ldquo;<code>%interface-name%</code>&rdquo;, which
+        gets expanded to the current value of the the tag
+        &ldquo;<code>interface-name</code>&rdquo; in the current target. If
+        the string starts and ends with the slash character, then it is used
+        as a Perl regular expression and a case-insensitive regular expression
+        match is done, instead of a simple string match. Use this feature only
+        when necessary. A string match is preferable, since it has less
+        overhead.
       </p>
       <p>
         The system is efficient and accurate. It uses a file sitting
@@ -108,10 +111,11 @@
         fetched per target.
       </p>
       <p>
-        Instance mapping is only enabled when the <tt>inst</tt> tag
-        starts with "map(". This means that hard-coded instances and
-        instance ranges are still completely supported, if you are
-        not ready to use the instance mapping feature.
+        Instance mapping is only enabled when the
+        &ldquo;<code>inst</code>&rdquo; tag starts with
+        &ldquo;<code>map(</code>&rdquo;. This means that hard-coded instances
+        and instance ranges are still completely supported, if you are not
+        ready to use the instance mapping feature.
       </p>
     </div>
     
@@ -127,37 +131,37 @@
         an exec datasource.
       </p>
       <p>
-        When it comes time to do a table scan, the instance mapping
-        code uses the tag named <tt>snmp</tt> from the current
-        target to find the community string, host, and port for the
-        SNMP transaction.  As discussed above, the snmp tag, by
-        convention, has the community string, host, and port in it
-        in a format ready to plug into SNMP ds-sources. Thus, even
-        if you've come up with a different way to encode community
-        string, host, and port into your datasources, you still need
-        to have a tag named snmp for the instance mapping code to
+        When it comes time to do a table scan, the instance mapping code uses
+        the tag named &ldquo;<code>snmp</code>&rdquo; from the current target
+        to find the community string, host, and port for the SNMP transaction.
+         As discussed above, the snmp tag, by convention, has the community
+        string, host, and port in it in a format ready to plug into SNMP
+        ds-sources. Thus, even if you've come up with a different way to
+        encode community string, host, and port into your datasources, you
+        still need to have a tag named snmp for the instance mapping code to
         use.
       </p>
       <p>
-        The moral of the story is to try very hard to not mess with
-        the sample-config tree. (The quote "Though this be madness,
-        let there be a method in it." comes to mind...)  It's setup
-        the way it is for a reason, and though you may be able to
-        make it more efficient in some ways, you won't end up with a
-        config tree that is as flexible and broadly-applicable.
-        Thus, I might do something later which breaks your config
-        tree without meaning to do so. And I won't feel very sorry
-        about it, now that you know better.
+        The moral of the story is to try very hard to not mess with the
+        sample-config tree (the quote &ldquo;Though this be madness, let there
+        be a method in it.&rdquo; comes to mind&hellip;).  It's setup the way
+        it is for a reason, and though you may be able to make it more
+        efficient in some ways, you won't end up with a config tree that is as
+        flexible and broadly-applicable. Thus, I might do something later
+        which breaks your config tree without meaning to do so. And I won't
+        feel very sorry about it, now that you know better.
       </p>
     </div>
 
-    <p>
-      <a href="http://cricket.sourceforge.net">Cricket</a>
-      version !!VERSION!!, released !!RELDATE!!.
-    </p>
-    <p>
-      Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
-      the <a href="gpl.html">GNU General Public License</a>.
-    </p>
+    <div class="footer">
+      <p>
+        <a href="http://cricket.sourceforge.net">Cricket</a>
+        version !!VERSION!!, released !!RELDATE!!.
+      </p>
+      <p>
+        Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+        the <a href="gpl.html">GNU General Public License</a>.
+      </p>
+    </div>
   </body>
 </html>

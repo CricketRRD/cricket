@@ -1,0 +1,110 @@
+﻿/* Zap margins on the document element, and set base colors, etc. */
+html, body {
+  margin:          0;
+  color:       black;
+  background:  white;
+  font-family: "Bitstream Vera Sans", sans-serif;
+}
+
+/* Make sure the first div or p has a margin. */
+body div {margin-left: 2em; margin-right: 2em;}
+body   p {margin-left: 2em; margin-right: 2em;}
+
+/* Further indent for each level of nesting. */
+div, dl, ul {
+  margin-left: 2em;
+}
+
+div.footer {
+  margin-top: 3em;
+  border-top: 1px solid black;
+}
+
+
+p.note {
+  float: right;
+  clear: right;
+  width: 30%;
+  background: #CFC;
+  color: #006;
+  padding: .5em;
+  margin: 1em 2em 1em 1em;
+  border: 1px dotted #00F;
+  text-align: justify;
+  font-size:  .6em;
+  font-family: "Bitstream Vera Sans", sans-serif;
+  font-weight: bold;
+}
+
+p.hint {
+  float: right;
+  clear: right;
+  width: 30%;
+  background: #FCC;
+  color: #006;
+  padding: .5em;
+  margin: 1em 2em 1em 1em;
+  border: 1px dotted #00F;
+  text-align: justify;
+  font-size:  .6em;
+  font-family: "Bitstream Vera Sans", sans-serif;
+  font-weight: bold;
+}
+
+code {
+  white-space: pre;
+  background: #f0f0f0;
+  color: darkblue;
+  font-family: "Bitstream Vera Sans Mono", monospace;
+}
+
+code.inline {
+  white-space: normal;
+  background: #f0f0f0;
+  color: darkblue;
+  font-family: "Bitstream Vera Sans Mono", monospace;
+}
+
+code.block {
+  display: block;
+  border: 1px dotted silver;
+  padding: 2ex 2ex 1ex 2ex;
+  margin: 1em 2em;
+}
+
+code.block samp {
+  font-weight: bolder;
+}
+
+code.block var {
+  font-style: italic;
+}
+
+dt, li {
+  margin-top: 1em;
+}
+
+dt {
+  font-weight: bold;
+}
+
+ul.inline li {
+  margin-top: .2em;
+}
+
+em {
+  font-weight: bold;
+}
+
+strong {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+div {
+  border: 1px solid white;
+}
+
+div:hover {
+  border: 1px solid red;
+}

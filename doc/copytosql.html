@@ -3,9 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
     <title>copy-to SQL</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
-    <h1>Using copy-to for Data Warehousing</h1>
+    <h1>Using &ldquo;<code>copy-to</code>&rdquo; for Data Warehousing</h1>
     <p>
       This document assumes the following: you have some knowledge about
       setting up databases, you have a database available, and have some
@@ -19,95 +20,108 @@
         data from Cricket. RRD provides a great means for graphing
         data but sometimes there is a need to have the numeric values
         in a more accessible form. That's where the SQL method for
-        copy-to comes in.
+        &ldquo;<code>copy-to</code>&rdquo; comes in.
       </p>
     </div>
 
     <div>
-      <h3>Set-Up</h3>
+      <h3>Setup</h3>
       <p>
-        This is still in it's early stages of development and has only
-        been tested under SQLServer 7.0. This should definitely work
-        with other versions of SQLServer, and maybe Sybase. 
+        This is still in it's early stages of development and has only been
+        tested under &ldquo;<code>SQLServer 7.0</code>&rdquo;. This should
+        definitely work with other versions of
+        &ldquo;<code>SQLServer</code>&rdquo;, and maybe
+        &ldquo;<code>Sybase</code>&rdquo;.
       </p>
       <p>
-        You need to create a database called 'cricket'. In this
-        database, set up a table called 'CricketData'. There is a file
-        in the docs directory called <a href="cricket.sql">cricket.sql</a>
-        which can be used either to create the table, or as a
-        reference to manually create the tables if it won't work with
-        your database. 
+        You need to create a database called
+        &ldquo;<code>cricket</code>&rdquo;. In this database, set up a table
+        called &ldquo;<code>CricketData</code>&rdquo;. There is a file in the
+        docs directory called &ldquo;<code><a
+        href="cricket.sql">cricket.sql</a></code>&rdquo; which can be used
+        either to create the table, or as a reference to manually create the
+        tables if it won't work with your database. 
       </p>
     </div>
 
     <div>
       <h3>Using</h3>
-      <p>In a target definition create a copy-to:</p>
-      <p><tt>target myImportantDatasource</tt></p>
-      <p><tt>copy-to = "sql:dbi:Sybase:NMSDB,mylogin,mypassword"</tt></p>
+      <p>In a target definition create a &ldquo;<code>copy-to</code>&rdquo;:</p>
+      <code class="block">
+target myImportantDatasource
+  copy-to = "sql:dbi:Sybase:NMSDB,<var>mylogin</var>,<var>mypassword</var>"
+      </code>
       <p>
         As you can see, it's pretty simple to define a copy-to. The
-        <tt>dbi:Sybase:NMSDB</tt> can be customized to use whatever
-        special definitions your DBI driver requires. This is designed
-        to be as flexible as possible to allow for working with all
+        &ldquo;<code>dbi:Sybase:NMSDB</code>&rdquo; can be customized to use
+        whatever special definitions your DBI driver requires. This is
+        designed to be as flexible as possible to allow for working with all
         DBI drivers.
       </p>
       <p>
         When the collection happens, it inserts into the database
-        whatever numbers were retrieved from the target. 
+        whatever numbers were retrieved from the target.
       </p>
       <p>
         That's it! You now have a crude form of data warehousing set
-        up for Cricket data. 
+        up for Cricket data.
       </p>
     </div>
      
     <div>
       <h3>Caveats</h3>
       <p>Yes, there are many.</p>
-      <ul>
-        <li>
-          <b>This isn't guaranteed to work with all DBI platforms</b>.
+      <dl>
+        <dt>This isn't guaranteed to work with all DBI platforms.</dt>
+        <dd>
           While it's designed to be as flexible and generic as
           possible, it may not work with your platform. If it doesn't,
-          we're accepting patches. :) 
-        </li>
-        <li>
-          <b>Cooked numbers aren't inserted</b>. This inserts every
-          number into the database as-is. This means that all of the
-          cool things rrd can do like averaging, interpolation, and
-          computations are gone. This copy-to happens before anything
-          is done with RRD. 
-        </li>
-        <li>
-          <b>Datasources aren't named</b>. This is a big limitation
-          right now. It means that the user has to figure out what
-          datasource number co-responds to which counter. Luckily, it
-          goes in the order collected in the Defaults file for the
-          particular target. Until Cricket can name datasources, it
-          can't insert named datasources into the database. 
-        </li>
-        <li>
-          <b>Cricket doesn't supply any tools for using these
-          numbers</b>. It's up to you to provide tools for extracting
-          and using the data once it goes to a database. Cricket is
-          simply an agent for passing the numbers over. 
-        </li>
-        <li>
-          <b>Still in early stages of development</b>. Don't expect
-          perfection. As more people use this, we'll see greater
+          we're accepting patches. <code>:-)</code>
+        </dd>
+        <dt>Cooked numbers aren't inserted.</dt>
+        <dd>
+          This inserts every number into the database as-is. This means that
+          all of the cool things rrd can do like averaging, interpolation, and
+          computations are gone. This copy-to happens before anything is done
+          with RRD. 
+        </dd>
+        <dt>Datasources aren't named.</dt>
+        <dd>
+          This is a big limitation right now. It means that the user has to
+          figure out what datasource number co-responds to which counter.
+          Luckily, it goes in the order collected in the
+          &ldquo;<code>Defaults</code>&rdquo; file for the particular target.
+          Until Cricket can name datasources, it can't insert named
+          datasources into the database.
+          <p class="note">
+            Note: Cricket 1.0.4 supports named datasources, but this support
+            is pretty new and untested. Until more experience is developed
+            with named datasources, this limitation stands.
+          </p>
+        </dd>
+        <dt>Cricket doesn't supply any tools for using these numbers.</dt>
+        <dd>
+          It's up to you to provide tools for extracting and using the data
+          once it goes to a database. Cricket is simply an agent for passing
+          the numbers over. 
+        </d>
+        <dt>Still in early stages of development.</dt>
+        <dd>
+          Don't expect perfection. As more people use this, we'll see greater
           improvements, though.
-        </li>
-      </ul>
+        </dd>
+      </dl>
     </div>
 
-    <p>
-      <a href="http://cricket.sourceforge.net">Cricket</a>
-      version !!VERSION!!, released !!RELDATE!!. 
-    </p>
-    <p>
-      Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
-      the <a href="gpl.html">GNU General Public License</a>. 
-    </p>
+    <div class="footer">
+      <p>
+        <a href="http://cricket.sf.net">Cricket</a>
+        version !!VERSION!!, released !!RELDATE!!. 
+      </p>
+      <p>
+        Copyright &copy; 1998-2000 !!COPYRIGHT!!. Cricket is released under
+        the <a href="gpl.html">GNU General Public License</a>. 
+      </p>
+    </dov>
   </body>
 </html>
