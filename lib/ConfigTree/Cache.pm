@@ -231,7 +231,11 @@ sub expandString {
         if ( defined $repl ) {
             $str =~ s/%$name%/$repl/;
         } else {
-            &{$w}("Variable expansion uses undefined variable: $name.");
+			my($sstr) = $str;
+			if (length($sstr) > 20) {
+				$sstr = substr($sstr, 0, 17) . "...";
+			};
+            &{$w}("Found unknown tag '$name' during expansion of '$sstr'.");
  
             # mark it as not found
             $str =~ s/%$name%/!$name!/;
@@ -239,7 +243,7 @@ sub expandString {
     }
  
     # fix all the not-found ones
-    $str =~ s/!([^\s!]*)!/%$1%/g;
+    $str =~ s/\000([^\s\000]*)\000/%$1%/g;
  
     return $str;
 }

@@ -65,8 +65,8 @@ $log = 'warn';
 
 # This is for debugging here at WebTV. Feel free to nuke this
 # if you happen to _also_ be running Cricket on a machine named
-# mango. :)
-if ($ENV{'HTTP_HOST'} =~ /mango/) {
+# small. :)
+if ($ENV{'HTTP_HOST'} =~ /small/) {
 	$log = 'debug';
 }
 Common::Log::setLevel($log);
@@ -1068,7 +1068,7 @@ sub initConst {
 
 sub si_unit {
 	my($value, $bytes) = @_;
-    return ($value, '') if ($value == 0);
+    return ($value, '') if ($value eq "nan" || $value == 0);
 
 	my(@symbol) = ('a', 'f', 'p', 'n', '&#181;', 'milli',
 				   '',
@@ -1644,7 +1644,7 @@ sub getHTMLDict {
 	my($h) = $gCT->configHash($name, 'html');
 
 	$h->{'auto-long-version'} = $Common::global::gVersion;
-	my($sv) = ($Common::global::gVersion =~ /Cricket version ([^\s]+) /);
+	my($sv) = ($Common::global::gVersion =~ /Cricket version (.*) \(/);
 	$sv = "?" unless ($sv);
 	$h->{'auto-short-version'} = $sv;
 
@@ -1911,6 +1911,8 @@ sub prepareValue {
 		($value, $prefix) = si_unit($value, $bytes);
 	}
 
-	$value = sprintf("%0.${precision}f", $value);
+	if ($value ne "nan") {
+		$value = sprintf("%0.${precision}f", $value);
+	}
 	return "$value$space$prefix$unit";
 }
