@@ -40,23 +40,18 @@ sub monValue {
 	my($min,$max,$minOK,$maxOK);
 	my(@Thresholds) = split(/\s*:\s*/, $args);
 
-	Debug("ds is $ds\n");
-	my($dsNum) = $self->getDSNum($target, $ds);
-	Debug("dsNum is $dsNum\n");
 	my($value) = $self->rrdFetch(
 					$target->{'rrd-datafile'},
 					$self->getDSNum($target, $ds), 0
 				 );
 
 	if(!defined($value)) {
-		Warn("Skipping: Couldn't Fetch last value from datafile $target->{'rrd-datafile'}.");
+		Warn("Skipping: Couldn't fetch last value from datafile.");
 		return 1;
 	}
-	Debug("value is $value");
 
 	$min = shift(@Thresholds);
 	$min = 'n' if (! defined($min));
-	Debug("min is $min.");
 
 	if(lc($min) eq 'n') {
 		$minOK = 1;
@@ -186,7 +181,6 @@ sub monRelation {
 		return 1;
 	}
 
-	Debug("value is $value, cmp_value is $cmp_value.");
 	if($cmp_value =~ /NaN/) {
 		Info("Skipping: Data for $cmp_time seconds ago from " .
 				"$cmp_name is NaN");
@@ -200,16 +194,15 @@ sub monRelation {
 		# threshold is a percentage
 		if($cmp_value == 0) {
 			# avoid division by 0 
-			if($difference == 0 && $gtlt eq '>') {
+			if($difference == 0 && $gtlt eq '<') {
 				return 1;
 			} else {
 				return 0; 
 			}
 		}
-		$difference = abs($value/$cmp_value) * 100;
+		$difference = $difference / abs($cmp_value) * 100;
 	}
-	Debug("difference is $difference,gtlt is $gtlt,thresh is $thresh.");
-	return 0 if (eval "$difference $gtlt $thresh");
+	return 0 if(!(eval "$difference $gtlt $thresh"));
 	return 1;
 }
 
@@ -268,72 +261,70 @@ sub getDSNum {
 			lc($target->{'target-type'}), 
 			$target);
 	my($Counter) = 0;
-	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,$ttRef->{'ds'});
+	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,lc($ttRef->{'ds'}));
 	return $dsMap{$dsName};
 }
 
 # Subroutines to handle alarms
 
 # Action to send an alarm, you can change this to do whatever you need
+# Default is to send a trap
 sub Alarm {
-	my($self,$target,$name,$ds,$type,$threshold) = @_;
-	#
-	# if email-address is set then send email to that address
-	#
-	if ($target->{'email-address'})  {
-		$self->sendEmail(
-			'alarm',
-			$target->{'email-address'},
-			$type,
-			$threshold,
-			$name,
-			$ds );
-	}
-	#
-	# if trap-address is set then send traps to that address
-	#
-	if ($target->{'trap-address'})  {
+	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs) = @_;
+
+	if($alarmType eq 'EXEC') {
+		system($alarmArgs->[0]);
+		Info("Triggered event with shell command '".$alarmArgs->[0]."' .");
+	} elsif($alarmType eq 'FUNC') {
+		if(defined $main::gMonFuncEnabled)
+		{
+			eval($alarmArgs->[0]);
+			Info("Triggered event with FUNC '".$alarmArgs->[0]."' .");
+		} else {
+			Warn("Exec monitor $threshold triggered, but executable alarms are not enabled.");
+		}
+	} elsif($alarmType eq 'SNMP') {
 		my($Specific_Trap_Type) = 4; # Violation Trap
 		$self->sendMonitorTrap(
-			$target->{'trap-address'},
-			$Specific_Trap_Type,
-			$type,
-			$threshold,
-			$name,
-			$ds );
+					$target->{'trap-address'},
+					$Specific_Trap_Type,
+					$type,
+					$threshold,
+					$name,
+					$ds );
+	} else {
+		Warn("Alarm Type $alarmType is not known.");
 	}
 }
 
 # Action to clear an alarm, you can change this to do whatever you need
+# Default is to send a trap
 sub Clear {
-	my($self,$target,$name,$ds,$type,$threshold) = @_;
-	my($Specific_Trap_Type) = 5; # Clear Trap
-	#
-	# if email-address is set then send email to that address
-	#
-	if ($target->{'email-address'})  {
-		$self->sendEmail(
-				'clear',
-				$target->{'email-address'},
-				$type,
-				$threshold,
-				$name,
-				$ds );
-	}
-	#
-	# if trap-address is set then send traps to that address
-	#
-	if ($target->{'trap-address'})  {
-		my($Specific_Trap_Type) = 5; # Clear Trap
-		$self->sendMonitorTrap(
-			$target->{'trap-address'},
-            $Specific_Trap_Type,
-            $type,
-            $threshold,
-            $name,
-            $ds );
-	}
+	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs) = @_;
 
+	 if($alarmType eq 'EXEC') {
+                system($alarmArgs->[1]) ;
+		Info("Cleared event with shell command '".$alarmArgs->[1]."' .");
+        } elsif($alarmType eq 'FUNC') {
+                if(defined $main::gMonFuncEnabled)
+                {
+                        eval($alarmArgs->[1]);
+			Info("Cleared event with FUNC '".$alarmArgs->[1]."' .");
+                } else {
+                        Warn("Exec monitor $threshold triggered, but executable alarms are not enabled."); 
+                }
+        } elsif($alarmType eq 'SNMP') {
+	 	my($Specific_Trap_Type) = 5; # Clear Trap
+		$self->sendMonitorTrap(
+					$target->{'trap-address'},
+					$Specific_Trap_Type,
+					$type,
+					$threshold,
+					$name,
+					$ds );
+	} else {
+		Warn("Alarm Type $alarmType is not known.");
+	}
 }
 
 # Attempt to send an alarm trap for a given target
@@ -356,29 +347,6 @@ sub sendMonitorTrap {
 
 	Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
 	snmpUtils::trap2($to,$spec,@VarBinds);
-}
-
-sub sendEmail {
-	my($self,$spec,$to,$type,$threshold,$target,$ds) = @_;
-
-	if(!defined($to)) {
-		Warn("No destination address defined for $target, couldn't send email.");
-		Info("Threshold Failed: $threshold for target $target");
-		return;
-	}
-	Debug ("made it to sendEmail\n");
-
-	my(@Message);
-	push(@Message, "type:\t\t$type");
-	push(@Message, "threshhold:\t$threshold");
-	push(@Message, "target:\t\t$target");
-	push(@Message, "ds:\t\t$ds");
-
-	Info("Email Sent to $to:\n". join(' -- ',@Message));
-	open (MAIL,"|/usr/ucb/Mail -s 'smrtg2 $spec: $target' $to\n");
-	print (MAIL join ("\n",@Message));
-	close (MAIL);
-
 }
 
 1;
