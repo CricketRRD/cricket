@@ -14,6 +14,10 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	Clifton Royston
+		updated listInterfaces with boatloads of new
+		functionality
+
 	Jeremy Hinton
 		contributed the "NaN in pinkish background" feature
 

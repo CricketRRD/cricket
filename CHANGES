@@ -1,8 +1,25 @@
 New features, fixes in version 1.0.4
 
+	listInterfaces has been updated (users of the contributed
+	web site may recognize listInterfaces+). When upgrading from
+	previous versions of Cricket, it is recommended that you
+	review any scripts that call listInterfaces.
+
+	The URL style is now selectable from cricket-conf.pl. Options
+	are "classic" (what Cricket 1.0.3 did, default), "relative"
+	(which uses relative URLs, for reverse proxy) and "pathinfo"
+	(passes the target name as part of the URL path, which allows
+	for using Apache <Location> access restrictions).
+
+	It is possible to mark NaN samples in the graph with a colored
+	background. This is selectable from cricket-conf.pl.
+	WARNING: do not enable this if you use the STACK draw-as
+	type anywhere in your graphs.
+
 	Added an alternate SNMP interface, using net-snmp. See
 	lib/alternate/snmpUtils.pm. Not recommended in its current
 	incarnation for users of SNMP traps and threshold monitoring.
+	On some systems, using it may speed up Cricket by 10-15%.
 
 	Fix mtargets bugs w.r.t. MiXeD CaSe names (hopefully for good)
 	[bug #521367]
