@@ -53,7 +53,11 @@ sub snmpFetch {
 		($index, $dsspec) = split(/:/, $dsspec, 2);
 		$dsspec =~ s#^//##;
 		
-		my($snmp, $oid) = split(/\//, $dsspec, 2);	
+		# This little hack is for people who like to use slashes in their 
+		# community strings.
+		my($comm, $cinfo) = split(/@/, $dsspec, 2);
+		my($snmp, $oid)   = split(/\//, $cinfo, 2);	
+		$snmp = $comm . "@" . $snmp;
 
 		$oid = mapOid($oidMap, $oid);
 		if (! defined $oid) {
