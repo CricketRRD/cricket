@@ -4,6 +4,11 @@ New features, fixes in version 1.0.5
 
 	An error with case dependance with new style views was eliminated.
 
+	A "label" tag was added to the "view" dictionary. This eliminates
+	the need for using spaces in view names. It also allows the Cricket
+	admin to alias different targetTypes to the same name in the
+	HTML menu -- use this feature wisely!
+
 	systemPerfConf.pl was reverted back to using our own SNMP_Session
 	based SNMP interface, and interfaces detection was added [Mike Han]
 
@@ -19,6 +24,12 @@ New features, fixes in version 1.0.5
 
 	A small bug in threshold monitoring was identified and fixed
 	by Jase MacLeod.
+
+	Error reporting by the monitor subsystem has been reviewed and
+	made more extensive, based on a patch by Andrew Clark.
+	If you have scripts that look for the text string "Skipping",
+	you are well advised to look for "Monitor" instead, and review
+	your scripts while you're at it.
 
 New features, fixes in version 1.0.4
 
