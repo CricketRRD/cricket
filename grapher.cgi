@@ -2019,7 +2019,7 @@ sub htmlCurrentPathLinks {
     my($html);
 
     my($path) = "/";
-    foreach $p (split(/\//, $target)) {
+    foreach my $p (split(/\//, $target)) {
         my($lQ) = new CGI;
         $path .= "$p";
         $lQ->delete_all() unless ($ct->isLeaf($path));
