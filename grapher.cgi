@@ -283,20 +283,32 @@ sub doHTMLPage {
             # now, we gather up a dslist: either it comes from
             # the view, or it's simply all the ds's in the target type.
 
-            my ($enableHoltWinters) = 0;
-            my($dslist);
+            my ($enableHoltWinters, $viewRef) = (0,undef);
+            my($dslist) = (undef);
             if (defined($view)) {
                 my($v);
                 foreach $v (split(/\s*,\s*/, $ttRef->{'view'})) {
                     # views are like this: "cpu: cpu1load  cpu5load"
                     my($vname, $dss) = split(/\s*:\s*/, $v, 2);
                     if ($view eq $vname) {
-                        # parse view name for HoltWinters special tag
-                        $enableHoltWinters = 1 if ($view =~ /HoltWinters/);
-                        $dslist = $dss;
-                        # make it comma-separated
-                        $dslist =~ s/\s*$//;
-                        $dslist =~ s/\s+/,/g;
+                        # check here for a view definition
+                        $viewRef = $ct->configHash($name, 'view', $view, $targRef);
+                        if (defined($viewRef) 
+                            && exists($viewRef->{'elements'})) {
+                            Debug("Found view defintion for $view");
+                            $dslist = $viewRef->{'elements'};
+                            $enableHoltWinters = 1 if (exists $viewRef->{'holtwinters'}
+                                && isTrue($viewRef->{'holtwinters'}));
+                        } else {
+                            # ignore all view definitions for backwards compatibility
+                            $viewRef = undef;
+                            # parse view name for HoltWinters special tag
+                            $enableHoltWinters = 1 if ($view =~ /HoltWinters/);
+                            $dslist = $dss;
+                        }
+                        $dslist =~ s/\s*$//; # remove trailing space
+                        # make it comma-separated unless it already is
+                        $dslist =~ s/\s+/,/g unless (index($dslist,",") != -1);
                     }
                 }
                 if (! $dslist) {
@@ -348,15 +360,17 @@ sub doHTMLPage {
                 $plural = "";
             }
 
-            # save the ranges before we start messing around with them
+            # determine the reqested temporal ranges
             my($reqRanges) = $gQ->param('ranges');
+            if (!defined($reqRanges)) {
+                $reqRanges = SetDefaultRange($targRef,$viewRef);
+                Debug("Default ranges utilized: $reqRanges");
+            }
+
             my(%dsDescr) = ();
             # if this tag is present,
             # the user wants to display a Holt-Winters graph
             my($hwParam) = $gQ->param('hw');
-            # delete this tag so those that inherit (i.e. makeNavLinks)
-            # are not affected
-            $gQ->delete('hw');
             # Holt-Winters links
             my(@hwlinks);
             @hwlinks = makeHwNavLinks() if ($enableHoltWinters);
@@ -371,7 +385,7 @@ sub doHTMLPage {
 
                 if (! $isMulti) {
                     %dsDescr = doHTMLSummary($name, $tname,
-                                             $targRef, $ttRef, $dslist);
+                                             $targRef, $ttRef, $dslist, $viewRef);
                 } else {
                     if ($targRef->{'long-desc'}) {
                         print "$targRef->{'long-desc'}<p>\n";
@@ -396,9 +410,9 @@ sub doHTMLPage {
             my($range, @ranges);
             @ranges = getRanges($reqRanges);
 
-            # add perimeter stuff for Holt-Winters as appropriate
             foreach $range (@ranges) {
                 my ($label);
+                # add perimeter stuff for Holt-Winters as appropriate
                 if (defined($hwParam)) {
                     if ($hwParam eq "confidence") {
                         $label = "Confidence Bounds: Hourly";
@@ -523,7 +537,10 @@ sub doHTMLPage {
 
                     my($gRef) = $ct->configHash($name, 'graph',
                                                 '--default--', $targRef);
-
+                    # use view parameters if defined
+                    if (defined($viewRef)) {
+                        mergeHash($gRef,$viewRef,1);
+                    }
                     my($widthHint) = graphParam($gRef, 'width-hint', undef);
                     $widthHint = "width=$widthHint" if ($widthHint);
                     $widthHint = ""                 unless ($widthHint);
@@ -542,14 +559,17 @@ sub doHTMLPage {
 
                     my($cache) = $gQ->param('cache');
 
+                    # create the mini-graph URL
                     $gQ->delete_all();
                     $gQ->param('type', $format);
                     urlTarget($gQ, $thisTarget2);
                     $gQ->param('inst', $thisInst) if defined($thisInst);
-
-                    $gQ->param('dslist', $dslist);
+                    if (defined($viewRef)) {
+                        $gQ->param('view', $view);
+                    } else {
+                        $gQ->param('dslist', $dslist);
+                    }
                     $gQ->param('range', $range);
-
                     $gQ->param('hw',$hwParam) if (defined($hwParam));
 
                     # this parameter is to trick Netscape into
@@ -606,7 +626,7 @@ sub doHTMLPage {
 
                 if (! $isMulti) {
                     %dsDescr = doHTMLSummary($name, $tname,
-                                             $targRef, $ttRef, $dslist);
+                                             $targRef, $ttRef, $dslist, $viewRef);
                 } else {
                     if ($targRef->{'long-desc'}) {
                         print "$targRef->{'long-desc'}<p>\n";
@@ -705,25 +725,13 @@ sub doHTMLPage {
                     $itemName = $targs->{$item}->{'display-name'};
                 }
 
-                # We set the initial scale depending on whether this is
-                # a multi-target or not. On the actual target page, we
-                # provide a fine selection of other scales. Also, we frob
-                # the itemName here, since it uses the same test.
-
+                # Decide on the itemName
                 if (defined($targs->{$item}->{'targets'}))  {
-                    $gQ->param('ranges', 'd');
                     $itemName .= " (multiple targets)";
                 } elsif (defined($targs->{$item}->{'mtargets'}))  {
                     $itemName .= " (aggregated targets)";
-                    $gQ->param('ranges', 'd:w');
                 } else  {
                     my($name) = $targs->{$item}->{'--name--'};
-                    my($gRef) = $gCT->configHash($name,
-                                                 'graph', '--default--');
-                    my($defRange) = graphParam($gRef, 'default-ranges', 'd:w');
-                    #my($defRange) = 'd:w';
-
-                    $gQ->param('ranges', $defRange);
                 }
 
                 # now, decide if there are multiple views for this target type
@@ -742,6 +750,8 @@ sub doHTMLPage {
 
                 # if it's set, views looks like this:
                 # cpu: cpu1min cpu5min,temp: tempIn tempOut
+                # or for defined top-level views:
+                # cpu, temp
                 if (defined($views)) {
                     my($v, $links);
                     $links = "";
@@ -803,8 +813,25 @@ sub doHTMLPage {
     return;
 }
 
+sub SetDefaultRange {
+    my ($targetRef, $viewRef) = @_;
+    my ($defRange);
+    if (defined($targetRef->{'targets'}))  {
+        $defRange = 'd';
+    } elsif (defined($targetRef->{'mtargets'}))  {
+        $defRange = 'd:w';
+    } else  {
+        if (defined($viewRef) && exists($viewRef->{'default-ranges'})) {
+            $defRange = $viewRef->{'default-ranges'};
+        } else {
+            $defRange = 'd:w';
+        }
+    }
+    return $defRange;
+}
+
 sub doHTMLSummary {
-    my($name, $tname, $targRef, $ttRef, $dslist) = @_;
+    my($name, $tname, $targRef, $ttRef, $dslist, $viewRef) = @_;
     my($tpath);
 
     print "<h3>Summary</h3>\n";
@@ -883,7 +910,10 @@ sub doHTMLSummary {
                                              'graph', $dsname, $targRef);
                 my($colorRef) = $gCT->configHash($thisName,
                                                  'color', undef, $targRef);
-
+                # use view parameters if defined
+                if (defined($viewRef)) {
+                    mergeHash($gRef,$viewRef,1);
+                }
                 my($space) = graphParam($gRef, 'space', ' ');
                 my($unit) = graphParam($gRef, 'y-axis', '');
                 $unit = graphParam($gRef, 'units', $unit);
@@ -1029,7 +1059,10 @@ sub doHTMLSummary {
             $dsname = lc($dsname);
             my($gRef) = $gCT->configHash($name, 'graph',
                                          $dsname, $targRef);
-
+            # use view parameters if defined
+            if (defined($viewRef)) {
+               mergeHash($gRef,$viewRef,1);
+            }
             my($color) = graphParam($gRef, 'color', nextColor($colorRef));
             my($legend) = graphParam($gRef, 'legend', $dsname);
             my($colorCode);
@@ -1252,7 +1285,21 @@ sub doGraph {
     }
 
     # things we will need from the params
-    my($dslist) = $gQ->param('dslist');
+    my($view) = $gQ->param('view');
+    # a comma-separated list of data sources
+    my($dslist);
+    my $viewRef = undef;
+    if (defined($view)) {
+        Debug("Found view tag $view in doGraph");
+        $viewRef = $gCT->configHash($name, 'view', $view, $targRef);
+        # skip error checking because doGraph args are generated by doHTMLPage
+        $dslist = $viewRef->{'elements'};
+        $dslist =~ s/\s*$//; # remove trailing space
+        # make it comma-separated unless it already is
+        $dslist =~ s/\s+/,/g unless (index($dslist,",") != -1);
+    } else {
+        $dslist = $gQ->param('dslist');
+    }
     my($range) = $gQ->param('range');
 
     # calculate this now for use later
@@ -1262,7 +1309,10 @@ sub doGraph {
     my($gRefDef) = $gCT->configHash($name, 'graph',
                                     '--default--', $targRef);
     my($colorRef) = $gCT->configHash($name, 'color', undef, $targRef);
-
+    # use view parameters if defined
+    if (defined($viewRef)) {
+        mergeHash($gRefDef,$viewRef,1);
+    }
     my($width) = graphParam($gRefDef, 'width', 500);
     my($height) = graphParam($gRefDef, 'height', 200);
     my($useGprint) = graphParam($gRefDef, 'use-gprint', 0);
@@ -1292,7 +1342,7 @@ sub doGraph {
         $yminlck = 0;
     }
 
-    # A hack for Holt-Winters graphs
+    # show Holt-Winters graphs
     my ($hwParam) = $gQ->param('hw');
     if (defined($hwParam)) {
         Debug("Holt Winters tag: $hwParam");
@@ -1306,8 +1356,6 @@ sub doGraph {
             Warn("Holt-Winters forecasting not supported for multiple data sources");
             $hwParam = undef;
         }
-    } else {
-        Debug("Holt Winters tag not found");
     }
 
     # ok, lets attempt to handle mtargets.  We need to loop through
@@ -1349,6 +1397,10 @@ sub doGraph {
                                           $Common::global::gConfigRoot);
         my($thisTname) = $targRef->{'auto-target-name'};
 
+        # check for paint-nan background option
+        my ($paintNaN) = (defined($viewRef) && exists($viewRef->{'paint-nan'})
+            && isTrue($viewRef->{'paint-nan'}));
+
         # take the inst from the url if it's there
         my($inst) = $gQ->param('inst');
         if (defined($inst)) {
@@ -1369,15 +1421,14 @@ sub doGraph {
         foreach $ds (split(/,/, $dslist)) {
             $ds = lc($ds);
 
-            if ($Common::global::gMarkNaN) {
-                push @cdefs, "CDEF:unavail$ct=ds$ct,UN,INF,0,IF";
-                push @lines, "AREA:unavail$ct#FFCCCC:";
-            }
-
             my($legend, $color, $colorCode, $drawAs, $scale,
                $colormax, $clmxCode, $drmxAs);
 
             my($gRef) = $gCT->configHash($name, 'graph', $ds, $targRef);
+            # use view parameters if defined
+            if (defined($viewRef)) {
+                mergeHash($gRef,$viewRef,1);
+            }
 
             $legend = graphParam($gRef, 'legend', $ds);
 
@@ -1429,14 +1480,6 @@ sub doGraph {
                 $scaled{$ds} = 0;
             }
 
-            # This is not 100% kosher, because the graph args are not
-            # target specific, but view specific. However, not doing
-            # this at all violates the rule of least astonishment.
-            my $pass = graphParam($gRef, 'rrd-graph-args', undef);
-            if (defined($pass)) {
-                push(@target_pass_args, $pass);
-            }
-
             # this way, we only take the _first_ yaxis that
             # was offered to us. (If they are trying to graph
             # different things on one graph, they get what they deserve:
@@ -1470,7 +1513,7 @@ sub doGraph {
             $colorCode = colorToCode($colorRef, $color);
 
             # default to not doing max stuff, since it's still a bit
-            # messy -- due to bad deafault RRA setup, etc.
+            # messy -- due to bad default RRA setup, etc.
             $mx = isTrue(graphParam($gRef, 'show-max', 0));
             # if hwParam, disable max, no matter what the config says
             $mx = 0 if (defined($hwParam));
@@ -1480,6 +1523,10 @@ sub doGraph {
                 usedColor($colormax);
                 $clmxCode = colorToCode($colorRef, $colormax);
             }
+
+            # push NaN bars on first in background
+            $paintNaN && push @cdefs, "CDEF:unavail$ct:ds$ct,UN,INF,0,IF";
+            $paintNaN && push @lines, "AREA:unavail$ct#FFCCCC";
 
             my($dsidx) = $dsmap{$ds};
             if (defined($dsidx)) {
@@ -1727,8 +1774,14 @@ sub doGraph {
     }
 
     my(@rules, $e);
-    if ($targRef->{'events'}) {
-        foreach $e (split(/\s*,\s*/, $targRef->{'events'})) {
+    my($eventlist) = (undef);
+    if (defined($viewRef)) {
+        $eventlist = $viewRef->{'events'};
+    } else {
+        $eventlist = $targRef->{'events'};
+    }
+    if ($eventlist) {
+        foreach $e (split(/\s*,\s*/, $eventlist)) {
             my($evRef) = $gCT->configHash($name, 'event', lc($e), $targRef);
             if ($evRef && $evRef->{'time'}) {
                 push @rules, join('', 'VRULE', ':', $evRef->{'time'},

@@ -31,10 +31,6 @@ $gInstallRoot = "$gCricketHome/cricket";
 #	-logLevel option instead.
 #$gLogLevel = "info"
 
-#	Uncomment to mark unavailable data in the charts with a pinkish
-#	background. NOTE: Do not enable this if you use stacked graphs.
-#$gMarkNaN = 1;
-
 #	Pick the style of URL you want Cricket to use when generating
 #	self-referencing URLs (either URL's to targets, or URL's to
 #	graphed images).

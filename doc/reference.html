@@ -143,6 +143,8 @@ The following table shows which tokens are parsed with which parsers:
   <tr>
     <td>graph<td>Tag/Value
   <tr>
+    <td>view<td>Tag/Value
+  <tr>
     <td>color<td>Simple
   <tr>
     <td>oid<td>Simple
@@ -179,6 +181,7 @@ Jump directly to:
   <li><a href="#datasource">datasource</a>
   <li><a href="#targettype">targetType</a>
   <li><a href="#graph">graph</a>
+  <li><a href="#view">view</a>
   <li><a href="#color">color</a>
   <li><a href="#oid">oid</a>
   <li><a href="#html">html</a>
@@ -279,10 +282,8 @@ will be displayed.
 <dt><tt>events</tt><p>
 <dd>Default value: <i>none</i><p>
 
-This tag is interpreted by the grapher as a comma-separated list
-of events to fetch from the <tt>events</tt> dictionary, and add
-to the graph in the form of a vertical rule.
-<p>
+The pre-1.0.4 syntax of specifying events as a target tag is deprecated. The
+<tt>events</tt> tag is now a view dictionary tag.
 
 <dt><tt>inst</tt><p>
 <dd>Default value: <i>none</i><p>
@@ -1040,13 +1041,18 @@ of known datasource names.
 <dt><tt>view</tt><p>
 <dd>Default value: <i>none</i><p>
 
-A view is a subset of the datasources that you'd like to display
-together, apart from the rest of the datasources. The syntax
-for the value is "view-name: ds ds ...". The view name you choose
-shows up in the CGI grapher, so you should try to make it
-descriptive. The space-separated list of datasources after the colon
-must be datasources that are part of the target type. You can specify
-several views by separating them by commas.
+Each <tt>view</tt> specifies a comma-delimited list of views associated
+with this target type. These views must be defined in separate view
+dictionary entries on the config tree inheritance path of targets 
+of this target type. This implies the view entries do not have
+to be defined in the same Defaults file in which the TargetType
+dictionary referencing them appears. However,
+for a cleaner, easier to read config tree, define view entries in
+the same Defaults file as the TargetType dictionary that references
+them.
+<p>
+The pre-1.0.4 syntax of defining views with the TargetType <tt>view</tt>
+tag is deprecated.
 <p>
 </dl>
 
@@ -1054,160 +1060,43 @@ several views by separating them by commas.
 <h3>The Graph Dictionary</h3>
 </a>
 
-The graph dictionary controls how individual variables are displayed
-when it comes time to graph them. The graph dictionary is structured
-exactly the same as the datasource dictionary, and in some ways they
-could be merged. For historical reasons, or architectural reasons (I
-haven't decided yet...) they remain separate dictionaries.<p>
+The graph dictionary controls how individual datasources are displayed
+when it comes time to graph them. It also controls display attributes
+of statistical summary for this data source on the HTML page which embeds 
+the graph image(s). Each named graph dictionary entry (not 
+<tt>--default--</tt>) should share the name of a datasource dictionary entry.
+In this respect, the graph dictionary could be merged with the datasource
+dictionary. However, the separation permits separate administration of
+datasource definition/collection and display properties in graphs. <p>
 
-There are actually two "flavors" of graph dictionary tags;
-per-datasource and generic. The generic tags relate to the graphs
-themselves, as opposed to the individual datasources drawn onto the
-graphs. For instance, the width and height of a graph are configured
-by generic tags, whereas the color of a datasource is configured by a
-per-datasource tag. Per-datasource tags are stored in the graph
-dictionary just as all the tags in the datasource dictionary are
-stored. Generic tags are stored only in the <tt>--default--</tt>
-dictionary.<p>
+Cricket variables in graph tags (i.e. %myvar%) are expanded with respect
+to a target. For example, in the graph dictionary entry for a datasource,
+you could specify <tt>y-max = %specific-y-max%</tt>, then set the tag
+<tt>specific-y-max</tt> on a per-target basis. The association between
+targets and graph dictionary entries is controlled by the TargetType 
+dictionary for the apporpriate target type (because the graph dictionary 
+names match datasource dictionary names). <p>
 
-Below, the generic tags are listed.<p>
+Graph <tt>--default--</tt> dictionary entries can be used to define
+default datasource graph attributes (such as default line thickness via the
+<tt>draw-as</tt> tag).<p> 
 
-<dl>
-
-<dt><tt>height</tt><p>
-<dd>Default value: 200<p>
-
-This tag defines the requested height of the data area of the
-graph. This value is passed into RRD, which then draws the actual
-image
-somewhat bigger, in order to leave room for the margin, the scales, and
-the legend.<p>
-
-<dt><tt>height-hint</tt><p>
-<dd>Default value: <i>none</i><p>
-
-HTML defines image sizing tags that allow the browser to layout the
-page more efficiently. Using the Cricket's size hints,
-you can control what image
-sizing tags Cricket generates in its HTML output. Most browsers will
-attempt to scale the image if the size hints passed in via HTML do not
-match the actual size of the image. The result is a hard-to-read graph
-that took too long to draw. Thus it is <b>critical</b> that if you
-choose to use sizing hints to help the browser layout the page, you
-make them precisely the same as the size of the generated image.<p>
-
-Because RRD pads the image with extra space, it's not possible for
-Cricket to guess the finished size of the image using the <tt>width</tt>
-and <tt>height</tt> tags. Instead, you need to find this number
-yourself by measuring an actual image produced by RRD. In Netscape
-Navigator, you
-can do this by right clicking on the image, then choosing <i>Open this
-Image</i>. Once the image is loaded, check the title bar for the actual
-size of the image.<p>
-
-<dt><tt>default-ranges</tt><p>
-<dd>Default value: "d:w"<p>
-
-What set of graphs are initially displayed. If you tend to be
-fetching graphs at low bandwidth, you might like to frob this.
-Setting it to "d", will make Cricket only send you the daily
-graph, instead of the daily and weekly graphs.<p>
-
-<dt><tt>interlaced</tt><p>
-<dd>Default value: false<p>
-
-Set this tag to true to enable interlaced image. An interlaced image
-will appear to "fade in" in most web browsers.<p>
-
-<dt><tt>graph-format</tt><p>
-<dd>Default value: <i>png</i> (for 4.0+ browsers), <i>gif</i> otherwise<p>
-
-Set this tag to 'gif' to get RRD Tool to create GIFs.
-The GIFs created by RRD are big and slow, because they do not use
-patented compression techniques. Cricket will use GIFs if the
-browser will not support PNG's.
-
-<dt><tt>rrd-graph-args</tt><p>
-<dd>Default value: <i>none</i><p>
-
-This tag can be used to pass through arguments to the RRD Tool.
-The most appropriate use for this tag is to send color tags through
-to the RRD Tool. For instance, to make the canvas that the graph
-is drawn on appear black, you can set <tt>rrd-graph-args</tt>
-to "-c CANVAS#000000". This tag is split on whitespace before
-it is sent to RRD Tool, so it is not possible at this time to
-send arguments with embedded whitespace to RRD Tool.
-<p>
-
-<dt><tt>vrule-color</tt><p>
-<dd>Default value: <i>none</i><p>
-
-Vertical rules are lines added to the graph by Cricket to help you
-visually find patterns in the data related to time of day. A vertical
-rule is placed at each "zero time" which appears on a graph. For an
-hourly graph, a zero time is midnight. For a daily graph, a zero time
-is the beginning of the most recent Monday.
-For a weekly graph, a zero time is the first day of the month.
-For a monthly graph, a zero time is the first day of the year.
-At this time, the definition of zero time for a
-given scale is hardcoded into Cricket's grapher.cgi script.<p>
-
-To enable vertical rules, use the <tt>vrule-color</tt> tag to choose a
-color for them. That's all there is to it. If <tt>vrule-color</tt> is
-defined, Cricket will automatically add the vertical rules for
-you.<p>
-
-<dt><tt>width</tt><p>
-<dd>Default value: 500<p>
-
-Like height, this is the height of the data area of the graph. The
-actual height of the resulting image will differ.<p>
-
-<dt><tt>width-hint</tt><p>
-<dd>Default value: <i>none</i><p>
-
-Like <tt>height-hint</tt> above, this controls the value used
-by Cricket for the height tag in its HTML output. See
-<tt>height-hint</tt> for more information about how to set this.<p>
-
-<dt><tt>y-max</tt><p>
-<dd>Default value: <i>none</i><p>
-
-Using this tag (and its opposite, <tt>y-min</tt>) you can
-explicitly control the vertical scale of the graph.
-If you use either <tt>y-min</tt> or <tt>y-max</tt>,
-you disable auto-scaling, and so you must explicitly set both of them. These
-tags are especially useful when you are graphing some value which should
-normally be very tightly bounded (for instance between 0 and 1 second), but
-occasionally jumps far above 1 second. In this case, all variation under
-one second will be essentially invisible on the graph, unless you set the
-<tt>y-min</tt> to 0 and the <tt>y-max</tt> to 1.
-<p>
-
-Because the graph dictionary is expanded with respect to the
-target dictionary, you could say <tt>y-max = %specific-y-max%</tt>,
-then set the tag <tt>specific-y-max</tt> on a per-target
-basis.
-<p>
-
-In general, it's a good idea to leave these unset and rely on
-auto-scaling, unless you have a situation that calls for explicit
-bounds.
-<p>
-
-<dt><tt>y-min</tt><p>
-<dd>Default value: <i>none</i><p>
-
-See <tt>y-max</tt>, above.
-<p>
-
-</dl>
-
-The following tags are per-datasource. They can occur in the
-<tt>--default--</tt> dictionary, in which case they are inherited into
-all subsequent per-datasource dictionaries. However, unlike the
-generic tags above, they are only ever referenced with respect to a
-certain datasource.<p>
+If your config tree does not utilize views, you should use graph
+<tt>--default--</tt> dictionary entries to define non-datasource
+specific graphing attributes. These tags include: 
+<tt>default-ranges</tt>,
+<tt>height</tt>,
+<tt>height-hint</tt>,
+<tt>interlaced</tt>,
+<tt>graph-format</tt>,
+<tt>vrule-color</tt>,
+<tt>width</tt>,
+and <tt>width-hint</tt>.
+If your config tree utilizes views, these attributes should instead
+be defined in view dictionary entries and these tags are defined
+in the <a href="#view">view dictionary section</a>. For a config
+tree that utilizes views, defining non-datasource specific graphing tags
+in graph <tt>--default--</tt> entries is deprecated.<p>
 
 <dl>
 
@@ -1328,7 +1217,8 @@ into bits per second for human use.
 <dt><tt>show-avg-max</tt><p>
 <dd>Default value: <i>true</i><p>
 
-This controls the amount of summary data shown on the top of graphs.
+This controls the amount of summary data shown for this datasource at the
+top of the graph page.
 If set to true, Cricket makes an extra call to RRD Tool to fetch the
 average and the maximum for the current day of data. If set to false, only
 the current reading is shown.
@@ -1402,19 +1292,263 @@ default to "bits per second".
 <dt><tt>y-max</tt><p>
 <dd>Default value: <i>unset</i><p>
 
-See <tt>y-max</tt> in the generic section. If there is a generic
-<tt>y-max</tt>, it overrides the per-datasource <tt>y-max</tt>.
-If there are multiple per-datasource y-maxes, then the maximum of
-all of them is used.
-<p>
+Use this tag (and its counterpart, <tt>y-min</tt>) to
+explicitly set the default vertical scale for this datasource when
+it is graphed. Often multiple datasources are graphed together,
+so this tag is better set in a view entry. Refer to the <a href="#view">
+the view dictionary section</a>.
+Presence of this tag disables auto-scaling, so you should set <tt>y-max</tt>
+and <tt>y-min</tt> together if you use this functionality. <p>
 
 <dt><tt>y-min</tt><p>
 <dd>Default value: <i>unset</i><p>
 
-See <tt>y-max</tt> above.
+Refer to <tt>y-max</tt>.
 <p>
 
 </dl>
+
+<a name="view">
+<h3>The View Dictionary</h3>
+</a>
+
+A view dictionary entry is a container for display elements. In
+particular, a view is a group of datasources to be displayed together
+with a particular set of display attributes/options. The same datasource
+can appear in multiple views. The datasource specific graph
+attributes are defined in graph dictionary entries, but other features
+of the graph and the HTML page in which the graph is embedded are
+configured in the view entry and thus can vary from view to view. As you
+navigate through the Cricket Grapher the choice of graph pages presented
+for a given target are the views defined for that target (via the
+view list in the TargetType dictionary).
+<p>
+The most important view tag is <tt>elements</tt>, as this tag specifies
+the list of datasources (with their associated graph dictionary entries)
+to be included in the view. The <tt>elements</tt> tag is the replacement
+for the space-delimited datasource list in the TargetType dictionary
+view tag in older (pre-1.0.4) versions of Cricket.
+<p>
+Views are not required. If a target type does not include any views, the
+Grapher will present the user with a list of datasources. But views
+unlock the full flexibility of the Cricket Grapher.
+<p>
+Cricket variables in view tags (i.e. %myvar%) are expanded with respect
+to a target. The association between 
+targets and view dictionary entries is controlled by the <a href="#targettype">
+TargetType dictionary</a> for the apporpriate target type. <p>
+<p>
+It is not uncommon for view names to contain space characters. Such names
+are permitted (and parseable) in the config tree. Simply enclose the name
+in double quotes: <p>
+<blockquote><pre>
+view   "Traffic Flow"
+    elements = "ifInOctects, ifOutOctets"
+</pre></blockquote>
+<p>
+Here is the list of view dictionary tags:
+<p>
+<dl>
+<dt><tt>confidence-band-scale</tt><p>
+<dd>Default value: 2<p>
+
+This tag is ignored unless the <tt>holtwinters</tt> is present and set to
+to true. In that case, it controls the multiple of the deviations
+(RRA CF DEVPREDICT) used to display confidence bands on the graph.<p>
+
+<dt><tt>default-ranges</tt><p>
+<dd>Default value: "d:w"<p>
+
+The default set of temporal scales, colon-separated, for which graphs 
+are initially displayed. For example, specifying
+<tt>default-ranges="d"</tt> for a view means only the daily graph
+will be generated, instead of both the daily and weekly graphs. Of course,
+the Cricket grapher permits the user to select another temporal scale once
+the default is rendered. <p>
+
+<dt><tt>elements</tt><p>
+<dd>Default value: <i>none</i><p>
+
+The <tt>elements</tt> tag specifies a list of datasources (with their
+associated graph dictionary entries) to be included in the view. These
+datasources are presumed to be listed in the <tt>ds</tt> tag of any
+TargetType dictionary to which the view belongs. The <tt>elements</tt>
+tag may either be comma-delimited (the preference) or space-delimited
+(to match pre-1.0.4 syntax).
+<p>
+Selecting a view in the Grapher without the <tt>elements</tt> tag defined
+in the Config Tree is one cause of the "No graph to make?" error in your
+web server log.
+<p>
+
+<dt><tt>events</tt><p>
+<dd>Default value: <i>none</i><p>
+
+This tag is interpreted by the grapher as a comma-separated list
+of events to fetch from the <tt>events</tt> dictionary, and add
+to the graph in the form of vertical lines.
+<p>
+
+<dt><tt>graph-format</tt><p>
+<dd>Default value: <i>png</i> (for 4.0+ browsers), <i>gif</i> otherwise<p>
+
+Set this tag to 'gif' to get RRD Tool to create GIFs.
+The GIFs created by RRD are big and slow, because they do not use
+patented compression techniques. Cricket will use GIFs if the
+browser will not support PNG's. This tag is likely to appear in
+view <tt>--default--</tt> entry.
+
+Note that RRD Tool 1.1.x does not support GIFs. It does support other image
+formats that may be incorporated into a future Cricket release.<p>
+
+<dt><tt>height</tt><p>
+<dd>Default value: 200<p>
+
+This tag defines the requested height of the data area of the
+graph. This value is passed into RRD, which then draws the actual image
+somewhat bigger, in order to leave room for the margin, the scales, and
+the legend. This tag is likely to appear in a view <tt>--default--</tt>
+entry. <p>
+
+<dt><tt>height-hint</tt><p>
+<dd>Default value: <i>none</i><p>
+
+HTML defines image sizing tags that allow the browser to layout the
+page more efficiently. Using the Cricket's size hints,
+you can control what image
+sizing tags Cricket generates in its HTML output. Most browsers will
+attempt to scale the image if the size hints passed in via HTML do not
+match the actual size of the image. The result is a hard-to-read graph
+that took too long to draw. Thus it is <b>critical</b> that if you
+choose to use sizing hints to help the browser layout the page, you
+make them precisely the same as the size of the generated image.<p>
+
+Because RRD pads the image with extra space, it's not possible for
+Cricket to guess the finished size of the image using the <tt>width</tt>
+and <tt>height</tt> tags. Instead, you need to find this number
+yourself by measuring an actual image produced by RRD. In Netscape
+Navigator, you
+can do this by right clicking on the image, then choosing <i>Open this
+Image</i>. Once the image is loaded, check the title bar for the actual
+size of the image.
+
+Like <tt>height</tt>, this tag is likely to appear in a view 
+<tt>--default--</tt> entry. <p>
+
+<dt><tt>holtwinters</tt><p>
+<dd>Default value: <i>false</i><p>
+
+If present and set to true, the <tt>holtwinters</tt> tag tells the
+Grapher to display aberrant behavior detection options
+on the graph and HTML summary page. These options include display
+of aberrant behavior recorded in the FAILURES RRA and predicted confidence
+bands for the observed time series (based on Holt-Winters Forecasting,
+hence the tag name). The underlying target must have RRD Tool aberrant
+behavior detection enabled (requires RRD Tool 1.1.x).
+<p>
+If this tag is enabled, the <tt>elements</tt> tag must contain only a
+single datasource; otherwise, an error will be generated. Furthermore,
+the <tt>default-ranges</tt> tag is ignored for a view with <tt>holtwinters=true
+</tt>.
+<p>
+Note that it is not required to define views with holtwinters=true simply
+because RRD Tool aberrant behavior detection is enabled.
+<p>
+
+<dt><tt>interlaced</tt><p>
+<dd>Default value: false<p>
+
+Set this tag to true to enable interlaced images for this view. An interlaced
+image will appear to "fade in" in most web browsers.<p>
+
+<dt><tt>paint-nan</tt><p>
+<dd>Default value: <i>false</i><p>
+
+Setting <tt>paint-nan</tt> to true for a view will shade the background
+of the graph with a pinkish hue for any time period in which one of the
+datasources included in the view has missing (NaN) data.
+
+<dt><tt>rrd-graph-args</tt><p>
+<dd>Default value: <i>none</i><p>
+
+This tag can be used to pass through arguments to the RRD Tool graph
+command. For example, to make the canvas that the graph
+is drawn on appear black, set <tt>rrd-graph-args</tt>
+to "-c CANVAS#000000". This tag is split on whitespace before
+it is sent to RRD Tool, so it is not possible at this time to
+send arguments with embedded whitespace to RRD Tool.
+<p>
+
+As a second example (running RRD Tool 1.1.x), to change the default
+font for in-graph text to 12 pt Times, set <tt>rrd-graph-args</tt> to 
+"--font DEFAULT:12:times.ttf". This example assume times.ttf is available
+on the path in the environment in which the Cricket grapher is running. <p>
+
+<dt><tt>vrule-color</tt><p>
+<dd>Default value: <i>none</i><p>
+
+Vertical rules are lines added to the graph by Cricket to help you
+visually find patterns in the data related to time of day. A vertical
+rule is placed at each "zero time" which appears on a graph. For an
+daily graph, a zero time is midnight. For a weekly graph, a zero time
+is the beginning of the most recent Monday.
+For a monthly graph, a zero time is the first day of the month.
+For a yearly graph, a zero time is the first day of the year.
+At this time, the definition of zero time for a
+given scale is hardcoded into Cricket's grapher.cgi script.<p>
+
+To enable vertical rules, use the <tt>vrule-color</tt> tag to choose a
+color for them defined in the color dictionary.
+That's all there is to it. If <tt>vrule-color</tt> is
+defined, Cricket will automatically add the vertical rules for
+you.<p>
+
+<dt><tt>width</tt><p>
+<dd>Default value: 500<p>
+
+Similar to <tt>height</tt>, this is the width of the data area of the graph. The
+actual width of the resulting image will differ.<p>
+
+<dt><tt>width-hint</tt><p>
+<dd>Default value: <i>none</i><p>
+
+Similar to <tt>height-hint</tt>, this controls the value used
+by Cricket for the width tag in its HTML output. See
+<tt>height-hint</tt> for more information.<p>
+
+<dt><tt>y-max</tt><p>
+<dd>Default value: <i>none</i><p>
+
+Using this tag (and its counterpart, <tt>y-min</tt>) you can
+explicitly control the vertical scale of the graph and override any
+datasource-specific <tt>y-max</tt> or <tt>y-min</tt> tag defined in
+a graph dictionary entry. For example, these tags
+might be useful when you are graphing some value which should
+normally be very tightly bounded (for instance between 0 and 1 second), but
+occasionally jumps far above 1 second. In this case, all variation under
+one second will be essentially invisible on the graph, unless you set the
+<tt>y-min</tt> to 0 and the <tt>y-max</tt> to 1.
+<p>
+
+Using <tt>y-max</tt> or <tt>y-min</tt>, disables
+auto-scaling, and so you must explicitly set both of them (although
+they need not both be set in the same dictionary entry, <tt>y-min=0</tt>
+could appear in a view <tt>--default--</tt> entry).
+Note that for many situations, the default auto-scaling is reasonable.
+<p>
+
+If the <tt>y-max</tt> tag is not defined in view entries, but
+does appear in graph datasource-specific entries, <tt>y-max</tt>
+for the view will default to the maximum per-datasource <tt>y-max</tt>.
+Similarly, <tt>y-min</tt> for the view defaults to the minimum
+per-datasource <tt>y-min</tt>.
+<p>
+
+<dt><tt>y-min</tt><p>
+<dd>Default value: <i>none</i><p>
+
+Refer to <tt>y-max</tt>.
+<p>
 
 <a name="color">
 <h3>The Color Dictionary</h3>
@@ -1571,9 +1705,9 @@ This dictionary holds information related to <i>events</i>. An
 event is some point in time which you'd like to mark on graphs
 so that later, you'll remember why it was that those graphs
 look the way they do. An event is named, just like a target
-or a datasource. The event
+or a datasource. The event names are used in the
+<a href="#view">view dictionary</a> tag called <tt>events</tt>.
 names are used in the target dictionary tag called <tt>events</tt>.
-See the entry for that tag for more information.
 <p>
 
 Each event should have the following tags set:
@@ -1640,4 +1774,3 @@ the <a href="gpl.html">GNU General Public License</a>.
 
 </body>
 </html>
-

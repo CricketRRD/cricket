@@ -1,5 +1,16 @@
 New features, fixes in version 1.0.4
 
+    Introducing the view dictionary! Views are now separate config
+    tree entries. Going forward, the view tag in the targettype
+    dictionary should specify a comma-delimited list of views that
+    are defined in separate view entries. View entries support all
+    non-datasource specific graph tags (aka graph --default-- tags)
+    and view specific tags. The most important view specific tag is
+    'elements' which specifies a comma-delimited or space-delimited
+    list of data sources. Note that this change should not break
+    existing config trees because the old targettype view tag syntax
+    is still supported.
+
 	listInterfaces has been updated (users of the contributed
 	web site may recognize listInterfaces+). When upgrading from
 	previous versions of Cricket, it is recommended that you
@@ -12,7 +23,7 @@ New features, fixes in version 1.0.4
 	for using Apache <Location> access restrictions).
 
 	It is possible to mark NaN samples in the graph with a colored
-	background. This is selectable from cricket-conf.pl.
+	background. This enabled via the view tag paint-nan (boolean value).
 	WARNING: do not enable this if you use the STACK draw-as
 	type anywhere in your graphs.
 

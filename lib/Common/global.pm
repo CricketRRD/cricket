@@ -71,7 +71,6 @@ BEGIN {
     $hasPersistantGlobals = 1 if $CGI::SpeedyCGI::i_am_speedy;
 
     $gSkipMonitor ||= 0;
-    $gMarkNaN ||= 0;
     $gUrlStyle ||= "classic";
 
     if (!defined($isGrapher)) {

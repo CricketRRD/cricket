@@ -22,7 +22,7 @@ package Common::Util;
 require Exporter;
 @ISA = qw(Exporter);
 
-@EXPORT = qw(Eval isNonNull isTrue isFalse mapOid runTime quoteString);
+@EXPORT = qw(Eval isNonNull isTrue isFalse mapOid runTime quoteString mergeHash);
 
 use Common::Log;
 
@@ -157,6 +157,21 @@ sub Eval {
 
 sub isNonNull {
     return (defined($_[0]) && $_[0] ne '');
+}
+
+# add elements from hashRef2 to hashRef1
+# bOverride indicate that hashRef2 elements with the same key
+# should override the corresponding elements in hashRef1
+sub mergeHash {
+    my ($hashRef1, $hashRef2, $bOverride) = @_;
+    my $curKey;
+    foreach $curKey (keys %{$hashRef2})
+    {
+        if (!(exists $hashRef1->{$curKey}) || $bOverride) 
+        {
+            $hashRef1->{$curKey} = $hashRef2->{$curKey};
+        }
+    }
 }
 
 1;
