@@ -1,5 +1,14 @@
 New features, fixes in version 1.0.3
 
+	The many disk accesses to the config database that collector
+	uses are causing the collector to run slowly on sites with
+	huge config trees. Starting with 1.0.3, the entire config
+	tree is slurped into memory. This causes a significant speedup
+	at the expense of collectors memory size. The database access
+	method can be set to "lookup" in cricket-conf.pl to revert
+	to the old behavior if collector memory footprint is of greater
+	concern to you than its hammering on the disk.
+
 	A new way of configuring Cricket has been added. It is now
 	possible to create a file called cricket-conf.pl, which can
 	either reside in the same directory as the grapher.cgi
