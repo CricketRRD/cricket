@@ -20,6 +20,8 @@ contributed ideas, patches, and/or debugging info:
 
 	Jeremy Hinton
 		contributed the "NaN in pinkish background" feature
+		identified and fixed a number of issues in the
+		1.0.4-pre1 prerelease
 
 	Nils Ketelsen and Raffael D'Albenzio
 		were instrumental in squashing the mtargets/mtargets-ops
