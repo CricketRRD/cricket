@@ -730,7 +730,7 @@ Here's a detailed description of each scheme.
   <p>
   Here is an example for collecting Current Disk Queue Length for all disks:
   <p>
-  <tt>perfmon:%auto-target-name%:PhysicalDisk:Current Disk Queue Length:_Total
+  <tt>perfmon:%auto-target-name%:PhysicalDisk:Current Disk Queue Length:_Total</tt>
   <p>
 
   <dt> EXEC
@@ -809,6 +809,12 @@ Here's a detailed description of each scheme.
 		running your code in its namespace. This should be fixed
 		someday, if many extensions to Cricket use this interface.
 		<p>
+
+  <dt> WBEM 
+  <dd> This ds-source uses a Win32 COM object to fetch WMI Counters.
+	   For details, please see <a href="win2kwmi.html">Installing Cricket
+	   on Win2K to Monitor WMI Counters</a>.
+	   <p>
 </dl>
 </blockquote>
 <p>

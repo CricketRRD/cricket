@@ -31,7 +31,7 @@ use Win32::OLE::Const 'Microsoft WMI Scripting V1.1 Library';
 $main::gDSFetch{'wbem'} = \&wbemFetch;
 
 sub wbemFetch {
-    # This procedure is passed a REFERENCE to an array of wbemodbc datasources.
+    # This procedure is passed a REFERENCE to an array of wbem datasources.
     # Each line consists of "index:host:namespace:table:field:predicate"
     # Predicate is optional.
 
