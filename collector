@@ -159,7 +159,8 @@ sub localHandleTargetInstance {
 		return unless newRRD($name, $target);
 	}
 
-	my(@data) = retrieveData($name, $target);
+	my $agent_restart = 0;
+	my(@data) = retrieveData($name, $target, \$agent_restart);
 	if ($#data+1 == 0) {
 		Warn("No data retrieved. Skipping RRD update.");
 		return;
@@ -184,6 +185,19 @@ sub localHandleTargetInstance {
 	if (! defined($when)) {
 		# if they didn't tell us when, use RRD's "now" syntax.
 		$when = "N";
+	}
+
+	# If an SNMP agent restart occurred, insert a dummy record consisting
+	# of all "U" one second before the current sample. This causes RRD
+	# to set the previous value of counters to undefined, avoiding weird
+	# results when a counter goes negative because of a restart.
+
+	if ($agent_restart && $when eq "N") {
+		my @dummyresults = @data2;
+		grep { $_ = 'U'} @dummyresults;
+		Info("Inserting dummy record because of agent restart");
+		my $now = time();
+		RRDs::update($datafile, join(":", $now - 1, @dummyresults));
 	}
 
 	RRDs::update($datafile, join(":", $when, @data2));
@@ -221,7 +235,7 @@ sub handleMultiTarget {
 }
 
 sub retrieveData {
-    my($name, $target) = @_;
+    my($name, $target, $restart_ref) = @_;
 
 	my($tname) = $target->{'auto-target-name'};
 	my($inst) = $target->{'inst'};
@@ -282,6 +296,10 @@ sub retrieveData {
 			my($newds) = "--snmp://${snmp}/${oid}.${inst}";
 			push @targetDSs, $newds;
 		}
+	}
+	if (defined($target->{'snmp-uptime'})) {
+		my $ds = "--snmp://$target->{'snmp'}/$target->{'snmp-uptime'}";
+		push @targetDSs, $ds;
 	}
 
 	# this will hold a hash of ds-method names. the values will
@@ -367,6 +385,19 @@ sub retrieveData {
 		}
 	}
 
+	# Check the agent uptime with the poll interval. If the uptime is
+	# less then one poll interval, notify our caller of the restart.
+
+	if (defined($target->{'snmp-uptime'})) {
+		my($agent_uptime) = pop @results;
+		my($poll) = $target->{'rrd-poll-interval'};
+		$poll = 300 unless (defined($poll));
+		if ($agent_uptime ne "U" && $agent_uptime < $poll * 100) {
+			Info("Agent uptime is less than poll interval");
+			$$restart_ref = 1 if (defined($restart_ref))
+		}
+	}
+
 	# if we are verifying, check the
 	# fetched mapping key to make certain it's right
 
@@ -392,7 +423,7 @@ sub retrieveData {
 				# now that we have the correct inst, fetch again
 				# (this time there is no need to verify)
 				delete($target->{'--verify-mapkey--'});
-				@results = retrieveData($name, $target);
+				@results = retrieveData($name, $target, undef);
 			} else {
 				# fill in all unknown, since the mapping key seems
 				# to no longer exist
