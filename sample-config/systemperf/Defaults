@@ -155,6 +155,18 @@ datasource ucd_diskIOWrites
     ds-source    = snmp://%snmp%/ucd_diskIOWrites.%inst%
     rrd-ds-type  = DERIVE
 
+datasource ifInErrors
+    ds-source   =   snmp://%snmp%/ifInErrors.%inst%
+
+datasource ifOutErrors
+    ds-source   =   snmp://%snmp%/ifOutErrors.%inst%
+
+datasource ifInUcastPackets
+    ds-source   =   snmp://%snmp%/ifInUcastPkts.%inst%
+
+datasource ifOutUcastPackets
+    ds-source   =   snmp://%snmp%/ifOutUcastPkts.%inst%
+
 map ucd-diskio-device
     base-oid    =   ucd_diskIODevice
     match       =   %ucd-diskio-device%
@@ -192,6 +204,12 @@ targetType    ucd_diskIO_bsdi
     ds    =    "ucd_diskIOReads"
     view  =    "diskIO: ucd_diskIOReads"
 
+targetType    standard-interface
+    ds    =    "ifInOctets, ifOutOctets, ifInErrors,
+                ifOutErrors, ifInUcastPackets, ifOutUcastPackets"
+    view  =    "Octets: ifInOctets ifOutOctets,
+                UcastPackets: ifInUcastPackets ifOutUcastPackets,
+                Errors: ifInErrors ifOutErrors"
 
 #### Graphs ###############
 
@@ -232,7 +250,6 @@ graph    ucd_load15min
     si-units= false
 
 graph    hrSystemNumUsers
-
     color     = dark-green
     draw-as   = AREA
     y-axis    = "Users"
@@ -318,3 +335,22 @@ graph    ucd_rawCpuIdle
     draw-as    = STACK
     y-min      = 0
     y-max      = 100
+
+graph   ifInUcastPackets
+    draw-as    =   AREA
+    y-axis     =   "packets per second"
+    units      =   "pkt/sec"
+    legend     =   "Average num Packets In"
+graph   ifOutUcastPackets
+    y-axis     =   "packets per second"
+    units      =   "pkt/sec"
+    legend     =   "Average num Packets Out"
+graph   ifInErrors
+    draw-as    =   AREA
+    y-axis     =   "errors per second"
+    units      =   "err/sec"
+    legend     =   "Average Errors In"
+graph   ifOutErrors
+    y-axis     =   "errors per second"
+    legend     =   "Average Errors Out"
+    units      =   "err/sec"
