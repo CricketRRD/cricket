@@ -1321,7 +1321,7 @@ sub doGraph {
         $thisName =~ s:([^/]+)$:lc $1:e;
 
         my($targRef) = $gCT->configHash($thisName, 'target', undef);
-      ConfigTree::Cache::addAutoVariables($thisName, $targRef,
+        ConfigTree::Cache::addAutoVariables($thisName, $targRef,
                                           $Common::global::gConfigRoot);
         my($thisTname) = $targRef->{'auto-target-name'};
 
