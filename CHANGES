@@ -1,15 +1,15 @@
 New features, fixes in version 1.0.4
 
-    Introducing the view dictionary! Views are now separate config
-    tree entries. Going forward, the view tag in the targettype
-    dictionary should specify a comma-delimited list of views that
-    are defined in separate view entries. View entries support all
-    non-datasource specific graph tags (aka graph --default-- tags)
-    and view specific tags. The most important view specific tag is
-    'elements' which specifies a comma-delimited or space-delimited
-    list of data sources. Note that this change should not break
-    existing config trees because the old targettype view tag syntax
-    is still supported.
+	Introducing the view dictionary! Views are now separate config
+	tree entries. Going forward, the view tag in the targettype
+	dictionary should specify a comma-delimited list of views that
+	are defined in separate view entries. View entries support all
+	non-datasource specific graph tags (aka graph --default-- tags)
+	and view specific tags. The most important view specific tag is
+	'elements' which specifies a comma-delimited or space-delimited
+	list of data sources. Note that this change should not break
+	existing config trees because the old targettype view tag syntax
+	is still supported.
 
 	listInterfaces has been updated (users of the contributed
 	web site may recognize listInterfaces+). When upgrading from
