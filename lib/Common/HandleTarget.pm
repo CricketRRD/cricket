@@ -141,6 +141,9 @@ sub checkTargetInstance {
 			$args =~ s/\0/:/g ;
 		}				
 		if(defined($Common::global::gMonitorTable{"$type"})) {
+			my $persistent = 'false';
+			$persistent = $target->{'persistent-alarms'};
+
 			if(&{$Common::global::gMonitorTable{"$type"}}
 				($m, $target, $ds, $type, $args)) {
 				# the test succeeded, check to see if we
@@ -157,7 +160,8 @@ sub checkTargetInstance {
 			} else {
 				my($metaRef) = $rrd->getMeta();
 				LogMonitor("$name - $Threshold failed.");
-				if(!defined($metaRef->{$Threshold})) {
+				if($persistent eq "true" || !defined($metaRef->{$Threshold})) {
+				#if(!defined($metaRef->{$Threshold})) {
 					LogMonitor("Triggering alarm for $Threshold.");
 					$m->Alarm($target,$name,$ds,$type,$Threshold,$alarmType,$alarmArgs);
 					$metaRef->{$Threshold} = 'Failed';
