@@ -196,7 +196,7 @@ sub checkTargetInstance {
                 if ($persistent eq "true" || !defined($metaRef->{$Threshold})) {
                     LogMonitor("Triggering alarm for $Threshold.");
                     $m->Alarm($target,$name,$ds,$type,$Threshold,$actionType,\@actionArgs,$val);
-                    $metaRef->{$Threshold} = 'Failed';
+                    $metaRef->{$Threshold} = 'Failed on ' . $val;
                     $rrd->setMeta($metaRef);
                 }
             }
