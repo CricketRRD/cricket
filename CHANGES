@@ -78,6 +78,9 @@ New features, fixes in version 1.0.3
 	Most notably, the internal database types "D:" and "n:" are
 	no longer generated.
 
+	All files were made consistent in their indentation. We now
+	use soft tabs exclusively, with a tab size of 4.
+
 New features, fixes in version 1.0.2 (18-May-00):
 
 	Fixed bug #104757, $clmxCode/max-color bugs.
