@@ -13,6 +13,15 @@ WebTV gets new stuff for free in return. So I am indebted to these
 contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
+	Jase MacLeod
+		Identified and fixed a threshold monitor bug in 1.0.4
+
+	Francois Mikus
+		Monitoring enhancements
+
+	Terje Bless
+		Website updates
+		Patch review and integration for 1.0.4
 
 	Lars Hansson
 		Spotted a bug in mungeDsName
@@ -156,10 +165,3 @@ contributed ideas, patches, and/or debugging info:
 		a prototype of SMRTG that crystalized our ideas
 			about the config tree
 		the contributors site
-
-	Francois Mikus
-		Monitoring enhancements
-
-	Terje Bless
-		Website updates
-		Patch review and integration for 1.0.4
