@@ -121,5 +121,9 @@ contributed ideas, patches, and/or debugging info:
 		monitoring/monitoring documentation
 		WMI on Win2K support
 
-	Adam Meltzer
+	Adam Meltzer <ameltzer@microsoft.com>
 		perfmon on Win2K support
+		sql provider
+		memory slurp additions
+		bug fixes
+

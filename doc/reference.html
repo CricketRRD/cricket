@@ -216,9 +216,10 @@ data it collects somewhere else after it is added to
 the RRD file. The value of this tag is interpreted
 as a colon separated list of two things. The first
 is where to send the data. The second item is used on
-a case-by-case basis. The only place to send data
-right now is to SNMP traps. To do so, set <tt>copy-to</tt>
-to a string like this: <tt>trap:public@traphost.company.com</tt>.
+a case-by-case basis. 
+
+To send SNMP traps, set <tt>copy-to</tt> to a string like this: 
+<tt>trap:public@traphost.company.com</tt>.
 <p>
 
 The traps Cricket sends are marked with an enterprise number
@@ -230,6 +231,18 @@ The OID's for these varbinds can be ignored. They are not
 significant.
 <p>
 
+To send SQL updates to a database (see <a href="copytosql.html">SQL HOWTO</a>),
+use a string like this:
+<p>
+<tt>sql:driver,user,password</tt>
+<p>
+
+<tt>driver</tt> is a string like: <tt>dbi:Sybase:NMSDB</tt>.
+<p>
+This is a new extension to copy-to and while it is designed to work with as
+many platforms as possible, it may not work with all types of databases. It
+has only been tested against SQLServer.
+<p>
 New copy-to types can only be added by editing the
 source to the collector. Please send any patches
 to the Cricket maintainer, so others can use your nifty
@@ -790,16 +803,16 @@ Here's a detailed description of each scheme.
   which don't use SNMP (or where counters aren't available through SNMP).<P>
   Setting up perflib counters in Cricket is not a trivial process, and requires
   the following: RRDtool 1.1.x, comfort with RPN, and ActiveState perl. This
-  module will not under any circumstances work under any non-Windows OS. 
+  module will not under any circumstances work with any non-Windows OS. 
   <P>
   Perflib counter procedures are documented more in depth in the 
-  <a href=perfmon.html>perfmon reference</a> document.
+  <a href=perfmon.html>Perfmon reference</a> document.
   <P>
-  The syntax for a perfmon datasource is:
+  The syntax for a Perfmon datasource is:
   <P>
   <tt>perfmon:hostname:counter group:counter name:instance:special</tt>
   <p>
-  Instance is optional, and only required for instantatiated counters. Unlike
+  Instance is optional, and only required for instance counters. Unlike
   the perfmon.exe application in NT. Special is optional as well and is
   documented in the <a href=perfmon.html>perfmon reference</a> document.
   <p>
@@ -832,7 +845,7 @@ Here's a detailed description of each scheme.
   first returned row. Currently any other rows returned get discarded.
   <P>
   <tt>DRIVER</tt> can have colons in it. Cricket's parser will not treat it
-  like seperate arguments to the ds itself. 
+  like separate arguments to the ds itself. 
   <p>
   Here is an example:
   <P>
@@ -935,7 +948,7 @@ fetched from this datasource. There are three possibilities:
   <p>
 	With an rrd-min of zero, the DERIVE datasource type acts like
 	COUNTER, except that negative samples are treated as unknown.
-	Handling SNMP COUNTERs in this fashion helps reduce the occurance
+	Handling SNMP COUNTERs in this fashion helps reduce the occurrence
 	of spikes in the graphs. Negative values can result from
 	restarting the device or implementation errors in its SNMP agent,
 	and are common enough to really recommend using DERIVE rather than
