@@ -46,6 +46,7 @@ sub snmpFetch {
 	my(%oidsPerSnmp) = ();
 
 	my($dsspec);
+	my($oidMap) = $main::gCT->configHash($name, 'oid');
     foreach $dsspec (@{ $dsList }) {
 		my($index);
 
@@ -54,7 +55,6 @@ sub snmpFetch {
 		
 		my($snmp, $oid) = split(/\//, $dsspec, 2);	
 
-		my($oidMap) = $main::gCT->configHash($name, 'oid');
 		$oid = mapOid($oidMap, $oid);
 		if (! defined $oid) {
 			Warn("Could not find an OID in $dsspec");
