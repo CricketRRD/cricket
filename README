@@ -27,7 +27,7 @@ Upgrading
 (2) Install this version to a separate directory from your
 existing version.
 (3) Copy subtree-sets and cricket-conf.pl from the existing
-version to this installation. Alternativel, rename this version 
+version to this installation. Alternatively, rename this version 
 cricket-conf.pl.sample to cricket-conf.pl and edit the file
 to match your settings from the cricket-conf.pl existing version.
 (4) Other potential pitfalls: If you use subtree timing info, you
