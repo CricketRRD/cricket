@@ -62,7 +62,7 @@
 #    Minidoc:
 #
 #    Perfmon counters use the following syntax for input:
-#    perfmon:hostname:object:counter:instance:duration
+#    perfmon:hostname:object:counter:instance:duration:special options
 #
 #    object is the top-level class such as "Processor" or "Memory". This is a
 #    required entry.
@@ -71,6 +71,8 @@
 #    instance is optional, but many counters have instances such as "_Total"
 #    duration is optional, it defaults to 1 second. For many perfmon counters,
 #    there is a required duration to get a time-based calculation.
+#    special options is optional. Currently it accepts 'noscale' which turns
+#    off scaling if perfmon so demands it.
 
 use Common::Log;
 use Win32::PerfLib;
@@ -82,11 +84,12 @@ my %specialMath; # This is crap which I hope to remove soon.
 sub perfmonFetch {
 	my($dsList, $name, $target) = @_;
 	my %pmonFetches;
+	my $counter = {};
 	my(@results);
 
 	foreach my $line (@{$dsList}) {
 		my @components = split(/:/, $line);
-		my ($index, $server, $myobject, $mycounter, $myinstance,$myduration);
+		my ($index, $server, $myobject, $mycounter, $myinstance,$myduration,$myoptions);
 		
 		if($#components+1 < 3) {
 			Error("Malformed datasource line: $line.");
@@ -99,31 +102,45 @@ sub perfmonFetch {
 		$mycounter  = shift(@components) || missing("counter",$line);
 		$myinstance = shift(@components) || '';
 		$myduration = shift(@components) || 1;
+		$myoptions  = shift(@components) || '';
 		
-		$pmonFetches{$index} = "$server:$myobject:$mycounter:$myinstance:$myduration";
+		$pmonFetches{$index} = "$server:$myobject:$mycounter:$myinstance:$myduration:$myoptions";
 	}
 
 	while(my ($index, $ilRef) = each %pmonFetches) {
-		my $counter = {};
 		my $pr1 = {};
 		my $pr2 = {};
 		my $critical;
 		my $matches = 0;
 		my $value;
+		my $noscale = int(0);
 		my %rcounter;
 
-		my($server, $myobject, $mycounter, $myinstance,$myduration) = split(/:/, $ilRef);
-		# Get a list of all the counters on the host. This is a required step.
-		# Otherwise it'd be up to the user to figure out the mappings on their
-		# own. 
-		Win32::PerfLib::GetCounterNames($server, $counter) or $critical = $!;
+		my($server, $myobject, $mycounter, $myinstance,$myduration,$myoptions) = split(/:/, $ilRef);
+	
+		my @options = split(/,/, $myoptions);
+		foreach my $op (@options) {
+			if($op =~ /noscale/i) {
+				$noscale = 1;
+			}
+		}
+				
+		if(!($counter->{$server})) { 
 
-		Error("Counters can't be retrieved from $server because of $critical") if $critical;
-		next if $critical;
+			my $tempref = {};
+			Win32::PerfLib::GetCounterNames($server, $tempref) or $critical = $!;
+			$counter->{$server} = $tempref;
+		}
+
+		if( (!$counter->{$server}) || $counter->{$server} == 0) {
+			Error("No counters were retrieved from $server! Not wasting any more time on this ds: $ilRef");
+			push @results, "$index:U";
+			return @results;
+		}
 
 		# Get a list of mappings from CounterName -> id
-		foreach my $k (sort keys %{$counter}) {
-			$rcounter{lc($counter->{$k})} = $k;
+		foreach my $k (sort keys %{$counter->{$server}}) {
+			$rcounter{lc($counter->{$server}->{$k})} = $k;
 		}
 
 		$myobject = lc($myobject);
@@ -150,12 +167,12 @@ sub perfmonFetch {
 					foreach my $level5 (sort keys %{$ir1->{'Counters'}}) {
 						my $cr1 = $ir1->{'Counters'}->{$level5};
 						my $cr2 = $ir2->{'Counters'}->{$level5};
-						my $saneCounterName = $counter->{$cr1->{'CounterNameTitleIndex'}};
+						my $saneCounterName = $counter->{$server}->{$cr1->{'CounterNameTitleIndex'}};
 						my $saneInstanceName = $ir1->{'Name'};
 						if(lc($saneCounterName) eq lc($mycounter)) {
 							if(lc($saneInstanceName) eq lc($myinstance) || !defined $myinstance) {
 								$specialMath{lc($saneCounterName)}{Win32::PerfLib::GetCounterType($cr1->{'CounterType'})} = $cr1->{'Counter'};
-								$value = getCounter($cr1,$cr2,$gDen1,$gDen2,$gDen1n,$gDen2n,$gTb,$ilRef);
+								$value = getCounter($cr1,$cr2,$gDen1,$gDen2,$gDen1n,$gDen2n,$gTb,$ilRef,$noscale);
 								$matches++;
 							}
 						}
@@ -165,10 +182,10 @@ sub perfmonFetch {
 			foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Counters'}}) {
 				my $cr1 = $pr1->{'Objects'}->{$level2}->{'Counters'}->{$level4};
 				my $cr2 = $pr2->{'Objects'}->{$level2}->{'Counters'}->{$level4};
-				my $saneCounterName = $counter->{$cr1->{'CounterNameTitleIndex'}};
+				my $saneCounterName = $counter->{$server}->{$cr1->{'CounterNameTitleIndex'}};
 				if(lc($saneCounterName) eq lc($mycounter)) {
 					$specialMath{lc($saneCounterName)}{Win32::PerfLib::GetCounterType($cr1->{'CounterType'})} = $cr1->{'Counter'};
-					$value = getCounter($cr1,$cr2,$gDen1,$gDen2,$gDen1n,$gDen2n,$gTb,$ilRef);
+					$value = getCounter($cr1,$cr2,$gDen1,$gDen2,$gDen1n,$gDen2n,$gTb,$ilRef,$noscale);
 					$matches++;
 				}
 			}
@@ -192,13 +209,14 @@ sub perfmonFetch {
 } 
 	
 sub getCounter {
-	my ($cr1,$cr2,$den1,$den2,$den1n,$den2n,$tb,$ilRef) = @_;
+	my ($cr1,$cr2,$den1,$den2,$den1n,$den2n,$tb,$ilRef,$noscale) = @_;
 	my ($crap,$junk,$cn) = split(/:/, $ilRef);
 	my $value;
 	my ($d1,$d2);
 
 	my $scaler = $cr1->{'DefaultScale'};
 	my $ctype = Win32::PerfLib::GetCounterType($cr1->{'CounterType'});
+	Debug("CounterType for $ilRef is $ctype");
 
 	my $n1 = $cr1->{'Counter'};
 	my $n2 = $cr2->{'Counter'} if($cr2);
@@ -211,14 +229,6 @@ sub getCounter {
 		$d2 = $den2;
 	}
 
-	Debug("CounterType for $ilRef is $ctype");
-
-	# Formulas are all defined on MSDN at:
-	# http://msdn.microsoft.com/library/en-us/perfmon/hh/pdh/perfdata_6di9.asp
-	#
-	# They have all been for the most part copy-and-paste jobs with some slight
-	# modifications (which I don't believe ultimately affected the outcome of
-	# the arithematic.
 	if ($ctype eq 'PERF_100NSEC_TIMER' || $ctype eq 'PERF_PRECISION_100NS_TIMER' || $ctype eq 'PERF_PRECISION_SYSTEM_TIMER') {
 		$value = (($n2 - $n1) / ($d2 - $d1)) * 100;
 	} elsif ($ctype eq 'PERF_100NSEC_TIMER_INV') {
@@ -248,7 +258,9 @@ sub getCounter {
 	if($scaler != 0) {
 		Debug("Scaler for $ilRef is: $scaler -- old value is: $value");
 	}
-	$value = $value * (10**$scaler) if($value);
+	if($value) {
+		$value = $value * (10**$scaler) unless ($noscale == 1);
+	}
 	Debug("Return value for $ilRef is: $value") unless (!$value);
 
 	return $value;
