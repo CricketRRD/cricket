@@ -1,0 +1,66 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# Cricket: a configuration, polling and data display wrapper for RRD files
+#
+#    Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#
+# run a cricket subtree and send any output to the provided email addresses
+#
+
+use strict;
+use Getopt::Long;
+use Net::SMTP;
+use Net::DNS;
+
+my $result	= "";
+my @output	= ();
+
+my $doMail = 'smrtg@corp.webtv.net';
+my $doSubtree;
+
+$result = GetOptions(	"mail|m=s" => \$doMail, 
+			"subtree|s=s" => \$doSubtree,
+		    );
+
+if (!$result) {
+	die "Error handling options.\n";
+}
+if (!defined($doSubtree)) {
+	die "Must provide a subtree to run.\n";
+}
+
+@output = `$ENV{"HOME"}/cricket/collect-subtrees $doSubtree 2>&1`;
+
+if ($#output > 0) {
+	my $res = Net::DNS::Resolver->new;
+	my ($eUser, $eDomain) = split(/\@/, $doMail);
+
+	my @mx = mx($res, $eDomain);
+
+	my $subject = "output from subtree " . $doSubtree;
+
+	my $smtp = Net::SMTP->new($mx[0]->{'exchange'}, Debug => 1);
+	$smtp->mail($doMail);
+	$smtp->to($doMail);
+	$smtp->data();
+	$smtp->datasend("Subject: $subject");
+	$smtp->datasend(@output);
+	$smtp->dataend();
+	$smtp->quit;
+}
