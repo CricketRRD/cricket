@@ -47,7 +47,8 @@ sub handleTarget {
     my(@inst);
     if (defined($target->{'inst'})) {
         my($inst) = $target->{'inst'};
-        $inst = ConfigTree::Cache::expandString($inst, $target, \&Warn);
+        $inst = ConfigTree::Cache::expandString($inst, $target, \&Warn)
+                    if (length($inst) > 2 && index($inst, "%") >= 0);
 
         Debug("Evaling inst which is: $inst");
         $inst = quoteString($inst);
