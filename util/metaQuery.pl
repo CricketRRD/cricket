@@ -147,6 +147,7 @@ my %mapErrorToModule = ( 'errors-carrier-trans' => 'if_err',
                          'anomalie-out'         => 'if_ano',
                          'cpu'                  => 'cpu',
                          'memory'               => 'memory',
+                         'unclassified'         => 'unclassified',
                       );
 
 # Global hashes that will be used to store the values of the monitor-thresholds
@@ -276,8 +277,9 @@ sub myHandleTarget {
         $colour = 'purple' if ($value && $value =~ /NaN/i);
 
         my $module    = $mapErrorToModule{$errorname};
-        Warn("Invalid monitor threshold set in cricket db meta file, $errorname, for $devicename") if (!$module);
-        next if (!$module);
+        Warn("Invalid or unset monitor threshold errorname, $errorname, for $devicename\nExpected format: <thresold>:META:<errorname>:<colour>") if (!$module);
+        #next if (!$module); # Uncomment this for strict processing of errornames
+        $module = "unclassified" if (!$module);        
  
         my $html_path = getHtmlPath($tname, $devicename, $shortpath, $module, $ds);
         my ($message) = "$errorname, OK.";
