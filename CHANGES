@@ -1,3 +1,9 @@
+New features, fixes in version 1.0 (??-??-00)
+
+	The version number changed, signifying that this is
+	going to be the begininning of a stable branch. Now,
+	all I have to do it learn how to make CVS do branches!
+
 New features, fixes in version 0.72 (23-Jan-00):
 
 	Fixed a typo in one of the "fixed" split lines from the
