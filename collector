@@ -562,11 +562,19 @@ sub newRRD {
                      "rrd-cdef is missing.");
                 return;
             }
+
+            my $rrd_dsname;
+            if ($Common::global::gLongDSName) {
+                $rrd_dsname = Common::Util::mungeDsName($dsname);
+            } else {
+                $rrd_dsname = "ds$dsCnt";
+            }
+
             if ($dst ne 'COMPUTE') {
-                push @dsDesc, join(":", 'DS', "ds$dsCnt",
+                push @dsDesc, join(":", 'DS', $rrd_dsname,
                                    $dst, $hb, $min, $max);
             } else {
-                push @dsDesc, join(":", 'DS', "ds$dsCnt",
+                push @dsDesc, join(":", 'DS', $rrd_dsname,
                                    $dst, $cdef);
             }
             $dsCnt++;

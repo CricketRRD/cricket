@@ -1,5 +1,22 @@
 New features, fixes in version 1.0.4
 
+	An experimental new feature allows you to use the Cricket
+	target name as the rrd datasource name. Some caveats apply:
+	 - if you use COMPUTE datasources, you will have to manually
+	   edit your config tree, and update all rrd-cdef rules to
+	   match the new reality. Do not switch on long ds names
+	   unless you're prepared to do this! In particular, users
+	   of the NT perfmon tree should not yet enable this.
+	 - RRD ds names are limited to 19 characters. Cricket datasource
+	   names longer than 15 characters are edited automatically to
+	   ensure the RRD ds name remains unique. You can use the
+	   Common::Util::mungeDsName routine in your own code to generate
+	   compatible munged names (or use target names under 16
+	   characters to avoid the issue altogether).
+	The feature is enabled by putting
+	   $gLongDSName=1
+	in their cricket-conf.pl
+
 	Introducing the view dictionary! Views are now separate config
 	tree entries. Going forward, the view tag in the targettype
 	dictionary should specify a comma-delimited list of views that

@@ -57,6 +57,8 @@ use Common::Util;
 use Common::Map;
 use Common::HandleTarget;
 
+my $gLongDSName = $Common::global::gLongDSName;
+
 # default to warn. You might wanbt to change this to 'debug' when
 # working on Cricket configs, or hacking Cricekt itself.
 $log = 'warn';
@@ -868,6 +870,7 @@ sub doHTMLSummary {
 
     # prepare a dsmap, using the targettype dict
     %dsmap = makeDSMap($ttRef->{'ds'});
+    my(%dsnamemap) = makeDSNameMap($ttRef->{'ds'});
 
     my(%dsDescr, @units, @dsnum, @dsnames, $rrdfile, $rrd);
     my($order) = 0;
@@ -987,10 +990,11 @@ sub doHTMLSummary {
                             $scale = "1,*";
                         }
 
+                        $dsidx = $dsnamemap{$dsname};
                         my(@args) = (
                                      "/dev/null",
-                                     "DEF:ds0=$rrdfile:ds$dsnum:AVERAGE",
-                                     "DEF:ds1=$rrdfile:ds$dsnum:MAX",
+                                     "DEF:ds0=$rrdfile:$dsidx:AVERAGE",
+                                     "DEF:ds1=$rrdfile:$dsidx:MAX",
                                      "CDEF:sds0=ds0,$scale",
                                      "CDEF:sds1=ds1,$scale",
                                      "PRINT:sds0:AVERAGE:\%lf",
@@ -1125,6 +1129,26 @@ sub doHTMLSummary {
     }
 
     return %dsDescr;
+}
+
+sub makeDSNameMap {
+    my($dslist) = @_;
+    my($i) = 0;
+    my($dsname, %dsnamemap);
+
+    if ($Common::global::gLongDSName) {
+        foreach $dsname (split(/\s*,\s*/, $dslist)) {
+            $dsnamemap{lc($dsname)} = Common::Util::mungeDsName($dsname);
+            $i++;
+        }
+    } else {
+        foreach $dsname (split(/\s*,\s*/, $dslist)) {
+            $dsnamemap{lc($dsname)} = "ds$i";
+            $i++;
+        }
+    }
+
+    return %dsnamemap;
 }
 
 sub makeDSMap {
@@ -1382,7 +1406,7 @@ sub doGraph {
 
     my($ttype) = lc($targRef->{'target-type'});
     my($ttRef) = $gCT->configHash($name, 'targettype', $ttype, $targRef);
-    my(%dsmap) = makeDSMap($ttRef->{'ds'});
+    my(%dsnamemap) = makeDSNameMap($ttRef->{'ds'});
 
     my($path) = $targRef->{'auto-target-path'};
     my($thisName, $mx);
@@ -1528,22 +1552,22 @@ sub doGraph {
             $paintNaN && push @cdefs, "CDEF:unavail$ct:ds$ct,UN,INF,0,IF";
             $paintNaN && push @lines, "AREA:unavail$ct#FFCCCC";
 
-            my($dsidx) = $dsmap{$ds};
+            my($dsidx) = $dsnamemap{$ds};
             if (defined($dsidx)) {
-                push @defs, "DEF:mx$ct=$rrd:ds$dsidx:MAX" if ($mx);
-                push @defs, "DEF:ds$ct=$rrd:ds$dsidx:AVERAGE";
+                push @defs, "DEF:mx$ct=$rrd:$dsidx:MAX" if ($mx);
+                push @defs, "DEF:ds$ct=$rrd:$dsidx:AVERAGE";
                 if (defined($hwParam)) {
                     if ($hwParam eq "failures" || $hwParam eq "all") {
                         # push failures onto the line stack first now, so that
                         # they will appear in the background of the graph
-                        push @defs, "DEF:fail$ct=$rrd:ds$dsidx:FAILURES";
+                        push @defs, "DEF:fail$ct=$rrd:$dsidx:FAILURES";
                         # hard code colors for now
                         push @lines, "TICK:fail$ct#ffffa0:1.0:" .
                             "Failures $legend";
                     }
                     if ($hwParam eq "confidence" || $hwParam eq "all") {
-                        push @defs, "DEF:hw$ct=$rrd:ds$dsidx:HWPREDICT";
-                        push @defs, "DEF:dev$ct=$rrd:ds$dsidx:DEVPREDICT";
+                        push @defs, "DEF:hw$ct=$rrd:ds$ct:HWPREDICT";
+                        push @defs, "DEF:dev$ct=$rrd:ds$ct:DEVPREDICT";
                         my $cbscale = graphParam($gRef,'confidence-band-scale',2);
                         push @cdefs, "CDEF:upper$ct=hw$ct,dev$ct,$cbscale,*,+";
                         push @cdefs, "CDEF:lower$ct=hw$ct,dev$ct,$cbscale,*,-";
