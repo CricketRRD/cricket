@@ -11,36 +11,40 @@ In this section, each script's functions and arguments
 are discussed. There is a set of common arguments that
 some of the scripts accept, and of course, each has its
 own idiosyncrasies, too.
+</p>
 
 <p>
 The following arguments are common to most of the components of
 Cricket.
+</p>
 
-<p>
 <dl>
-<dt><tt>-logLevel</tt><p>
+<dt><tt>-logLevel</tt></dt>
 <dd>Default value: <i>info</i> (except grapher.cgi, where it defaults to
-	<i>warn</i>)<p>
-
+	<i>warn</i>)</p>
+<p>
 The possible values are "error", "warn", "info", or "debug". Each
 setting includes the output created by any of the preceding
 settings. All diagnostic output goes to the standard error stream.
-<p>
+</p>
+</dd>
 
-<dt><tt>-base</tt><p>
+<dt><tt>-base</tt></dt>
 <dd>Default value: <i>$HOME/cricket-config</i><p>
 
 You can use this setting to use a different config tree. Experience
 shows, however, that it's simplest to just accept the defaults
 and install Cricket in an account of its own.
-<p>
+</p>
+</dd>
 </dl>
 
-Here's a brief description of each program, and what arguments it takes.
 <p>
+Here's a brief description of each program, and what arguments it takes.
+</p>
 
 <dl>
-<dt><tt>collector</tt><p>
+<dt><tt>collector</tt></dt>
 <dd>
 
 <p>
@@ -48,12 +52,15 @@ Collector is the script that runs every five minutes from cron
 in order to traverse the config tree, fetch data, and enter it
 into the RRD files. It's also used interactively to test configurations,
 and to convert old-style RRD files to RRD 1.x.x files.
+</p>
 
 <p>
 The collector will process only the subtrees listed on the command line,
 unless there are none, in which case it will process the entire config
 tree.
+</p>
 
+<p>
 Except during testing, collector is usually run from collect-subtrees,
 which takes care of creating the huge command lines collector
 sometimes needs, and does other housekeeping jobs.  When testing a new
@@ -62,33 +69,39 @@ subtree of the config-tree, you can use a command like
 certain the subtree is functioning correctly, you can add it to the
 collect-subtrees config file, and rely on collect-subtrees to run the
 collector for you.
-<p>
+</p>
 
+<p>
 The collector will always run in two stages: collecting the data and
 checking thresholds for monitoring. If you for some reason do not need or
 want the threshold monitoring, you can specify the <tt>-skipMonitor</tt>
 option. Good reasons not to run this second phase include:
+</p>
+
 <ul>
 <li>Cricket is first run, or has been down for more that your heartbeat
-interval, and you want to avoid threshold alarms because of NaN values.
+interval, and you want to avoid threshold alarms because of NaN values.</li>
 <li>You don't use threshold monitoring at all and want to avoid the overhead
-of scanning for it.
+of scanning for it.</li>
 <li>You run your collector more frequently than once every five minutes, and
-don't want the overhead for the "intermediate" runs.
+don't want the overhead for the "intermediate" runs.</li>
 </ul>
-<p>
+</dd>
 
-<dt><tt>grapher.cgi</tt><p>
+<dt><tt>grapher.cgi</tt></dt>
 <dd>
-Accepts common arguments.<p>
+<p>
+Accepts common arguments.</p>
 
+<p>
 The grapher is almost never run from the command line, so
 options parsing is basically a moot point. The CGI script
 should get run by the web server automatically in response
 to accesses to files that end in CGI. Consult your web server
 documentation to find out how to make it work like this.
-<p>
+</p>
 
+<p>
 Because it's not generally possible to control the command line
 of grapher.cgi, it's critical that it either defaults to the
 correct base directory, or that it has the base directory
@@ -97,31 +110,35 @@ $HOME/cricket-config. However, $HOME will only be set right
 if Cricket can guess it's username from it's URL. If there's
 any doubt, you should hard code the base directory by editing the
 first few lines of grapher.cgi.
-<p>
+</p>
+</dd>
 
-<dt><tt>configure</tt><p>
+<dt><tt>configure</tt></dt>
 <dd>
-Accepts no arguments at this time.<p>
+<p>
+Accepts no arguments at this time.</p>
 
+<p>
 This is basically a placeholder for when Cricket is more
 complicated (say it ain't so!) and requires an autoconf-generated
 configure script. At this point, it can point all the Cricket
 scripts at your Perl install, which is very helpful for sites
 which do not have Perl installed in a standard location.
-<p>
-
+</p>
+</dd>
 </dl>
 
-<p>
 <hr>
 
 <p>
 <a href="http://cricket.sourceforge.net">Cricket</a>
 version !!VERSION!!, released !!RELDATE!!.
+</p>
 
 <p>
 Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
 the <a href="gpl.html">GNU General Public License</a>.
+</p>
 
 </body>
 </html>

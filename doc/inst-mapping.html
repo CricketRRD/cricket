@@ -11,7 +11,9 @@ Cricket has a nifty feature called instance mapping. Basically
 it's meant to take the busywork out of monitoring SNMP devices.
 In this document, you'll learn far more than you ever wanted to know
 about it.
+</p>
 
+<div>
 <h2> The Problem </h2>
 
 <p>
@@ -25,6 +27,7 @@ what I mean and go do it. However, when we humans think about router
 interfaces, we don't think about instance numbers. We think
 about some other identifier for the row, like the interface name
 or the IP address. 
+</p>
 
 <p>
 Interface mapping lets you configure Cricket to talk to devices
@@ -35,7 +38,10 @@ guaranteed to be right no matter what kind of row re-arranging
 goes on on the router. (It seems cruel, but they are allowed
 to re-arrange their rows at any time. This would presumably
 <b>not</b> be part of what makes SNMP "simple".)
+</p>
+</div>
 
+<div>
 <h2> What does this mean to me? </h2>
 
 <p>
@@ -46,6 +52,7 @@ name as a key. When you use <tt>listInterfaces</tt> to make
 an interfaces file, it will set the "interface-name" tag for
 you, and Cricket will use that to do the instance mapping
 automatically.
+</p>
 
 <p>
 On the other hand, if you want to setup Cricket to use
@@ -54,7 +61,10 @@ human-readable descriptions Cisco routers support), or to
 monitor something else via SNMP that lives in tables,
 then you need to read on and understand the <tt>map</tt> dictionary,
 and how it is used to control the interface mapping algorithm.
+</p>
+</div>
 
+<div>
 <h2> The Icky Details </h2>
 
 <p>
@@ -65,6 +75,7 @@ instance mapping code to find the instance number. It uses the part
 inside the parenthesis ("interface-name" in the case above) to find an
 entry in the <tt>map</tt> dictionary that it can use to help map the
 given key to an instance number.
+</p>
 
 <p>
 There are two interesting tags in a <tt>map</tt> entry that control
@@ -84,6 +95,7 @@ it is used as a Perl regular expression and a case-insensitive RE
 match is done, instead of a simple string match. Use this feature only
 when necessary. A string match is preferable, since it has less
 overhead.
+</p>
 
 <p>
 The system is efficient and accurate. It uses a file sitting right
@@ -96,14 +108,17 @@ the cache is invalidated, a table-scan is done to map the instance
 number, and the data is re-fetched using the new instance number.  The
 maximum cost of this system is one table-scan per host anytime an
 instance changes, and one extra variable fetched per target.
+</p>
 
 <p>
 Instance mapping is only enabled when the <tt>inst</tt> tag starts
 with "map(". This means that hard-coded instances and instance ranges
 are still completely supported, if you are not ready to use the
 instance mapping feature.
+</p>
+</div>
 
-
+<div>
 <h2> The Ickiest Details </h2>
 
 <p>
@@ -113,6 +128,7 @@ management code. This is partly because it was easier to implement
 that way, and partly because instance mapping is an intrinsically
 SNMP-thing, and it probably will never make sense to talk about using
 instance mapping with an exec datasource.
+</p>
 
 <p>
 When it comes time to do a table scan, the instance mapping code uses
@@ -124,6 +140,7 @@ ds-sources. Thus, even if you've come up with a different way to
 encode community string, host, and port into your datasources, you
 still need to have a tag named snmp for the instance mapping code to
 use.
+</p>
 
 <p>
 The moral of the story is to try very hard to not mess with the
@@ -134,17 +151,22 @@ ways, you won't end up with a config tree that is as flexible and
 broadly-applicable. Thus, I might do something later which breaks your
 config tree without meaning to do so. And I won't feel very sorry
 about it, now that you know better.
+</p>
 
 <p>
 <hr>
+</p>
 
 <p>
 <a href="http://cricket.sourceforge.net">Cricket</a>
 version !!VERSION!!, released !!RELDATE!!.
+</p>
 
 <p>
 Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
 the <a href="gpl.html">GNU General Public License</a>.
+</p>
+</div>
 
 </body>
 </html>

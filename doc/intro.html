@@ -14,6 +14,7 @@ config file, the larger and more unwieldy it got. We found that we
 were making mistakes due to the complexity, and then we wrote scripts
 to write the configs for us, and using these scripts, we made mistakes
 in a faster, more automated manner. Something needed to be done.
+</p>
 
 <p>
 Cricket uses a hierarchical configuration system, thus a complete set of
@@ -27,7 +28,9 @@ grouped into directories and processed in a predictable order within
 those directories. As a directory is processed, the state of the
 system is saved and restored. In this way, changes made to the
 defaults in a sub-tree do not affect a sibling sub-tree.
+</p>
 
+<div>
 <h2> Understanding the config tree </h2>
 
 <p>
@@ -39,13 +42,16 @@ to, and what type of device they all are. The inheritance property of
 the config tree applies equally to all types of data, making it
 possible to make a concise description of a large, complicated set of
 monitored devices.
+</p>
 
+<div>
 <h3> A guided tour </h3>
 
 <p>
 In this section, we will take a guided tour of the sample config tree
 that ships with Cricket. It would be a very good idea to read this section
 with a window open that you can use to explore the sample config tree.
+</p>
 
 <p>
 The first thing to notice about the config tree is that every
@@ -56,6 +62,7 @@ apply to the entire subtree that it sits on top of. Thus, when
 you look at the file named <tt>sample-config/Defaults</tt>, it's
 important to realize that unless those values get overridden
 later, they will be used throughout the entire config tree.
+</p>
 
 <p>
 When Cricket goes to process a directory, it processes the Defaults
@@ -68,6 +75,7 @@ configuration when processing files; one file could make a change to
 the defaults that another file in the same directory can see.
 For the time being, consider this a feature. It can be useful, as
 long as you are expecting it to behave that way.
+</p>
 
 <p>
 Scroll through the root Defaults file and take a look at
@@ -77,6 +85,7 @@ that word, they differ somewhat, but generally what a
 chunk does is define some tag/value pairs, and assign them
 to some key name. For instance, the tag <tt>rrd-datafile</tt> gets
 set to "%dataDir%/%auto-target-name%.rrd".
+</p>
 
 <p>
 That's great, you say, but what are the percent signs
@@ -88,6 +97,7 @@ also has a variable in it, it is also expanded. (There is no
 check for loops so don't accidentally make one!)
 This is a very powerful feature which makes complicated
 configurations boil down to a few simple config lines.
+</p>
 
 <p>
 For instance, the example I chose above sets the tag
@@ -100,6 +110,7 @@ process turns this mess into a complete pathname. If
 a tag is not defined, but it is referenced via an expansion,
 then Cricket will log a warning, but it will attempt to
 continue to use the partially expanded string.
+</p>
 
 <p>
 The tags that Cricket uses to get it's configuration are
@@ -110,6 +121,7 @@ instance, nowhere in the reference section will you find <tt>dataDir</tt>
 mentioned. That is simply a tag that exists to make the definition
 <tt>rrd-datafile</tt> easier to read. You can add as many of your own tags
 as you want; it's all up to how you want to setup your config tree.
+</p>
 
 <p>
 After Cricket expands a string, it scans the string for substrings
@@ -119,7 +131,10 @@ can do arbitrary math and other nifty trickery between curly braces.
 Some day I'll add more examples for how you might use this, but
 for now all I'm telling you is that it's there. You have to figure out
 how to use it.
+</p>
+</div>
 
+<div>
 <h3>Target types, and datasources</h3>
 
 <p>
@@ -134,6 +149,7 @@ it. This is all described in much more detail below, but for now, you
 already know enough to get going.  This is because Cricket's sample
 config tree comes with lots of predefined target types that will let
 you look at common things on your network.
+</p>
 
 <p>
 To see this stuff in action, go into the
@@ -143,7 +159,10 @@ you create a target of type "Cisco-7200-Router", Cricket will know
 what data to fetch. As you can see by the different target types
 defined in this file, not all routers are created equal.  Some can
 return temperature, some can't.
+</p>
+</div>
 
+<div>
 <h3> Tacking a Target </h3>
 
 <p>
@@ -157,6 +176,7 @@ defines some real targets. The sample config tree comes with two,
 <tt>engineering-router</tt> and <tt>main-router</tt>.  These two
 dictionaries are added onto the bottom of the config tree, and are
 sometimes referred to as leaves. A leaf is where some work happens.
+</p>
 
 <p>
 When Cricket comes to process the <tt>engineering-router</tt> leaf
@@ -170,6 +190,7 @@ part of the config tree, Cricket traverses all the nodes from the root
 down to the current node, gathering together the <tt>--default--</tt>
 dictionaries. Items lower in the config tree override items higher
 up.
+</p>
 
 <p>
 Cricket uses the <tt>target-type</tt> tag to decide what method to use
@@ -180,6 +201,7 @@ is a list of the datasources we expect to fetch from this router.
 Each datasource is fetched in the same way, and there Cricket
 discovers that it will be talking SNMP to this router, in order to
 fetch 6 variables.
+</p>
 
 <p>
 Next, Cricket turns over control to the SNMP fetcher. The fetcher is
@@ -189,10 +211,14 @@ data on the engineering-router is
 probably already noticed that the only thing the fetcher seems to have
 to go on is the <tt>ds-source</tt> tag, which has a <tt>%snmp%</tt>
 where we expected to find the community string, hostname and port.
+</p>
 
 <p>
 How does Cricket manufacture the whole SNMP URL for this target?
+</p>
+</div>
 
+<div>
 <h3>Explaining expansion</h3>
 
 <p>
@@ -203,11 +229,14 @@ itself. Likewise, when Cricket fetches a dictionary like the
 respect to the target dictionary. By the time the SNMP
 fetcher is looking for the contents of the <tt>ds-source</tt> tag, it
 has already been expanded to the correct value.
+</p>
 
 <p>
 Let's unwind the expansions that contributed to changing <tt>%snmp%</tt>
 into <tt>public@engineering-router:161</tt>.
+</p>
 
+<p>
 <blockquote><pre>  From sample-config/Defaults
     snmp-community      = public
     snmp-port           = 161
@@ -217,6 +246,7 @@ into <tt>public@engineering-router:161</tt>.
     router              = %auto-target-name%
     snmp-host           = %router%
 </pre></blockquote>
+</p>
 
 <p>
 You can see that one level about the leaf, the <tt>snmp-host</tt> tag
@@ -225,6 +255,7 @@ target. Tags starting with <tt>auto-</tt> are provided to you by
 Cricket. There are a number of these automatic tags which are
 discussed below. The rest of the <tt>snmp</tt> tag is filled in by
 defaults inherited from all the way up at the top of the config tree.
+</p>
 
 <p>
 This is a good example of the power of the config tree. If you were
@@ -235,17 +266,23 @@ from above. Alternatively, if you need to change the community string
 on 1000 devices simultaneously, you could do so by simply changing it
 at the root, then allowing the change to filter down to each of the
 1000 targets in your config tree.
+</p>
 
 <p>
 <hr>
+</p>
 
 <p>
 <a href="http://cricket.sourceforge.net">Cricket</a>
 version !!VERSION!!, released !!RELDATE!!.
+</p>
 
 <p>
 Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
 the <a href="gpl.html">GNU General Public License</a>.
+</p>
+</div>
+</div>
 
 </body>
 </html>
