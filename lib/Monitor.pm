@@ -50,12 +50,14 @@ sub monValue {
                                  );
 
     if (!defined($value)) {
-        Warn("Skipping: Couldn't fetch last value from datafile.");
+        Warn("Monitor: Couldn't fetch last $ds value from " .
+             $target->{'rrd-datafile'}.".");
         return 1;
     }
 
     if (isNaN($value))  {
-        Info("Skipping: Last value from datafile was $value.");
+        Info("Monitor: Last $ds value from $target->{'rrd-datafile'} was " .
+             "$value.");
         return 1;
     }
 
@@ -86,7 +88,8 @@ sub monHunt {
     my($roll, $cmp_name, $cmp_ds) = split(/\s*:\s*/, $args);
 
     if (!defined($roll)) {
-        Warn("Skipping: Missing rollover value in hunt threshold.");
+        Warn("Monitor: Missing rollover value in hunt threshold for " .
+             $target->{'auto-target-name'} . " datasource $ds.");
         return 1;
     }
 
@@ -95,7 +98,8 @@ sub monHunt {
                                  $self->getDSNum($target, $ds), 0);
 
     if (!defined($value)) {
-        Warn("Skipping: Couldn't fetch last value from datafile.");
+        Warn("Monitor: Couldn't fetch last $ds value from " .
+             "$target->{'rrd-datafile'}.");
         return 1;
     }
     if ($value == 0) {
@@ -113,7 +117,7 @@ sub monHunt {
                                                 $Common::global::gConfigRoot);
             ConfigTree::Cache::expandHash($cmp_target, $cmp_target, \&Warn);
         } else {
-            Warn("Skipping: No such target: $cmp_name");
+            Warn("Monitor: No such target: $cmp_name");
             return 1;
         }
     } else {
@@ -125,7 +129,7 @@ sub monHunt {
                                      $self->getDSNum($cmp_target, $cmp_ds), 0);
 
     if (!defined($cmp_value)) {
-        Warn("Skipping: Couldn't fetch current value from $cmp_name");
+        Warn("Monitor: Couldn't fetch current value from $cmp_name");
         return 1;
     }
 
@@ -146,7 +150,8 @@ sub monRelation {
     $cmp_time = 0 unless(defined($cmp_time));
 
     if (!defined($thresh) || !defined($cmp_time)) {
-        Warn("Skipping: Improperly formatted relation monitor.");
+        Warn("Monitor: Improperly formatted relation monitor for " .
+             "$target->{'auto-target-name'} datasource $ds.");
         return 1;
     }
 
@@ -163,7 +168,8 @@ sub monRelation {
                                  $self->getDSNum($target,$ds), 0);
 
     if (!defined($value)) {
-        Warn("Skipping: Couldn't fetch last value from datafile.");
+        Warn("Monitor: Couldn't fetch last $ds value from " .
+             "$target->{'rrd-datafile'}.");
         return 1;
     }
 
@@ -185,7 +191,8 @@ sub monRelation {
         }
         $difference = $difference / abs($cmp_value) * 100;
     }
-    Debug("Values $value, $cmp_value; Difference is $difference; gtlt is $gtlt; thresh is $thresh.");
+    Debug("Values $value, $cmp_value; Difference is $difference; " .
+          "gtlt is $gtlt; thresh is $thresh.");
 # see documentation: threshold fails if expression is false
     return (0,$value) if ((eval "$difference $gtlt $thresh") == 0);
     return (1,$value);
@@ -196,7 +203,8 @@ sub monExact {
     my(@args) = split(/\s*:\s*/, $args);
 
     if (@args != 1) {
-        Warn("Skipping: monitor type \"exact\" requires 1 argument.");
+        Warn("Monitor: monitor type \"exact\" requires 1 argument for " .
+             "$target->{'auto-target-name'} $ds.");
         return 1;
     }
     my $exact = shift @args;
@@ -207,7 +215,8 @@ sub monExact {
                                  );
 
     if (!defined($value)) {
-        Warn("Skipping: Couldn't fetch last value from datafile.");
+        Warn("Monitor: Couldn't fetch last $ds value from " .
+             "$target->{'rrd-datafile'}.");
         return 1;
     }
 
@@ -256,7 +265,8 @@ sub monFailures {
     my $ret;
     $ret = $self->{openrrd}->getDSRowValue($rraNum,0,$dsNum);
     if (!defined($ret)) {
-        Warn("Skipping: Couldn't fetch last value from datafile FAILURES RRA.");
+        Warn("Monitor: Couldn't fetch last $ds value from " .
+             "$target->{'rrd-datafile'} FAILURES RRA.");
         return 1;
     }
     # FAILURES array stores a 1 for a failure (so should return 0)
@@ -276,11 +286,13 @@ sub monQuotient {
     my($thresh, $cmp_name, $cmp_ds, $cmp_time) = split(/\s*:\s*/, $args);
     my($pct) = ($thresh =~ s/\s*pct\s*//i);
     $cmp_time = 0 unless(defined($cmp_time));
-    Info("Use of quotient monitors without percent threshold is deprecated")
+    Info("Monitor: Use of quotient monitors without percent threshold is " .
+         "deprecated for $target->{'auto-target-name'} datasource $ds.")
         unless (defined($pct));
 
     if (!defined($thresh) || !defined($cmp_time)) {
-        Warn("Skipping: Improperly formatted quotient monitor.");
+        Warn("Monitor: Improperly formatted quotient monitor for " .
+             "$target->{'auto-target-name'} datasource $ds.");
         return 1;
     }
 
@@ -296,7 +308,8 @@ sub monQuotient {
                                  $self->getDSNum($target,$ds), 0);
 
     if (!defined($value)) {
-        Warn("Skipping: Couldn't fetch last value from datafile.");
+        Warn("Monitor: Couldn't fetch last $ds value from " .
+             "$target->{'rrd-datafile'}.");
         return 1;
     }
 
@@ -339,7 +352,7 @@ sub FetchComparisonValue {
                                                 $Common::global::gConfigRoot);
             ConfigTree::Cache::expandHash($cmp_target, $cmp_target, \&Warn);
         } else {
-            Warn("Skipping: No such target: $cmp_name");
+            Warn("Monitor: No such target: $cmp_name");
             return 'NaN';
         }
     }
@@ -351,13 +364,13 @@ sub FetchComparisonValue {
                                      $cmp_time);
 
     if (!defined($cmp_value)) {
-        Warn("Skipping: Couldn't fetch value for $cmp_time ".
+        Warn("Monitor: Couldn't fetch value for $cmp_time ".
              "seconds ago from $cmp_name.");
         return 'NaN';
     }
 
     if (isNaN($cmp_value)) {
-        Info("Skipping: Data for $cmp_time seconds ago from " .
+        Info("Monitor: Data for $cmp_time seconds ago from ".
              "$cmp_name is NaN");
         return 'NaN';
     }
@@ -396,13 +409,13 @@ sub rrdFetch {
     }
 
     if ($lastrecord < $sec) {
-        Warn("Fetch Failed: RRD file does not have data going back " .
+        Warn("Monitor: $datafile does not have data going back " .
              "$sec seconds.");
         return;
     }
 
     if ($sec % ($lastrecord / $rra->{row_cnt})) {
-        Warn("Fetch Failed: RRA required to find data $sec seconds ago " .
+        Warn("Monitor: RRA required to find data $sec seconds ago " .
              "is too granular.");
         return;
     }
@@ -443,7 +456,8 @@ sub dispatchAlarm {
     my ($target, $ds, $val) = ($$args[1], $$args[3], $$args[8]);
 
     if (defined($val) && isNaN($val)) {
-        Info("NaN in last value for target: $target->{'auto-target-path'} $target->{'auto-target-name'} for $ds.");
+        Info("Monitor: NaN in last $ds value for target: " .
+             "$target->{'auto-target-path'} $target->{'auto-target-name'}.");
         return (0,'NaN');
     }
 
@@ -460,7 +474,12 @@ sub dispatchAlarm {
 
     my $alarm = $dispatch{$alarmType};
 
-    unless (defined($alarm)) { Warn("Unknown alarm: $alarmType"); return; }
+    unless (defined($alarm)) {
+        Warn("Monitor: unknown alarm $alarmType for target: ".
+             $target->{'auto-target-path'} . $target->{'auto-target-name'} .
+             " for datasource $ds");
+        return;
+    }
 
     my $return = $alarm->($args, $action);
     return;
@@ -493,11 +512,13 @@ sub alarmExec {
     system($alarmArgs->[0]);
 
     if ($action eq 'ADD') {
-        Info("Triggered event with system command '".$alarmArgs->[0]."' .");
+        Info("Monitor: Triggered event with system command '".
+             $alarmArgs->[0]."' .");
     }
 
     else {
-        Info("Cleared event with shell command '".$alarmArgs->[1]."' .");
+        Info("Monitor: Cleared event with shell command '".
+             $alarmArgs->[1]."' .");
     }
 
     return;
@@ -522,18 +543,18 @@ sub alarmFunc {
 
         if ($action eq 'ADD') {
             eval($alarmArgs->[0]);
-            Info("Triggered event with FUNC '".$alarmArgs->[0]."' .");
+            Info("Monitor: Triggered event with FUNC '".$alarmArgs->[0]."' .");
         }
 
         elsif ($action eq 'CLEAR') {
             eval($alarmArgs->[1]);
-            Info("Cleared event with FUNC '".$alarmArgs->[1]."' .");
+            Info("Monitor: Cleared event with FUNC '".$alarmArgs->[1]."' .");
         }
 
     }
 
     else {
-        Warn("Exec triggered, but executable alarms are not enabled.");
+        Warn("Monitor: Exec triggered, but executable alarms are not enabled.");
     }
 
     return;
@@ -578,8 +599,8 @@ sub sendMonitorTrap {
 
     my $to = $target -> {'trap-address'};
     if (!defined($to)) {
-        Warn("No trap address defined for $target, couldn't send trap.");
-        Info("Threshold Failed: $threshold for target $target");
+        Warn("Monitor: No trap address defined for $target, couldn't send trap.");
+        Info("Monitor: Threshold Failed: $threshold for target $target");
         return;
     }
 
@@ -616,7 +637,7 @@ sub sendMonitorTrap {
     }
     push(@VarBinds, "${OID_Prefix}.9", 'string', $val) unless (!defined($val));
 
-    Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
+    Info("Monitor: Trap Sent to $to:\n ". join(' -- ',@VarBinds));
     snmpUtils::trap2($to,$spec,@VarBinds);
 }
 
@@ -645,14 +666,14 @@ sub LogToFile {
     }
 
     unless (open(INFILE, "+>>$filePath")) {
-        Info("Failed to open file $filePath");
+        Info("Monitor: Failed to open file $filePath: $!");
         return;
     }
 
 
     # append the new line to the end of the file
     if ($action eq 'ADD' && $bFound == 0) {
-        Info("Appending line $targetLine to $filePath");
+        Info("Monitor: Appending line $targetLine to $filePath");
         print INFILE $targetLine . "\n";
         close(INFILE);
         return;
@@ -662,21 +683,23 @@ sub LogToFile {
     close(INFILE);
 
     if ($action eq 'ADD' && $bFound == 1) {
-        Info("$targetName $dataSourceName already in file $filePath");
+        Info("Monitor: $targetName datasource $dataSourceName already in ".
+             "file $filePath");
         return;
     }
 
     if ($action eq 'CLEAR' && $bFound == 0) {
-        Info("$targetName $dataSourceName already deleted from file $filePath");
+        Info("Monitor: $targetName datasource $dataSourceName already " .
+             "deleted from file $filePath");
         return;
     }
     # need to print out @lines, which excludes the $targetLine
     # overwrite old file
     unless (open(OUTFILE, ">$filePath")) {
-        Info("Failed to open file $filePath");
+        Info("Monitor: Failed to open file $filePath: $!");
         return;
     }
-    Info("Deleting $targetLine from $filePath");
+    Info("Monitor: Deleting $targetLine from $filePath");
     print OUTFILE join("\n", @lines);
     print OUTFILE "\n" unless (scalar(@lines) == 0);
     close(OUTFILE);
@@ -687,7 +710,8 @@ sub sendEmail {
 
     my $to = $alarmArgs -> [1];
     if (!defined($to)) {
-        Warn("No destination address defined for $target, couldn't send email.");
+        Warn("Monitor: No destination address defined for $target, " .
+             "couldn't send email.");
         return;
     }
 
@@ -706,15 +730,15 @@ sub sendEmail {
 
     my $mail_program = $alarmArgs -> [0];
     if (!defined($mail_program)) {
-        Warn("No email-program defined. Not sending email");
+        Warn("Monitor: No email-program defined. Not sending email");
         return;
     } elsif (!open(MAIL, "|$mail_program -s 'Cricket $spec: $target' $to\n")) {
-        Warn("Failed to open pipe to mail program");
+        Warn("Monitor: Failed to open pipe to mail program: $!");
         return;
     }
     Debug("|$mail_program -s 'Cricket $spec: $target' $to\n");
     print (MAIL join ("\n", @Message));
-    Info("Email sent to: $to\n" . join(' -- ', @Message));
+    Info("Monitor: Email sent to: $to\n" . join(' -- ', @Message));
     close(MAIL);
 }
 1;
