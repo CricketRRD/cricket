@@ -321,7 +321,6 @@ sub Clear {
 				$threshold,
 				$name,
 				$ds);
-		}
         } elsif($alarmType eq 'FUNC') {
                 if(defined $main::gMonFuncEnabled)
                 {
