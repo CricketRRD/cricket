@@ -9,10 +9,11 @@
 # <oetiker@ee.ethz.ch> as skeleton
 #
 # returns:
-# #modems
+# #async
+# #digital
 # #isdn
-# sysName
-# sysUptime
+# #sync
+# #other
 #
 
 # 1998/10/30
@@ -42,15 +43,28 @@ use BER;
 use Socket;
 use strict;
 
-%snmpget::OIDS = (  'sysName' => '1.3.6.1.2.1.1.5.0',
-		    'sysUptime' => '1.3.6.1.2.1.1.3.0',
-		    'ifNumber' =>  '1.3.6.1.2.1.2.1.0',
+# PMip is livingston.livingstonMib.livingstonInterfaces.livingstonSerial.livingstonSerialTable.livingstonSerialEntry.livingstonSerialIpAddress 
+# PMty is livingston.livingstonMib.livingstonInterfaces.livingstonSerial.livingstonSerialTable.livingstonSerialEntry.livingstonSerialPhysType 
+
+# TODO 
+  
+# - sum all the calls, connects, detects, renegotiates, and retrains 
+# from livingstonModemTable. 
+# 
+# - think about using livingstonModemStatus instead of 
+# livingstonSerialIpAddress to count lines in use (not portable to 
+# PM2)  (or livingstonSerialPortStatus?) 
+ 
+%snmpget::OIDS = ( 'ifNumber' =>  '1.3.6.1.2.1.2.1.0',
 		    'PMip' => '1.3.6.1.4.1.307.3.2.1.1.1.14',
 		    'PMty' => '1.3.6.1.4.1.307.3.2.1.1.1.3',
 		);
 
-my($tot_isdn,$tot_modems,$args) = (0,0,0);
-my($input_string,$PROGNAME,$sysUptime,$sysName,$interfaces)="";
+my($tot_isdn, $tot_modems, $args) = (0,0,0);
+my($tot_isdn, $tot_digitalmodems, $tot_asyncmodems,
+	$tot_sync, $tot_other, $args) = (0,0,0,0,0,0); 
+
+my($input_string, $PROGNAME, $interfaces)="";
 ($PROGNAME = $0) =~ s/.*\///;
 
 diexit(0) if $#ARGV < 0;
@@ -61,28 +75,41 @@ for ($args=0; $args < $#ARGV+1; $args++) {
 
    diexit(0) unless $community && $router;
 
-   ($sysName,$sysUptime,$interfaces) =
-      snmpget($router,$community,'sysName','sysUptime','ifNumber');
+   $interfaces = snmpget($router,$community,'ifNumber');
    my @PMip = snmpgettable($router,$community,'PMip');
    my @PMty = snmpgettable($router,$community,'PMty');
    my ($i);
 
    for ($i=0; $i < $#PMip+1; $i++) {
+      #
+      # instead of livingstonSerialIpAddress we should use livingstonSerialPortStatus
+      # and check for "established" (which might be applicable to terminal sessions)
+      #
       if ($PMip[$i] ne "0.0.0.0") {
-         if ($PMty[$i] == 2 || $PMty[$i] == 5) {
-            $tot_modems++;
+         if ($PMty[$i] == 2) {
+            $tot_asyncmodems++;
+         }
+         elsif ($PMty[$i] == 3) {
+            $tot_sync++;
+         }
+         elsif ($PMty[$i] == 5) {
+            $tot_digitalmodems++;
          }
          elsif ($PMty[$i] == 4 || $PMty[$i] == 6 || $PMty[$i] == 7) {
             $tot_isdn++;
          }
+       else {
+          $tot_other++;
+       }
       }
    }
 }
 
-printf "$tot_modems\n";
+printf "$tot_asyncmodems\n";
+printf "$tot_digitalmodems\n";
 printf "$tot_isdn\n";
-printf "$sysUptime\n";
-printf "$sysName\n";
+printf "$tot_sync\n";
+printf "$tot_other\n";
 
 exit(0);
 
@@ -113,6 +140,7 @@ sub snmpget{
     while ($bindings) {
       ($binding,$bindings) = decode_sequence ($bindings);
       ($oid,$value) = decode_by_template ($binding, "%O%@");
+      # WARNING: this makes getting values such as timeticks in raw form impossible
       my $tempo = pretty_print($value);
       $tempo=~s/\t/ /g;
       $tempo=~s/\n/ /g;
