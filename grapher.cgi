@@ -1377,7 +1377,7 @@ sub doGraph {
 					push @cdefs, "CDEF:sds$ct=ds$ct,$scale";
 					if ($isMTargetsOps) {
 						if (!$linePushed[$mod])  {
-							push @lines, "$drawAs:totmx$mod#clmxCode:" .
+							push @lines, "$drawAs:totmx$mod#$clmxCode:" .
 											"Max $legend" if ($mx);
 							push @lines, "$drawAs:tot$mod#$colorCode:$legend";
 							$linePushed[$mod] = 1;
@@ -1396,7 +1396,7 @@ sub doGraph {
 							$linePushed[$mod] = 1;
 						}
 					}  else  {
-						push @lines, "$drawAs:mx$ct#$colorCode:" .
+						push @lines, "$drawAs:mx$ct#$clmxCode:" .
 										"Max $legend" if ($mx);
 						push @lines, "$drawAs:ds$ct#$colorCode:$legend";
 					}
