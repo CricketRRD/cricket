@@ -667,15 +667,17 @@ sub doHTMLPage {
 
         if ($searchCrit) {
             @children = ();
+	    my %children;
             foreach $subtree ($name) {
                 if ($gCT->nodeExists($subtree)) {
                     $gCT->visitLeafs($subtree, \&searchHandleTarget,
-                                     $searchCrit, \@children);
+                                     $searchCrit, \%children);
                 } else {
                     Warn("Unknown subtree $subtree.");
                 }
 
             }
+	    @children = keys %children if (scalar keys %children);
         }
 
         my($targs, $t, @targets, @dirs);
@@ -2348,32 +2350,45 @@ sub urlTarget {
 }
 
 # Find matching targets for arbitrary tag/value searching.
-# This currently only applies to searching against the chassis target.
+# Or default value search on snmp-host and display-name tags.
 sub searchHandleTarget {
     my($name) = shift;
     my($search) = shift;
-    my($targList) = shift;
+    my($searchHash) = shift;
     my($match) = 0;
     my($path) = "";
     my($target) = $gCT->configHash($name, 'target', undef, 1);
-    # Return if it is not the chassis target
-    return unless (defined($target->{'auto-target-name'}) && $target->{'auto-target-name'} eq 'chassis');
+
+    # Return if it is not the chassis target 
+    # or contains at least one tag/value pair
+    return unless (defined($target->{'auto-target-name'}) && 
+           ($search =~ /\w+[=|!=]\w+/ || $target->{'auto-target-name'} eq 'chassis'));
 
     foreach my $val (split ",", $search) {
-#            ($attr, $val) = split (/=/, $prop);
-#            if (($target->{$attr}) && ($target->{$attr} =~ /$val/)) {
-            if (defined($target->{'display-name'}) && $target->{'display-name'} =~ /$val/i) {
-                    $path = $target->{'auto-target-path'};
-                    $match = 1;
-            } elsif (defined($target->{'snmp-host'}) && $target->{'snmp-host'} =~ /$val/i) {
-                    $path = $target->{'auto-target-path'};
-                    $match = 1;
-            } else {
-                    return;
+        if ($val =~ /\w+=\w+/) {
+            my ($attr, $tval) = split (/=/, $val);
+            if (defined($target->{$attr}) && ($target->{$attr} =~ /$tval/i)) {
+                $path = $target->{'auto-target-path'};
+                $match = 1;
             }
+        } elsif ($val =~ /\w+!=\w+/) {
+            my ($attr, $tval) = split (/!=/, $val);
+            if (defined($target->{$attr}) && ($target->{$attr} !~ /$tval/i)) {
+                $path = $target->{'auto-target-path'};
+                $match = 1;
+            }
+        } elsif (defined($target->{'display-name'})
+             && $target->{'display-name'} =~ /$val/i) {
+            $path = $target->{'auto-target-path'};
+            $match = 1;
+        } elsif (defined($target->{'snmp-host'}) 
+             && $target->{'snmp-host'} =~ /$val/i) {
+            $path = $target->{'auto-target-path'};
+            $match = 1;
+        }
     }
-
-    push @$targList, $path;
+    # No duplicate targets should be displayed after a search
+    $searchHash->{$path} = $path if ($match && !exists($searchHash->{$path}));
 }
 
 # Local Variables:
