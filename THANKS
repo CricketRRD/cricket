@@ -14,6 +14,9 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	John Woolner
+		Made getFormat.c portable to DEC Alpha
+
 	Albert Herranz Martin
 		Provided the solution for instance names that look
 		like floats to Perl

@@ -55,6 +55,8 @@ New features, fixes in version 1.0.4
 	Fix graph scaling with explicit "bytes=false", which was
 	misinterpreted by the graphing code.
 
+	Updated getFormat.c from John Woolner. Patch #454472.
+
 New features, fixes in version 1.0.3
 
 	The many disk accesses to the config database that collector
