@@ -1324,7 +1324,8 @@ sub doGraph {
     }
 
     # things we will need from the params
-    my($view) = lc $gQ->param('view');
+    my($view) = $gQ->param('view');
+    $view = lc $view if defined $view;
     # a comma-separated list of data sources
     my($dslist);
     my $viewRef = undef;
