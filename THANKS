@@ -1,0 +1,97 @@
+Thanks to Tobias Oetiker, the author of RRD, for his very
+useful tool. Without RRD, Cricket would be useless. (And without
+Cricket, RRD is still cool, but hard to use!) Tobias also
+contributed the cool Cricket logo.
+
+Thanks to WebTV Networks for letting me work on this tool.
+If it's half as useful to others as it is to us at WebTV,
+we've definitely made the network management world a better
+place!
+
+I can only justify spending time on this project as long as
+WebTV gets new stuff for free in return. So I am indebted to these
+contributors for making this project possible. These folks
+contributed ideas, patches, and/or debugging info:
+
+	Shannon Reis <sreis@fastlane.net>
+		contributed a fix for annoying y-min/y-max behavior
+		contributed the nifty avg/max reporting, and added
+		max line to graphs.
+
+	Jost Krieger <Jost.Krieger@ruhr-uni-bochum.de>
+		contributed the news-server subtree
+
+	Matthew Stier <Matthew.Stier@tddny.fujitsu.com>
+		Various small bugfixes.
+
+	Jeremy Fischer <jeremy@kiva.net>
+		contributed usr subtree
+
+	Noam Freedman <noam@noam.com>
+		contributed generate-statics
+
+	Robert J. Adams <radams@siscom.net>
+		submitted the pmlines script for monitoring portmasters.
+
+	S. John Banner <jbanner@UVic.Ca>
+		found the right format strings for AIX
+
+	Juan Cabezas S. <practica_1@bhif.cl>
+		found the right format strings for Irix
+
+	Russ Wright <russ5@corp.home.net>
+		Fixed a bug in VRULE generation for yearly graphs.
+
+	Ragnar Kjørstad <ragnark@vestdata.no>
+		The squid-proxy configuration.
+
+	Blair Zajac <bzajac@geocities.com>
+		Changes to use shared-object RRD module
+		Taught me how to use return. :)
+
+	Patrick Myers <pjm@mcc.ac.uk> 
+		Found correct settings for FreeBSD.
+
+	Philippe.Simonet@swisscom.com
+		Continually re-porting to NT as I break it.
+		Also, game me the func scheme for ds-sources.
+
+	Simon Leinen <simon@switch.ch>
+		SNMP in Perl 5
+
+	Alan Lichty <alichty@eli.net>
+		Found a nasty bug related to corrupted instances.
+		Applying Cricket to Cascade ATM switches (the
+		atm-interfaces subtree).
+
+	Ed Bugg <Bugge@ABCBS.com>
+		contributed the converter and getFormat
+
+	Matija Grabnar <Matija.Grabnar@arnes.si> 
+		Verified that Linux formats work on i86pc-solaris.
+
+	David Koski <dkoski@noc.ns.itd.umich.edu>
+		auto-configuration via listInterfaces 
+
+	Javier Muniz <jmuniz@corp.webtv.net>
+		Monitoring
+		bug finder
+
+	Kirby Krueger <kirbyk@corp.webtv.net>
+		test-url script maintenance
+
+	Bryce Jasmer <kirbyk@corp.webtv.net>
+		expansion bug catcher
+
+	Jeff Jensen <jpj@corp.webtv.net>
+		config tree brainstorming
+		meanest beta tester alive
+		usrModemUsage tool and modems subtree
+		switches subtree, as well as the routing subtree
+		nifty multi-target support
+		unknown-is-zero
+
+	Emmett Hogan <hogan@gnac.com>
+		a prototype of SMRTG that crystalized our ideas
+			about the config tree
+		the contributors site

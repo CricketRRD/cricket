@@ -1,0 +1,46 @@
+Collector:
+	focus does not work right for directories not in top level
+	focus does not work with an extra / on the dir name
+
+Grapher:
+	remove legend from GIFs
+	think about fetching values in response to %fetch(ds)% syntax
+
+Cricket Paper
+	DONE: outline ready for review
+	DONE: outline sent in
+	DONE: paper accepted!
+	write paper
+
+Later:
+
+figure out what's wrong with expires, decide on refresh
+
+same-as tag for target-types, so that jpj can make a Cisco-7500-Router
+same-as a Cisco-7200-Router. (proper handling of --default-- helps
+obviate this need)
+
+Search for ERR in grapher.cgi and implement reasonable
+error notification.
+
+Make it possible to add the MAX data to graphs. (MRTG 2 does them only for
+old graphs... hmm.)
+
+Add loop detection in expand* routines.
+
+Make more things configurable via the HTML dict, to aid i18n.
+(i.e. instead of hardcoding "Values at last update", get it from the
+dict, if possible)
+
+Add an include syntax. (Useful for i18n, and for building libraries
+of target-types for novice users.)
+
+make it possible for subtree sets to include other subtree sets.
+
+figure out why colons are not allowed in target names and decide
+what to do about it (currently, it's just documented).
+
+There's a Perl module named FastTemplate that might make the HTML
+display significantly more powerful.
+
+Unify the repeated code between collector and rrd-tune.

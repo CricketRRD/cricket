@@ -1,0 +1,794 @@
+New features, fixes in version 0.72 (23-Jan-00):
+
+	Fixed a typo in one of the "fixed" split lines from the
+	last release.
+
+	Fixed a typo that makes scaled mtargets work right.
+
+	Fixed the height-hint in the root Defaults file to match
+	the height used by rrdtool-1.0.10.
+
+	Fixed y-min/y-max code, hopefully once and for all.
+
+	Directories named 'CVS' (exactly) in the config tree
+	are ignored now.
+
+	Collect-subtrees now makes the log directory if necessary.
+
+	Minor documentation fixes to reference.html.
+
+	Cleared up warnings when inst-names tag is missing.
+
+New features, fixes in version 0.71 (09-Jan-00):
+
+	This release has a minimal number of patches to fix
+	the most pressing bugs reported to me in the last 4 months.
+
+	It works with RRD Tool 1.0.10. You must upgrade your RRD Tool
+	install to this version to use Cricket 0.71. (This is because some
+	critical bugs have been fixed recently in RRD Tool.)
+
+	If this version of Crikcet proves to be stable, it will be
+	renamed 1.0. Future development will take place in 1.0.x
+	releases, culminating in a 1.1 release. In general, three-digit
+	releases will be development, two digit releases production.
+
+	Here are the patches that have been applied to Cricket 0.70:
+		Minor documentation fixes.
+		A new avg() function to go with the sum() function.
+		Scaling works right in multitargets now.
+		Event names are case insensitive, as documented now.
+		Comma and colon delimited lists now ALWAYS allow
+			whitespace. Previously, rrd-tune was broken because
+			of a split() that was too restrictive. All of these
+			have been fixed.
+		Cricket no longer gives RRD Tool input that crashes it.
+		Support for various architectures added to Format.pm.
+		Lots of changes to Monitor.pm, but it's still not ready for
+			production use. Sorry.
+		http-performance tests a slightly different URL
+
+New features, fixes in version 0.70 (11-Aug-99):
+
+	ATTENTION: You must use RRD Tool 1.0.x with Cricket 0.70
+	and higher. Cricket now defaults to making PNG pictures,
+	if you are using a 4.0 browser or better. If you really
+	want GIFs (which are big and slow, now that GD has been
+	lobotomized by Dr. Unisys), then you need to investigate 
+	the graph-format tag in the graph dictionary.
+
+	Frobbed the quoting magic some. I think it was broken before.
+	I think it is less broken now. If you see odd behavior, suspect
+	quoting problems.
+
+	Integrated a patch from Shannon Reis <sreis@fastlane.net> 
+	that adds avg/max display in. This adds an additional
+	call to RRDs::graph. If you want it the old way, check
+	out the tag named show-avg-max in the graph dict.
+
+	backed out change related to lower-casing the
+	target names in the targets and mtargets tags. What
+	was I thinking?
+
+	usrModemUsage script no longer tries to use
+	common.pm.
+
+	removed useless and confusing reference to domain
+	in the routers subtree.
+
+	made warnings work right in util/* again. Oops.
+
+	made the mapping routines use collect=false when
+	called from the collector. Note: if you set collect
+	to 'false', the target will still show up in the grapher
+	and if necessary, the instance will be mapped. This
+	could cause warnings in the grapher, but they can be
+	ignored.
+	
+New features, fixes in version 0.69 (16-Jul-99):
+
+	A bunch of namespace fixes:
+	The collector can again make directories when necessary.
+	Instance mapping works. Lots of other fixes...
+
+	Monitoring is now documented, and seems to work.
+	Please read the description of the tag named
+	'monitor-thresholds' and discuss this stuff on the
+	mailing list. Javier Muniz, who wrote it, will be available
+	to hel pus learn about it in the coming weeks.
+	
+	The new unknown-is-zero tag in the targets dictionary
+	makes it possible to add together graphs which have unknown
+	regions and not have the unknown regions blot out the entire
+	graph.
+
+New features, fixes in version 0.68 (09-Jul-99):
+
+	Made it possible to use mixed case in mtargets and targets
+	specifications.
+
+	Integrated patch that makes y-min and y-max datasource-level.
+
+	Added patches to make it work under NT (again).
+
+	Significant changes to namespace usage to
+	make it work under mod_perl. Search for mod_perl
+	in reference.html for more info.
+
+	Fixed sum() to work right.
+
+	Fixes to make it work (sorta) under mod_perl.
+
+	Fixed a minor bug related to iterating over
+	results from the table walks done during
+	instance mapping.
+
+	Made the error message for an unmatched quote
+	include the file and line number.
+
+New features, fixes in version 0.67 (09-Jun-99):
+
+	Fix: Added quoting to the inst tag to protect the
+	argument of map() from eval.
+
+	Fix: made overzealous warning from Perl
+	(in Log.pm) go away.
+
+	Fix: A vector instance with one element is now
+	correctly treated like a fixed-instance scalar.
+	If you didn't understand that, don't worry. What
+	it means is that Cricket will Do the Right Thing.
+
+	Fix: missed a conversion of expandString. Instance
+	mapping now works again.
+
+New features, fixes in version 0.66 (03-Jun-99):
+
+	Fix: instance names are correctly shown in the title
+	after visiting the instance seletor widget.
+
+	New feature: target tag collect=false tells the
+	collector to skip that target.
+
+	Fix: all dictionaries are expanded with respect
+	to the target dictionary, which seems to be more in
+	line with how people thought it would behave.
+	I'm not certain how people are going to use this,
+	but if it makes people less confused, it's good, I
+	guess.
+
+	New feature: events. You can mark a graph with a
+	vertical rule of any color to mark the time something
+	of interest happened. Check out the new events target
+	tag, and the event dictioanry. This requires Date::Parse,
+	but you should have that anyway. If not, go to CPAN
+	and get it.
+
+	New feature: eval's during expansion. You can surround
+	code you want eval'd with {} in a tag, and that will
+	happen immediately after expansion. So this:
+		snmp-port-2 = "%snmp-port% + 1"
+	results in snmp-port-2 getting set to 162 (i.e. 161 + 1).
+	Useful functions to make use of this will be coming
+	to a release near you soon. In particular, there
+	will be a snmpget() and a snmpwalk() that behave
+	in ways that help make the config tree more compact.
+
+	New feaute: directories can have descriptions which
+	show up in directory selection list. See
+	target tag directory-desc.
+
+	SLIGHTLY INCOMPATIBLE CHANGE: I renamed the meta
+	tag, since it makes more sense to call it
+	'head-html' where it is used. Compare your existing
+	root Defaults file to the one in sample-config
+	and you'll see the change. See the docs for how you
+	might use this to use stylesheets to override my
+	terrible sense of style.
+
+	Converter completely removed. If you have RRD files
+	in pre 0.99 format, you'll need to use Cricket 0.65
+	to convert them, then upgrade to later versions.
+
+	The white in cricket-sm.gif is now transparent. And
+	it's 20 bytes smaller. Cool.
+
+	Added a new subtree for monitoring news servers.
+
+	grapher.cgi will no longer fail on negative data.
+	We now compute the si_unit using abs($value).
+
+	Expansion is now working correctly in the target
+	selector widget.
+
+	There's a new trap subroutine in snmpUtils that
+	makes it possible to specify OIDs in outgoing traps.
+
+New features, fixes in version 0.65 (19-May-99):
+
+	This is the paper-bag-over-my-head release.
+
+	This fixes a big bug in the config tree system
+	that made it unable to understand config trees
+	deeper than two levels.
+
+	There are also some minor fixes to ignore RCS
+	files correctly.
+
+New features, fixes in version 0.64 (18-May-99):
+
+	Sorry I got a bit verbose this time... a lot of
+	infrastructure stuff has been happening recently. Keep
+	reading all the way... there are some incompatible
+	changes in this release.
+
+	This version was tested with RRD Tool 0.99.29.1.
+	It should work with other 0.99.x releases of RRD Tool
+	also.
+
+	You need to have the Perl module named DB_File
+	installed to use this release. It's relatively
+	standard, but if you don't have it, go get it
+	from CPAN. (See doc/beginner.txt for more info on
+	CPAN.) You can check to see if you have it by executing:
+
+		perl -MDB_File -e 'print $DB_File::VERSION, "\n"' 
+
+	New feature: Cricket operates off of a compiled
+	form of the config tree, which is stored in a file
+	named config.db in the root of your config tree.
+	The collector will recompile this as necessary,
+	but when you are making interactive changes to the
+	config tree, you need to remember to recompile it
+	yourself -- the grapher does not have the permissions
+	it needs to recompile it. The grapher will set the
+	variable auto-error with a warning about the out-of-date
+	compiled form. If you have added that variable to your
+	page-footer tag, you'll at least get a reminder message.
+	(search for auto-error in sample-config/Default for
+	an example).
+
+	To recompile the config tree manually, run:
+		$HOME/cricket/compile -base <config-tree-base>
+	If your config tree is in ~/cricket-config, you can omit
+	the -base argument, since that is the default.
+
+	New feature: ds-sources can now return text information
+	after an floating point number, and Cricket will correctly
+	ignore the text and use only the number. See the EXEC
+	example in the docs for how this might be useful.
+
+	New feature: you can defeat the cache by hand editing the
+	URL that points to the target display page. Add '&cache=no'
+	onto the end of the URL. This is helpful when you are
+	making changes to the graph dictionary, and you want to
+	regenerate the graphs on demand to see your changes.
+	Remember, however, that you still need to recompile the
+	Config Tree after each change.
+
+	INCOMPATIBLE CHANGE: collect-subtree is now named
+	collect-subtrees. It reads a file named subtree-sets
+	which is slightly different format. For one, you need
+	to replace the "subtree foo" lines with "set foo". You
+	also need to nae subtrees by their full path relative
+	to the root of the config tree. For instance,
+	"router-interfaces" becomes "/router-interfaces".
+
+	INCOMPATIBLE CHANGE: the URLs used by the grapher
+	are a bit different now. If you have saved bookmarks
+	that jump into certain parts of the config tree,
+	they might not work now. Check them, and fix them
+	if necessary. (The target parameter is no longer
+	rooted at the Unix root.)
+
+	New subtrees: usr, for monitoring USR modem chassis.
+
+	New utilities: generate-statics and pmlines.pm, a more
+	flexible replacement for PM3lines. Note that the portmaster
+	subtree may not be in sync with the utility anymore...
+	I'm not a portmaster user, so I'm relying on patches from
+	you guys.
+
+	generate-statics is a cool little tool to take snapshots
+	of the GIFs. Read about it in the util/README file.
+
+	New feature: graph dict tag rrd-graph-args allows
+	you to send arguments directly in to RRD Tool, which
+	Cricket does not already send for you. A notable use
+	of this would be to set colors on the graphs to something
+	other than the default. See the docs for more info.
+
+	I made the page-footer easier to override in subtrees.
+	If you want to put something in the center pane
+	replace the tag named contact with your stuff.
+
+	New feature: if mtargets-ops is "sum()", it is replaced
+	with the right number of plusses.
+
+	Grapher.cgi is a big mother, and it takes a long time
+	for Perl to parse it. It now redirects image requests
+	through mini-graph.cgi, which is a tiny mother, which
+	is fast to parse. This makes your webserver spend less
+	time parsing Perl and more time spraying GIFs, which
+	is a Good Thing. This may not work on NT. If not,
+	comment out the line in grapher.cgi with "mini-graph.cgi"
+	in it. (It's a substitution on the variable $me.)
+	Please send patches to make this work on NT. :)
+	You may need to add a new link in ~/public_html/cricket
+	to point to mini-graph.cgi.
+
+New features, fixes in version 0.63 (02-Apr-99):
+
+	INCOMPATIBLE CHANGE: If you have installed previous
+	versions, you need to compare your targetType
+	lines to the ones in the sample-config tree and fix them.
+	Basically, tags are no longer allowed to appear
+	multiple times, instead they must appear once
+	with a comma-delimited list inside quotes.
+
+	Jeff Jensen gave us the kick butt routing subtree,
+	which lets you watch BGP updates with Cricket.
+
+	The paper I wrote for NetA 99 is in doc/neta-paper.
+
+	A new smaller rrdtool.gif Tobi gave me a long time
+	ago which I forgot to add.
+
+	Various bugfixes to jpj's new mtargets thing.
+
+	Fixed a goofy bug which made view get set wrong
+	when there were targets with and without a view
+	in the same directory.
+
+	collect-subtrees processes all subtree sets if it
+	was given no arguments. Also cleaned up an error
+	message.
+
+	We now set --base correctly when drawing graphs.
+	We decide how to set it based on the bytes tag
+	in the graph dictionary.
+
+	Unspecified bug in VRULE generation for yearly graphs
+	fixed. Russ is the man.
+
+New features, fixes in version 0.62 (27-Mar-99):
+
+	Fixed some bugs in getFormat.c that the Compaq (cough)
+	Alpha let us notice. It now creates output suitable to
+	cut and paste into lib/RRD/Format.pm. Yippee.
+
+	atm-interfaces subtree was contributed by Alan.
+
+	grapher.cgi is friendlier about a missing VERSION
+	file. But you really _should_ still have it in the
+	same directory that grapher.cgi is in.
+
+	Added the new disable-short-desc tag, which
+	can make more room in the target selection table
+	by skipping the description column.
+
+	Fixed the README to reflect a recursive diff for submitting
+	patches. (jpj)
+
+	Updated or created documentation for targets,
+	targets-short-desc, targets-long-desc, mtargets,
+	and mtargets-ops. (jpj)
+
+	Implemented support for graphing multiple targets on
+	the same graph using the mtargets tag. (jpj)
+
+	Implemented basic support for graphing of arithematic
+	operations on targets.  You can now graph the sum of
+	multiple targets, as well as other operations! (jpj)
+
+New features, fixes in version 0.61 (07-Mar-99):
+
+	Interlaced now works as specified in the manual.
+	Previously you had to use "interleaved", which is
+	not what the docs said.
+
+	You can specify the time at which a given measurement
+	was taken. Search for XXX@YYY in the reference docs.
+
+	Minor efficiency change in collector.
+
+	Cricket can now send traps with the data it is collecting
+	inside. This is useful if you happen to be running
+	Netcool, and you've set things up correctly to
+	escalate alerts holding data that violates
+	certain thresholds. However, it is implemented to be
+	flexible enough to later let us send data other places.
+	See the docs for tag copy-to for more info.
+
+	As part of the copy-to implementation, snmpUtils now
+	knows how to send SNMP traps. Cool.
+
+New features, fixes in version 0.60 (05-Mar-99):
+
+	CHANGE REQUIRING YOUR INTERVENTION!!!
+	Old versions of Cricket might not have set rrd-min
+	and rrd-max correctly in your RRD files. In this
+	version of Cricket, the values come from the
+	datasource dictionary, and from the target dictionary.
+	If they are present in the target dictionary, they override
+	the ones in the datasource dictionary. Check
+	your config now to make certain it's doing what you
+	want, and then run rrd-tune to apply the values
+	to your existing RRD's.
+
+	support for Portmasters, via an EXEC script.
+
+	support for FreeBSD.
+
+	removed unused call to localtime from grapher.cgi
+
+	listInterfaces no longer lets colons creep into target
+	names. 
+
+	rrd-dump truncates C strings correctly now.
+
+	More control over multitargets with targets-desc-long
+	and targets-desc-short. (Thanks, jpj.)
+
+	Datasource descriptions are now displayed in the order
+	they occur on the graphs.
+
+New features, fixes in version 0.59 (15-Feb-99):
+
+	grapher now handles blank long-desc gracefully.
+
+	grapher will attempt to put up an error message
+	in a GIF (failed.gif) when it cannot give you
+	a graph.
+
+	Minor fix in options to handle unset $HOME better.
+
+	Grapher debug level defaults to 'info' again.
+
+	Multi-target supports instances now. The separator
+	in the targets tag is now ";". This is not a backwards
+	compatible change; if you were using targets before,
+	you need to change it now. It's all still undocumented
+	but it getting stable enough to document it.
+
+	Fixed bug reated to inst not getting set and
+	causing a warning.
+
+	FAQ updated... keep those "dumb" questions coming! The
+	only dumb question is one we don't document and learn
+	from!
+
+	RRD::Format now supports Linux again, and there's
+	a nifty tool from Ed that makes it a no-brainer
+	to port to new OS's. See the comments in RRD::Format.
+
+New features, fixes in version 0.58 (05-Feb-99):
+
+	FINALLY: Support for RRD 0.99.* (tested with 0.99.7)
+	(only the RRDs (shared library) module, at this time)
+
+	NOTE: You MUST edit your RRA definitions, if you will
+	be creating new RRD's. (Do it now before you forget!!!)
+	You need to add the x-files-factor into the RRA definition
+	after the consolidation function. See the comments in the
+	root Defaults file. (New users can simply copy sample-config
+	as usual.)
+
+	Collector will do auto-conversion from old-format RRD files,
+	for all you old-timers. It works like this; run 'collector'
+	by hand once with the option '-convert'. Any RRD files that
+	need to be converted will be. You can run with '-convert' as
+	often as you want -- it will only do the conversion once.
+	You can also convert a file on demand using util/convert-file.
+	The old files are left in the same directory as "foo.rrd.old".
+	Using find to remove them would save a lot of disk space --
+	if you trust the converter. :) The command is:
+
+		find ~/cricket-data -name '*.old' -exec rm {} \;
+
+	collect-subtrees now takes a -cf arg, which you can
+	use to tell it to look at a different subtrees file.
+
+	Fixed incorrect HTML entity in sample-configs/rotuers/Defaults.
+
+	Cricket's version is now available in the HTML dictionary,
+	in both it's long and short forms. You can see it in action
+	in the newest root Defaults file, which puts the version number
+	in the footer.
+
+New features, fixes in version 0.57 (02-Feb-99):
+
+	Sample config tree now contains Cricket logo and the RRD
+	logo. You should definately upgrade your root Defaults file...
+	the logos look cool!
+
+	Changes cached expiration system to be real-time. This means
+	no evil cron job (yeah), no permissions problems (yeah) and
+	no possibility of incorrectly cached graphs. I think.
+
+	Expansions on the target list pages are now handled
+	correctly.
+
+	Short-desc is used now in the aggregates and at the
+	top of target pages.
+
+	New tag: bytes, which tells si_unit to calculate the prefix
+	using powers of 2 instead of 10. "bytes" is set to true for
+	ifInOctets and ifOutOctets in the sample tree now.
+
+	Ignores files like "#foo#", which emacs can leave behind
+	as backups.
+
+	Datasources were not actually case insensitve like the
+	docs claimed they were. Now they are. (Rumor has it they
+	aren't everywhere yet...)
+
+	Fixed bugs related to instance lists with variable expansions
+	in them. Also a bug related to quoting these guys.
+
+	Fixed bug in the way micro symbol was displayed.
+
+	RRD::Format now supports arch i86pc-solaris and MSWin32-x86.
+
+	listInterface will quote more lines that need it (i.e.
+	empty or whitespace only lines).
+
+New features, fixes in version 0.56 (15-Jan-99):
+
+	Documentation updated in various ways, including
+	new features, new info on purging the GIF cache, and
+	fixed typos.
+
+	Made RRD::Format cross-architecture. Supports
+	sun4-solaris and i386-linux. For tips on
+	porting to other archtectures, see lib/RRD/Format.pm.
+
+	Reworked Makefile to make a more better tarfile (writeable
+	files, and no garbage in lib).
+
+	Added a "rand" parameter to image URLs so that Netscape
+	will let RRD decide what things should be cached. Search
+	for "rand" in grapher.cgi to shut this off, if you are
+	annoyed by the slightly longer load times.
+
+	Added a caching mechanism to the graph drawing routine.
+	The cache dir can be changed easily by editing the beginning
+	of grapher.cgi. It will never hold more than 5 minutes worth
+	of graphs, so /tmp should be appropriate. Clearing the
+	cache is done by running grapher.cgi from cron with certain
+	options. Search for "cache" in the documentation.
+
+	Made collect-subtree strip leading whitespace from
+	subtree names correctly.
+
+	Taught listInterfaces and router-interfaces subtree
+	about sub-interfaces. It turns out that some interfaces,
+	like those related to PVC's on frame relay circuits,
+	will not tell you the packet or error counts. So
+	listInterfaces tries to mark those as "sub-interface"
+	type interfaces, so that we don't try to fetch things
+	that we can't get.
+
+	New feature: inst-names will let you name the instances
+	in a vector instance list. See documentation for details.
+
+	New feature: the graph dict tag si-units=false will
+	let you disable si_unit(), which turns 2000 in 2k. The
+	scales of the graph will still have the SI transformation
+	done to them.
+
+	The instance selector widget is now formatted as a
+	5 column table.
+
+New features, fixes in version 0.55 (07-Jan-99):
+
+	Various fixes to make it work better on NT.
+	Documentation expanded.
+	listInterfaces handles quoting right.
+	Squid OIDs revisited. (Still might not be right...)
+	Changed the layout of the time-navigation links some.
+	Other minor bugfixes to the grapher and collector.
+
+New features, fixes in version 0.54 (21-Dec-98):
+
+	Made collect-subtree work right when there are two or more
+	different users running it on the same machine. Also made
+	it scan logs for errors.
+
+	Made the collector more robust when making new RRD files.
+	It reports useful stats again (# targets, amount of wall
+	clock time).
+
+	Fixed a stupid bug in RPN.pm that made it impossible to
+	divide.
+
+	Made grapher.cgi work with installs where RRD.pm
+	needs to be installed in the local lib directory for
+	some reason. Fixed bug in graphParam. Layed out datasources
+	more nicely in HTML summary.
+
+	Made regexp-based instance mapping work. Included
+	an interesting example of how to use this feature.
+	See sample-config/Defaults, and search for ^map.
+
+	Added new switches subtree, which polls interesting things
+	from a switch. This is relatively untested -- we use it here,
+	but not in the exact form I am shipping. Please try it out
+	and give me feedback.
+
+	Resolved some questions in the docs.
+
+	Added a new file datasource type. See docs for more info.
+
+New features, fixes in version 0.53 (10-Dec-98):
+
+	Fixed a bug in collector regarding creating new
+	RRD files with more than one DS. This bug has been in
+	since 0.50.
+
+	Worked on the documentation some more, including more
+	information about the graph dictionary.
+
+New features, fixes in version 0.52 (10-Dec-98):
+
+	SMRTG is now named Cricket. The website changed.
+
+	There's a configure script that will take care
+	of you if your Perl is not where mine is.
+
+	Once RRD tool supports the -i (--interlaced) feature
+	(a patch has been sent to Tobias) you will be
+	able to use the "interlaced" attribute of the
+	"graph --default--" dictionary to control the
+	encoding of the GIF.
+
+New features, fixes in version 0.51 (8-Dec-98):
+
+	fixes to the squid-proxy subtree (already!)
+	fixes to the http-performance tree
+	actually implemented locking in collect-subtrees
+
+	grapher.cgi:
+		new feature lets you set the upper and lower bounds
+		on graphs which have occasional spikes that you don't
+		want to see. Set "y-max" to (for example) 3.0 to
+		trim peaks higher than 3.0. Setting y-max or
+		y-min will disable auto-scaling, so only use it when
+		you mean it!
+
+New features, fixes in version 0.50 (4-Dec-98):
+
+	sample-config:
+		squid-proxy subtree added
+
+	all RRD users converted to use RRD module instead of talking
+	over pipe.
+
+	more complete documentation
+
+New features, fixes in version 0.49 (21-Nov-98):
+
+	sample-config
+		lots of things added to show off various features
+
+	grapher.cgi:
+		new 'precision' attribute of graph dictionary lets you
+		control the precision of the HTML summary for that
+		datasource. Set it to "integer" for things which should
+		be rounded to the nearest integer (like the number of
+		modems in use).
+
+		new "space" tag in graph dict that will let you
+		override the space printed before units. (Useful
+		for things like the degree mark.)
+
+		case-sensitivity bugfixes related to datasource
+		descriptions.
+
+New features, fixes in version 0.48 (12-Nov-98):
+
+	util/listInterfaces
+		Now outputs ready-to-use SMRTG config files. (Thanks David!)
+
+	util/ciscoDiscover
+		An interesting contribution from Ed Bugg, which isn't
+		quite working for me yet.
+
+	limited multi-target support:
+		if you have a target with a "targets" attribute in it,
+		it is considered a multi-target. No data is collected
+		for it, and when it is displayed, the grapher puts
+		each of the graphs up one after another.
+
+	grapher.cgi:
+		scales and values in HTML and add prefixes to your
+		units.
+
+		shows fewer graphs by default, but gives you choices
+		about which to show one you are looking at a graph.
+
+	collector:
+		easier to mess with the logging level. Use "-loglevel debug"
+		to debug your config. Other options are 'info', 'warn',
+		and 'error'.
+
+New features, fixes in version 0.47 (8-Nov-98):
+
+	THANKS:
+		added a place to keep track of the help people
+		are giving me... you guys make this process work!
+		Keep it up!
+
+	collect-subtrees:
+		a replacement for the crufty old wrap-collector
+		script. This understands the concept of subtree-sets, which
+		makes it much easier to parallelize SMRTG (which you need
+		to do if you are trying to poll thousands of targets).
+
+	sample-config:
+		new http-performance subtree which makes if possible
+		for SMRTG to monitor webservers (and FTP servers too!)
+
+	documentation:
+		a few more tidbits, still need volumes more
+		a tiny fix to the README -- the crontab entry was missing 55!
+
+	collector:
+		a bugfix related to making new RRD's
+
+	grapher.cgi:
+		now works on Netscape's webserver too!
+
+New features, fixes in version 0.46 (4-Nov-98):
+
+	collector
+		handles oids right, for real this time. (really!)
+
+	common:
+		handleTarget is abstracted better to make adding new
+		commands (like rrd-tune, see below) easier.
+
+	grapher.cgi:
+		pays attention to the size hints now (fixed bug)
+
+		new long-desc and short-desc attributes of targets
+		let you add text to the web pages describing the targets.
+
+		new desc attribute for a datasource causes a description
+		of the datasources to be added to the end of the graph page.
+
+		we now use RRD::File to dig out the current values
+		for the graphed variables.
+
+		new attribute in graph dict called "unit". Uses this
+		as the first choice in the summary -- will fall back to
+		y-axis. See sample-config/routers/Defaults for an example.
+
+	There is a new tool in util called rrd-tune. It traverses
+	a config tree and tunes each RRD to the current settings
+	for min, max, xff, and hearbeat. (Takes same args as collector).
+	Run this on a target (or it's whole subtree, for now) after making
+	a change to it's config.
+
+New features, fixes in version 0.45 (30-Oct-98):
+
+	Miniscule bit of Documentation!
+
+	ConfigTree.pm
+		more consisten --default-- behavior: works right across
+			all TagValue items
+		handles missing quotes (and other errors) slightly better
+		now possible to nuke a key that you inherited
+
+	grapher.cgi
+		no longer uses path_info, since this doesn't seem to work
+			with all webservers. (Thanks to David Koski
+			<dkoski@noc.ns.itd.umich.edu> for his help diagnosing
+			this.)
+
+	collector
+		handles raw oids in datasources correctly now
+		fails gracefully in many more situations where
+			the config tree is missing data
+
+This file started with version 0.45.

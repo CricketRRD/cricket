@@ -1,0 +1,13 @@
+# switch-ports sub-tree
+#
+# This is where we collect stats on switch ports. We inherit pretty
+# much everything we need, since it's in the root Default file.
+
+Target	--default--
+	rrd-datafile	=	%dataDir%/%auto-target-name%-%inst%.rrd
+	switch			=	%auto-target-name%
+	snmp-host		=	%switch%
+	target-type		=	switch-port
+
+targetType	switch-port
+	ds	=	"ifInOctets, ifOutOctets"

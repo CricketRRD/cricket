@@ -1,0 +1,77 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# usrModemUsage
+#
+#    Copyright (C) 1998 Jeff Jensen and WebTV Networks, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Program to return usage information from a US Robotics
+# modem chassis.
+
+BEGIN {
+    $gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . "..";
+}
+
+#
+# We need these
+#
+use lib "$gInstallRoot/lib";
+use strict;
+
+use Common::Log;
+use snmpUtils;
+
+#
+# Take the hostname and community as arguments
+#
+my $hostname = $ARGV[0];
+my $community = "public";
+$community = $ARGV[1] if (defined($ARGV[1]));;
+
+die("usage: $0 host [community-string]\n")
+	unless (defined($hostname) && defined($community));
+
+my($modemTableOid) = '.1.3.6.1.4.1.429.1.6.9.1.1.2';
+my($inUse) = 0;
+my($neg) = 0;
+
+my(@res) = snmpUtils::walk("$community\@$hostname", $modemTableOid);
+
+# did we get nothing?
+if ($#res+1 == 0) {
+	print "U\n";
+	print "U\n";
+	exit;
+}
+
+my($row);
+foreach $row (@res) {
+	my($inst, $value) = split(':', $row, 2);
+
+	# these state numbers are taken from the USR mibs.
+	if ($value == 8)  {
+		$inUse++;
+	} elsif ($value == 6)  {
+		$neg++;
+	} else {
+		# unknown state... ignore it
+	}
+}
+
+print "$inUse\n";
+print "$neg\n";
+

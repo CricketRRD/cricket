@@ -1,0 +1,96 @@
+This directory has contributed goodies and other useful,
+but not critical programs in it. Each is documented, sparingly,
+below.
+
+usrModemUsage:
+
+		This tool can be run from Cricket via an EXEC datasource
+		to collect stats on the number of modems in use in a
+		USR Total Control chassis. Give it hostname and community
+		string on the commandline, and it will give you number of
+		modems in use and number of modems in negotiation on lines 0
+		and 1 of it's output.
+
+pmlines.pl:
+
+		A tool to tell you the total number of modem and ISDN
+		sessions active on a Portmaster.
+
+dump-targets:
+
+		Lets you see what collector will be working on before you
+		let the collector loose on your config tree. Useful
+		for testing out brand new configs.
+
+rrd-dump:
+
+		A simple program to exercise RRD::File, but it could
+		also be used to debug problems, etc. If RRD::File is
+		lying to you, so will rrd-dump! Be warned!
+
+test-url:
+
+		A script to fetch a URL and tell you how long it took.
+		This can be used via an EXEC datasource to monitor
+		HTTP and FTP server response times.
+
+listInterfaces:
+
+		Give this script a router name and a community string
+		and it will make a set of target definitions for you.
+		Very useful!
+
+rrd-tune:
+
+		Use this to force an rrd "tune" operation on parts
+		of your config tree. You'll need to use this to make
+		changes to rrd-min, rrd-max, or rrd-heartbeat stick
+		if you make them after the RRD files already exist.
+
+relocate-perl:
+
+		Used during install to fix the location of Perl in the
+		#! lines of the scripts.
+
+getFormat.c:
+
+		If you need to port RRD::Format to your architecture,
+		you can use this little C program to help out. See
+		the comments in ../lib/RRD/Format.pm.
+
+newsstats:
+		This script is called by the news-server subtree to
+		format stats from INN's ctlinnd command.
+
+generate-statics:
+
+		This is a nifty little tool to take snapshots of the
+		GIFs for a bunch of targets and deposit them into
+		a directory to be served as parts of static HTML documents.
+		This can be used to make Cricket snappier, or to archive
+		interesting GIFs in an automated way.
+
+		This script depends on some tags in order to know where
+		to put things. Put these tags in your root Defaults file
+		in the target dictionary:
+
+		  static-ranges    -> ranges to calculate for (such as d:y) 
+		  static-path      -> file system path to place the image 
+		  static-name      -> base file name for the image 
+
+		For example:
+ 
+		  static-ranges = d:w:m 
+		  static-path   = %auto-base%/../public_html/static/%auto-target-path% 
+		  static-name   = %auto-target-name% 
+
+		You either need to edit the script to set $gBaseURL correctly,
+		or you need to use -baseURL to set it. (Or, if you are
+		feeling lucky, you can ignore it and hope I guessed the right
+		URL for your machine. Don't laugh, it might work...)
+
+		Now, put a tag named "generate-static" in any target
+		which you want to be generated. Finally, run generate-statics
+		from cron. Making HTML pages that incorporate the generated
+		image files is left as an exercise to the reader.
+

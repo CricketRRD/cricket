@@ -1,0 +1,22 @@
+#
+# The SNMP host is defined as target name.domain, in this case it comes out
+# to internet-router-1.foo.com.  You'll need to make sure that host is SNMP
+# reachable.
+#
+# The inst values are the IP addresses of your BGP peers.  In the Cisco world
+# these are from the neighbor statements in the BGP router section.
+#
+target internet-router-1
+	domain		= "foo.com"
+	short-desc	= "Primary Internet Router"
+	inst		= "('172.16.1.1','172.18.1.1')"
+	inst-names	= "('Peer 16','Peer 18')"
+
+#
+# You can also look at both of these on the same HTML page
+#
+target all-peers
+	domain		= ""
+	short-desc	= "All BGP Peers"
+	targets		= "internet-router-1:'172.16.1.1';
+			   internet-router-1:'172.18.1.1'"

@@ -1,0 +1,57 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# Cricket: a configuration, polling and data display wrapper for RRD files
+#
+#    Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+BEGIN {
+	$Common::global::gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+}
+
+use lib "$Common::global::gInstallRoot/lib";
+
+use Common::Version;
+use Common::Log;
+use Common::Options;
+use Common::Util;
+use Common::Map;
+use Common::HandleTarget;
+use ConfigTree::Node;
+
+Common::Options::commonOptions();
+
+Info("Starting compile: $Common::global::gVersion");
+my($nodeCt, $fileCt) = (0, 0);
+
+$gCT = new ConfigTree::Node;
+$gCT->info(\&Common::Log::Info);
+$gCT->warn(\&Common::Log::Warn);
+$gCT->debug(\&Common::Log::Debug);
+$gCT->Base($Common::global::gConfigRoot);
+
+$gCT->init();
+$gCT->processTree();
+
+($nodeCt, $fileCt) = $gCT->compile();
+
+# log summary info before exiting
+$time = runTime();
+Info("Processed $nodeCt nodes (in $fileCt files) in $time.");
+
+exit;
+

@@ -1,0 +1,25 @@
+#!/usr/local/bin/perl
+
+##
+# Get simple stats from INND with cleanfeed
+# expects output crom "ctlinnd mode" on STDIN
+#
+# Author: Jost Krieger <Jost.Krieger@ruhr-uni-bochum.de>
+# Revision: $Revision$
+##
+
+use strict;
+
+my ($passed, $reject, $refuse);
+
+while (<>) 
+{
+#	print STDERR $_;
+	if (/Perl filter stats/) {
+		/Pass: (\d+)/ and $passed=$1;
+		/Reject: (\d+)/ and $reject=$1;
+		/Refuse: (\d+)/ and $refuse=$1;
+        }
+}
+
+print "$passed\n$reject\n$refuse\n";

@@ -1,0 +1,88 @@
+#!/usr/local/bin/perl -w 
+# -*- perl -*-
+
+# this is a little script to exercise RRD::File -- useful
+# when I was developing it, and possibly useful now too
+
+BEGIN {
+    $gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . "..";
+}
+
+use lib "$gInstallRoot/lib";
+use RRD::File;
+
+my($rrd) = new RRD::File ( -file => $ARGV[0] );
+
+$rrd->open();
+if ($rrd->loadHeader()) {
+	my(@info) = ($rrd->ds_cnt(), $rrd->rra_cnt(), $rrd->pdp_step());
+	print "Header info: ", join(",", @info), "\n";
+
+} else {
+	print STDERR "Could not read RRD file: $RRD::File::gErr\n";
+	exit 1;
+};
+
+print "\n";
+
+foreach $i (0 .. $rrd->ds_cnt()-1) {
+	print "DS $i:\t";
+	print join(",", %{$rrd->ds_def($i)}), "\n";
+}
+print "\n";
+
+foreach $i (0 .. $rrd->rra_cnt()-1) {
+	print "RRA $i:\t";
+	print join(",", %{$rrd->rra_def($i)}), "\n";
+}
+print "\n";
+
+print "Live header:\n";
+print "\tlast update time: ", $rrd->last_up();
+print "\n\n";
+
+foreach $i (0 .. $rrd->ds_cnt()-1) {
+	print "PDP $i:\t";
+	print join(",", %{$rrd->pdp($i)}), "\n";
+}
+print "\n";
+
+print "CDP's:\n";
+foreach $i (0 .. $rrd->rra_cnt()-1) {
+	print "rra=$i\n";
+	foreach $j (0 .. $rrd->ds_cnt()-1) {
+		print "\tds=$j:\t";
+		print join(",", %{$rrd->cdp($rrd->ds_cnt() * $i + $j)}), "\n";
+	}
+}
+print "\n";
+
+print "RRA ptrs\n";
+foreach $i (0 .. $rrd->rra_cnt()-1) {
+	print " $i: ", $rrd->rra_ptr($i), "\n";
+}
+print "\n";
+
+print "Current values\n";
+foreach $i (0 .. $rrd->ds_cnt()-1) {
+	print " $i: ", $rrd->getDSCurrentValue($i), "\n";
+}
+print "\n";
+
+$rrd->close();
+
+print "Metadata:\n";
+$meta = $rrd->getMeta();
+
+my($k);
+foreach $k (keys(%{$meta})) {
+	print "\t$k: $meta->{$k}\n";
+
+	# for testing setMeta
+#	if ($k eq "last-inst") {
+#		$meta->{$k}++;
+#	}
+}
+
+#$rrd->setMeta($meta);
+

@@ -1,0 +1,164 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# Cricket: a configuration, polling and data display wrapper for RRD files
+#
+#    Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+BEGIN {
+	$gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+}
+
+use lib "$gInstallRoot/../lib";
+
+use RRDs 1.000101;
+
+use ConfigTree::Cache;
+use Common::HandleTarget;
+use Common::Map;
+use Common::Options;
+use Common::Log;
+
+Common::Options::commonOptions();
+
+$Common::global::gCT = new ConfigTree::Cache;
+$gCT = $Common::global::gCT;
+$gCT->Base($Common::global::gConfigRoot);
+$gCT->Warn(\&Warn);
+ 
+if (! $gCT->init()) {
+    Die("Failed to open compiled config tree from " .
+		"$Common::global::gConfigRoot/config.db: $!");
+}
+
+my($recomp, $why) = $gCT->needsRecompile();
+if ($recomp) {
+    Die("Config tree needs to be recompiled: $why");
+}
+
+# if they gave us no subtrees to focus on, use the root of the config tree
+if ($#ARGV+1 == 0) {
+    push @ARGV, '/';
+}
+
+# foreach subtree to do
+#   find the base node of that subtree
+#   foreach leaf node of this subtree
+#       process it
+ 
+my($subtree);
+foreach $subtree (@ARGV) {
+    if ($gCT->nodeExists($subtree)) {
+		$gCT->visitLeafs($subtree, \&handleTarget,
+			\&handleTargetInstance, \&localHandleTargetInstance);
+    } else {
+        Warn("Unknown subtree $subtree.");
+    }
+}
+
+exit;
+
+sub localHandleTargetInstance {
+	my($name, $target) = @_;
+
+	my($tname) = $target->{'auto-target-name'};
+
+	# don't try to tune multitargets
+	if ($target->{'targets'}) {
+		return;
+	}
+
+	my($ttype) = $target->{'target-type'};
+	if (! $ttype) {
+		Warn("Skipping RRD tune for $tname; no target type.");
+		return;
+	}
+
+	my($ttRef) = $main::gCT->configHash($name, 'targettype',
+										lc($ttype), $target);
+	if (! defined($ttRef)) {
+		Warn("Skipping RRD tune for $tname; unknown target type.");
+		return;
+	}
+
+	my($dslist) = $ttRef->{'ds'};
+	if (! defined($dslist)) {
+		Warn("Skipping RRD tune for $tname; no DS's for target-type $ttype.");
+		return;
+	}
+
+	# run rrd tune on the RRD
+	my($rrd) = $target->{'rrd-datafile'};
+	if (! $rrd) {
+		Warn("Skipping RRD tune for $tname; could not find " .
+				" rrd-datafile.");
+		return;
+	}
+
+	my(@arg);
+	my($dsnum) = 0;
+	my($dsname);
+
+	foreach $dsname (split(/\s*,\s*/, $dslist)) {
+
+		my($ds) = $main::gCT->configHash($name, 'datasource',
+									lc($dsname), $target);
+
+		if (! defined($ds)) {
+			Warn("Unknown datasource: $dsname");
+			next;
+		}
+
+        my($dst) = $ds->{'rrd-ds-type'};
+        $dst = "GAUGE" unless (defined($dst));
+        $dst = uc($dst);
+
+        my($hb) = $ds->{'rrd-heartbeat'};
+        $hb = $target->{'rrd-heartbeat'}
+            if (defined($target->{'rrd-heartbeat'}));
+        $hb = 1800 unless (defined($hb));
+
+        my($min) = $ds->{'rrd-min'};
+        $min = $target->{'rrd-min'}
+            if (defined($target->{'rrd-min'}));
+        $min = 'U' unless (defined($min));
+
+        my($max) = $ds->{'rrd-max'};
+        $max = $target->{'rrd-max'}
+            if (defined($target->{'rrd-max'}));
+        $max = 'U' unless (defined($max));
+
+		push(@arg,
+			'-d', "ds$dsnum:$dst",
+			'-h', "ds$dsnum:$hb",
+			'-i', "ds$dsnum:$min",
+			'-a', "ds$dsnum:$max");
+		$dsnum++;
+	}
+
+	Info("Tuning $tname");
+	Debug("RRDs::tune $rrd ", join(" ", @arg));
+	RRDs::tune $rrd, @arg;
+
+	my($err) = RRDs::error();
+	if ($error) {
+		Warn("Unable to tune $rrd: $error\n");
+		return;
+	}
+
+	return 1;
+}

@@ -1,0 +1,222 @@
+# squid-proxy sub-tree
+#
+# A contributed config from Ragnar Kjørstad <ragnark@vestdata.no>
+# Minor modifications by Jost Krieger <Jost.Krieger+cricket@ruhr-uni-bochum.de>
+#
+
+target	--default--
+	target-type		= squid-proxy
+	snmp-host		= %auto-target-name%
+	# you could set a router-specific community string here:
+	snmp-community	= public
+
+OID     ClientHttpRequests      1.3.6.1.4.1.3495.1.3.2.1.1 
+OID     HttpHits                        1.3.6.1.4.1.3495.1.3.2.1.2 
+OID     HttpErrors                      1.3.6.1.4.1.3495.1.3.2.1.3 
+OID     HttpInKb                        1.3.6.1.4.1.3495.1.3.2.1.4 
+OID     HttpOutKb                       1.3.6.1.4.1.3495.1.3.2.1.5 
+OID     ICPpktsSent                     1.3.6.1.4.1.3495.1.3.2.1.6 
+OID     ICPpktsRecv                     1.3.6.1.4.1.3495.1.3.2.1.7 
+OID     ICPkbSent                       1.3.6.1.4.1.3495.1.3.2.1.8 
+OID     ICPkbRecv                       1.3.6.1.4.1.3495.1.3.2.1.9 
+OID     ServerRequests                  1.3.6.1.4.1.3495.1.3.2.1.10 
+OID     ServerErrors                    1.3.6.1.4.1.3495.1.3.2.1.11 
+OID     ServerInKb                      1.3.6.1.4.1.3495.1.3.2.1.12 
+OID     ServerOutKb                     1.3.6.1.4.1.3495.1.3.2.1.13 
+OID     CurrentSwapSize                 1.3.6.1.4.1.3495.1.3.2.1.14 
+OID     SysPageFaults                   1.3.6.1.4.1.3495.1.3.1.1 
+OID     MemUsage                        1.3.6.1.4.1.3495.1.3.1.4 
+OID     CpuUsage                        1.3.6.1.4.1.3495.1.3.1.5 
+OID     MaxResSize                      1.3.6.1.4.1.3495.1.3.1.6 
+OID     NumObjCount                     1.3.6.1.4.1.3495.1.3.1.7 
+OID     CurrentUnlinkRequests           1.3.6.1.4.1.3495.1.3.1.9 
+OID     CurrentUnusedFileDescrCount     1.3.6.1.4.1.3495.1.3.1.10 
+OID     CurrentReservedFileDescrCount   1.3.6.1.4.1.3495.1.3.1.11 
+OID     HttpAllSvcTimeFiveMin           1.3.6.1.4.1.3495.1.3.2.2.1.2.5 
+OID     HttpMissSvcTimeFiveMin          1.3.6.1.4.1.3495.1.3.2.2.1.3.5 
+OID     HttpNmSvcTimeFiveMin            1.3.6.1.4.1.3495.1.3.2.2.1.4.5 
+OID     HttpHitSvcTimeFiveMin           1.3.6.1.4.1.3495.1.3.2.2.1.5.5 
+OID     IcpQuerySvcTimeFiveMin          1.3.6.1.4.1.3495.1.3.2.2.1.6.5 
+OID     IcpReplySvcTimeFiveMin          1.3.6.1.4.1.3495.1.3.2.2.1.7.5 
+OID     DnsSvcTimeFiveMin               1.3.6.1.4.1.3495.1.3.2.2.1.8.5 
+OID     HttpAllSvcTimeHourly            1.3.6.1.4.1.3495.1.3.2.2.1.2.60 
+OID     HttpMissSvcTimeHourly           1.3.6.1.4.1.3495.1.3.2.2.1.3.60 
+OID     HttpNmSvcTimeHourly             1.3.6.1.4.1.3495.1.3.2.2.1.4.60 
+OID     HttpHitSvcTimeHourly            1.3.6.1.4.1.3495.1.3.2.2.1.5.60 
+OID     IcpQuerySvcTimeHourly           1.3.6.1.4.1.3495.1.3.2.2.1.6.60 
+OID     IcpReplySvcTimeHourly           1.3.6.1.4.1.3495.1.3.2.2.1.7.60 
+OID     DnsSvcTimeHourly                1.3.6.1.4.1.3495.1.3.2.2.1.8.60 
+
+datasource	--default--
+	rrd-ds-type		=	COUNTER
+	rrd-heartbeat	=	1800
+	rrd-min			=	undef
+	rrd-max			=	undef
+	
+datasource      ClientHttpRequests
+	ds-source = snmp://%snmp%/ClientHttpRequests
+
+datasource      HttpHits
+	ds-source = snmp://%snmp%/HttpHits
+
+datasource      HttpErrors
+	ds-source = snmp://%snmp%/HttpErrors
+
+datasource      HttpInKb
+	ds-source = snmp://%snmp%/HttpInKb
+
+datasource      HttpOutKb
+	ds-source = snmp://%snmp%/HttpOutKb
+
+datasource      ICPpktsSent
+	ds-source = snmp://%snmp%/ICPpktsSent
+
+datasource      ICPpktsRecv
+	ds-source = snmp://%snmp%/ICPpktsRecv
+
+datasource      ICPkbSent
+	ds-source = snmp://%snmp%/ICPkbSent
+
+datasource      ICPkbRecv
+	ds-source = snmp://%snmp%/ICPkbRecv
+
+datasource      ServerRequests
+	ds-source = snmp://%snmp%/ServerRequests
+
+datasource      ServerErrors
+	ds-source = snmp://%snmp%/ServerErrors
+
+datasource      ServerInKb
+	ds-source = snmp://%snmp%/ServerInKb
+
+datasource      ServerOutKb
+	ds-source = snmp://%snmp%/ServerOutKb
+
+datasource      CurrentSwapSize
+	ds-source = snmp://%snmp%/CurrentSwapSize
+	rrd-ds-type = GAUGE
+
+datasource      SysPageFaults
+	ds-source = snmp://%snmp%/SysPageFaults
+
+datasource      MemUsage
+	ds-source = snmp://%snmp%/MemUsage
+	rrd-ds-type = GAUGE
+
+datasource      CpuUsage
+	ds-source = snmp://%snmp%/CpuUsage
+
+datasource      MaxResSize
+	ds-source = snmp://%snmp%/MaxResSize
+	rrd-ds-type = GAUGE
+
+datasource      NumObjCount
+	ds-source = snmp://%snmp%/NumObjCount
+	rrd-ds-type = GAUGE
+
+datasource      CurrentLRUExpiration
+	ds-source = snmp://%snmp%/CurrentLRUExpiration
+	rrd-ds-type = GAUGE
+
+datasource      CurrentUnlinkRequests
+	ds-source = snmp://%snmp%/CurrentUnlinkRequests
+	rrd-ds-type = GAUGE
+
+datasource      CurrentUnusedFileDescrCount
+	ds-source = snmp://%snmp%/CurrentUnusedFileDescrCount
+	rrd-ds-type = GAUGE
+
+datasource      CurrentReservedFileDescrCount
+	ds-source = snmp://%snmp%/CurrentReservedFileDescrCount
+	rrd-ds-type = GAUGE
+
+datasource      HttpAllSvcTimeFiveMin
+	ds-source = snmp://%snmp%/HttpAllSvcTimeFiveMin
+	rrd-ds-type = GAUGE
+
+datasource      HttpMissSvcTimeFiveMin
+	ds-source = snmp://%snmp%/HttpMissSvcTimeFiveMin
+	rrd-ds-type = GAUGE
+
+datasource      HttpNmSvcTimeFiveMin
+	ds-source = snmp://%snmp%/HttpNmSvcTimeFiveMin
+	rrd-ds-type = GAUGE
+
+datasource      HttpHitSvcTimeFiveMin
+	ds-source = snmp://%snmp%/HttpHitSvcTimeFiveMin
+	rrd-ds-type = GAUGE
+
+datasource      IcpQuerySvcTimeFiveMin
+	ds-source = snmp://%snmp%/IcpQuerySvcTimeFiveMin
+	rrd-ds-type = GAUGE
+
+datasource      IcpReplySvcTimeFiveMin
+	ds-source = snmp://%snmp%/IcpReplySvcTimeFiveMin
+	rrd-ds-type = GAUGE
+
+datasource      DnsSvcTimeFiveMin
+	ds-source = snmp://%snmp%/DnsSvcTimeFiveMin
+	rrd-ds-type = GAUGE
+
+datasource      HttpAllSvcTimeHourly
+	ds-source = snmp://%snmp%/HttpAllSvcTimeHourly
+	rrd-ds-type = GAUGE
+
+datasource      HttpMissSvcTimeHourly
+	ds-source = snmp://%snmp%/HttpMissSvcTimeHourly
+	rrd-ds-type = GAUGE
+
+datasource      HttpNmSvcTimeHourly
+	ds-source = snmp://%snmp%/HttpNmSvcTimeHourly
+	rrd-ds-type = GAUGE
+
+datasource      HttpHitSvcTimeHourly
+	ds-source = snmp://%snmp%/HttpHitSvcTimeHourly
+	rrd-ds-type = GAUGE
+
+datasource      IcpQuerySvcTimeHourly
+	ds-source = snmp://%snmp%/IcpQuerySvcTimeHourly
+	rrd-ds-type = GAUGE
+
+datasource      IcpReplySvcTimeHourly
+	ds-source = snmp://%snmp%/IcpReplySvcTimeHourly
+	rrd-ds-type = GAUGE
+
+datasource      DnsSvcTimeHourly
+	ds-source = snmp://%snmp%/DnsSvcTimeHourly
+	rrd-ds-type = GAUGE
+
+targetType	squid-proxy
+	ds   = "ClientHttpRequests, HttpHits, HttpErrors, HttpInKb,
+		HttpOutKb, ICPpktsSent, ICPpktsRecv, ICPkbSent,
+		ICPkbRecv, ServerRequests, ServerErrors, ServerInKb,
+		ServerOutKb, CurrentSwapSize, SysPageFaults, MemUsage,
+		CpuUsage, MaxResSize, NumObjCount,
+		CurrentUnlinkRequests, CurrentUnusedFileDescrCount,
+		CurrentReservedFileDescrCount, HttpAllSvcTimeFiveMin,
+		HttpMissSvcTimeFiveMin, HttpNmSvcTimeFiveMin,
+		HttpHitSvcTimeFiveMin, IcpQuerySvcTimeFiveMin,
+		IcpReplySvcTimeFiveMin, DnsSvcTimeFiveMin,
+		HttpAllSvcTimeHourly, HttpMissSvcTimeHourly,
+		HttpNmSvcTimeHourly, HttpHitSvcTimeHourly,
+		IcpQuerySvcTimeHourly, IcpReplySvcTimeHourly,
+		DnsSvcTimeHourly"
+	view = "Traffic: ServerInKb ServerOutKb,
+		ICPTraffic: ICPkbSent ICPkbRecv,
+		ClientRequests: ServerRequests ServerErrors,
+		SwapSize: CurrentSwapSize,
+		ICPPackets: ICPpktsSent ICPpktsRecv,
+		ClientHttpRequests: ClientHttpRequests HttpHits HttpErrors,
+		HttpTraffic: HttpInKb HttpOutKb,
+		SysPageFaults: SysPageFaults,
+		MemUsage: MemUsage,
+		CpuUsage: CpuUsage,
+		FileDescr: CurrentUnusedFileDescrCount
+			CurrentReservedFileDescrCount,
+		SvcFiveMin: HttpAllSvcTimeFiveMin HttpMissSvcTimeFiveMin
+			HttpNmSvcTimeFiveMin HttpHitSvcTimeFiveMin
+			DnsSvcTimeFiveMin,
+		IcpSvcFiveMin: IcpQuerySvcTimeFiveMin IcpReplySvcTimeFiveMin,
+		SvcHourly: HttpAllSvcTimeHourly HttpMissSvcTimeHourly
+			HttpNmSvcTimeHourly HttpHitSvcTimeHourly DnsSvcTimeHourly,
+		IcpSvcHourly: IcpQuerySvcTimeHourly IcpReplySvcTimeHourly"

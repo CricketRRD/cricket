@@ -1,0 +1,84 @@
+# routing subtree: by Jeff Jensen <jpj@corp.webtv.net>
+#
+# Lets you track BGP route announcements to help you correlate
+# periods of route instability with unexpected traffic shifts.
+
+target  --default--
+    snmp-host       =   %auto-target-name%.%domain%
+    rrd-datafile    =   %dataDir%/%auto-target-name%-%inst%.rrd
+	#
+	# You'll probably need to change the snmp community
+	#
+    snmp-community  =   public
+    target-type     =   bgp-speaker
+
+OID bgpPeerInUpdates    1.3.6.1.2.1.15.3.1.10
+OID bgpPeerOutUpdates   1.3.6.1.2.1.15.3.1.11
+OID bgpPeerInTotalMessages 1.3.6.1.2.1.15.3.1.12
+OID bgpPeerOutTotalMessages 1.3.6.1.2.1.15.3.1.13
+
+#
+# Define the BGP datasources
+#
+datasource  bgpPeerInUpdates
+    ds-source       =   snmp://%snmp%/bgpPeerInUpdates.%inst%
+    desc            =   "The number of BGP UPDATE messages received on
+                         this connection."
+
+datasource bgpPeerOutUpdates
+    ds-source       =   snmp://%snmp%/bgpPeerOutUpdates.%inst%
+    desc            =   "The number of BGP UPDATE messages transmitted on
+                         this connection."
+
+datasource bgpPeerInTotalMessages
+    ds-source       =   snmp://%snmp%/bgpPeerInTotalMessages.%inst%
+    desc            =   "The total number of messages received from the
+                         remote peer on this connection."
+
+datasource bgpPeerOutTotalMessages
+    ds-source       =   snmp://%snmp%/bgpPeerOutTotalMessages.%inst%
+    desc            =   "The total number of messages transmitted on
+                         this connection."
+
+#
+# I've found different views useful at different times
+#
+targetType  bgp-speaker
+	ds	=	"bgpPeerInUpdates, bgpPeerOutUpdates, 
+				bgpPeerInTotalMessages, bgpPeerOutTotalMessages"
+    view    =   "Updates: bgpPeerInUpdates bgpPeerOutUpdates,
+				Total Messages: bgpPeerInTotalMessages bgpPeerOutTotalMessages,
+    			Total In: bgpPeerInUpdates bgpPeerInTotalMessages,
+    			Total Out: bgpPeerOutUpdates bgpPeerOutTotalMessages"
+
+#
+# Setup the graph dictionaries for these datasources
+#
+# I set the defaults for these two graph dictionary entries
+#
+graph   --default--
+    y-axis  =   "Updates"
+    precision   =   2
+    units   =   "updates/s"
+
+graph   bgpPeerInUpdates
+    draw-as =   AREA
+    legend  =   "Inbound Updates"
+
+graph   bgpPeerOutUpdates
+    legend  =   "Outbound Updates"
+
+#
+# Change the defaults for these two
+#
+graph   --default--
+    y-axis  =   "Messages"
+    precision   =   2
+    units   =   "messages/s"
+
+graph   bgpPeerInTotalMessages
+    draw-as =   AREA
+    legend  =   "Inbound Messages"
+
+graph   bgpPeerOutTotalMessages
+    legend  =   "Outbound Messages"

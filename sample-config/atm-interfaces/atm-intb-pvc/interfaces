@@ -1,0 +1,21 @@
+target	ATMSwitch1--ELI-DP-INET-XXXXINTB-CITY1CORE1_CITY2CORE1.3
+	interface-desc = "ELI-DP-INET-XXXXINTB-CITY1CORE1/CITY2CORE1"
+	swname = "ATMSwitch1"
+	rrd-max = 130000
+	InterfaceID = "3.65579"
+	target-type = intb-pvcs
+
+target	ATMSwitch2--ELI-DP-INET-XXXXINTB-CITY1CORE2_CITY3BORDER1.3
+	interface-desc = "ELI-DP-INET-XXXXINTB-CITY1CORE2/CITY3BORDER1"
+	swname = "ATMSwitch2"
+	rrd-max = 95000
+	InterfaceID = "3.65580"
+	target-type = intb-pvcs
+
+target	ATMSwitch3--ELI-DP-INET-XXXXINTB-CITY4CORE1_CITY4BORDER1.11
+	interface-desc = "ELI-DP-INET-XXXXINTB-CITY4CORE1/CITY4BORDER"
+	swname = "ATMSwitch3"
+	rrd-max = 95000
+	InterfaceID = "11.65577"
+	target-type = intb-pvcs
+

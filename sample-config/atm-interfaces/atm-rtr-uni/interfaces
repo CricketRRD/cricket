@@ -1,0 +1,21 @@
+target	ATMSwitch1--9.1-EIP41INTB-INTB-CITY1CORE1-0.0.9.1
+	interface-desc = "9.1-EIP41INTB-INTB-CITY1CORE1-0.0"
+	swname = "ATMSwitch1"
+	rrd-max = 353208
+	InterfaceID = "9.1"
+	target-type = atm-lport
+
+target	ATMSwitch1--10.3-EIPXXINTB-INTB-CITY1CORE2-1.0.0.10.3
+	interface-desc = "10.3-EIPXXINTB-INTB-CITY1CORE2-1.0.0"
+	swname = "ATMSwitch1"
+	rrd-max = 353208
+	InterfaceID = "10.3"
+	target-type = atm-lport
+
+target	ATMSwitch2--10.1-EIPXXINTB-INTB-CITY2CORE2-0.0.10.1
+	interface-desc = "10.1-EIPXXINTB-INTB-CITY2CORE2-0.0"
+	swname = "ATMSwitch2"
+	rrd-max = 353208
+	InterfaceID = "10.1"
+	target-type = atm-lport
+

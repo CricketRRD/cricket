@@ -1,0 +1,16 @@
+# Here is an example of a set of switches. They are grouped by
+# switch type to minimize the number of "target-type" tags we need.
+
+target --default--
+	target-type = cisco-1900
+
+target c1900-1
+target c1900-2
+target c1900-3
+
+target --default--
+	target-type = cisco-2926
+
+target c2629-1
+target engineering-switch
+

@@ -1,0 +1,72 @@
+#!/bin/sh
+
+# This little shell program searches the path for Perl, and once
+# it finds it, it substitutes the path into all the Perl executables
+# in the tree. It is intended to be run as part of the install process.
+
+isPerl5 () {
+	$1 -e 'require 5;' > /dev/null 2>&1
+}
+
+findPerl () {
+	for i in `echo $PATH | tr ':' ' '`
+	do
+		for p in perl perl5
+		do
+			if test -x $i/$p && isPerl5 $i/$p ; then
+				echo $i/$p
+				return 0
+			fi
+		done
+	done
+}
+
+process () {
+	dir=$1
+
+	for i in $dir/*
+	do
+		if [ -d $i ]; then
+			# recurse into directories (note: there's no guarantee
+			# that $dir will be set right after this...)
+			process $i
+		elif [ -x $i ]; then
+			echo "    $i"
+			$perl -i.bak -pe "s%^#!/usr/local/bin/perl%#!$perl%" $i
+			chmod +x $i
+			rm -f $i.bak
+		fi
+	done
+}
+
+if [ ! -f VERSION ]; then
+	echo "Run this command from the Cricket distribution's root"
+	echo "directory (the one with the VERSION file in it)."
+	exit 1
+fi
+
+perl=`findPerl`
+if [ ! -z "$perl" ]; then
+	echo "Congratulations, you have Perl 5 installed as $perl"
+	echo
+else
+	echo "You don't seem to have Perl 5 in your path."
+	echo "Either fix your path to include your perl, or"
+	echo "visit http://www.perl.com, install Perl 5, and"
+	echo "try again."
+	exit 1
+fi
+
+if [ "$perl" != "/usr/local/bin/perl" ]; then
+	echo "Fixing executables to use your Perl binary."
+	echo
+	process .
+else
+	echo "No need to process files, since your Perl is in a standard place."
+fi
+
+echo
+echo "Done."
+
+exit 0
+

@@ -1,0 +1,232 @@
+Frequently Asked Questions about Cricket
+
+1.	What's Cricket? What's MRTG? What's RRD? Which is better?
+	Which do I need?
+
+Cricket and MRTG share a design trait: it takes two pieces to
+fetch data, store it, and graph it; the frontend and the backend.
+Cricket is a frontend which only works when it has RRD as a
+backend. MRTG is a frontend that uses "rateup" (included
+with MRTG) as a backend. MRTG and Cricket have a completely
+different approach to configuration and operation, even though they
+create graphs that look almost the same.  Cricket is more flexible and
+higher performance, but MRTG is simpler to setup if you only want to
+measure a few routers.
+
+2. I am getting an error from test-url that looks like this:
+
+	Can't locate LWP/UserAgent.pm in @INC at test-url line 22.
+	BEGIN failed--compilation aborted at test-url line 22. 
+
+You need to get and install the LWP module. See the Perl FAQ for more
+information about fetching and installing modules. It is available
+from here:
+
+    ftp://ftp.cs.colorado.edu/pub/perl/CPAN/doc/FAQs/FAQ/PerlFAQ.html
+
+3. I have edited (hacked) collect-subtree to look for my
+   non-standard config-tree. It still doesn't work. Why?
+
+You are missing one of collect-subtree's nice features, which is that
+it will take the config tree path (and the log directory) from its
+config file. Read the comments in the file 'subtrees' that comes with
+the distribution and try again with an un-hacked copy of
+collect-subtree.
+
+Note: if you change the location of the config tree from the standard,
+you still need to edit grapher.cgi and tell it where to find the
+config tree. The CGI graph browser does not read the same config file
+that collect-subtree reads.
+
+4. I am getting messages saying "architecture XXX not supported".
+
+You need to get read the comments in lib/RRD/Format.pm, and add the
+format strings for your architecture. If you don't feel like you have
+the knowledge to do this, you might ask on the mailing list for
+help from someone who does. If you do make Cricket work on an
+unsupported architecture, please forward the patches to the
+maintainer so that others can benefit.
+
+5. I am getting this in my logfiles (and e-mail):
+
+		Variable expansion uses undefined variable: inst
+
+This is probably not a serious failure. Instead, it's probably due to
+an inherited variable making use of a variable which isn't set in a
+later target. For instance, if my rrd-datafile variable referenced
+%inst%, but under that setting I created a meta-target (which has no
+need for an rrd-datafile), I might not have a value for inst by the
+time the rrd-datafile value gets expanded. Thus, the warning. The
+target is still usable (and will display in the grapher correctly),
+but it should get fixed.
+
+In general, you should hunt these guys down and solve them, if for no
+other reason than to make it easier to find real errors.  If your
+problem is forward references, add an entry to the dictionary at the
+same level as the forward reference setting the referred-to variable
+to "".
+
+6. I'd like to collect something which is measured in cells, but
+   display the data in bytes. How do I do that?
+
+With MRTG, if you wanted to do weird scaling hacks, you needed
+to preproces the data, usually by fetching it with a shell script
+and munging it before turning it over to MRTG. In Cricket, the
+best way to do this is to fetch the data and store it in the
+original units, then convert it when it gets displayed.
+
+For an example of this, see ifInOctets in the router-interfaces
+subtree. In particular, note that the MIB specifies that ifInOctets
+is a counter of bytes. We want to display it as bits/sec. The
+conversion from counter to rate is done for us by RRD as a result
+of setting the rrd-ds-type to COUNTER. Thus, the data is stored
+in the RRD as bytes/sec. Then when we display it, we use the
+scale tag in the graph dictionary to scale it up to bits/sec
+by multiplying it by 8.
+
+The moral of the story is that you rarely need to preproces data
+for Cricket. Try as hard as you can to rely on it's internal
+mechanisms, and things should work OK.
+
+7. I have set rrd-max to 2500, but I am still getting spikes
+   on my graph or 1.5 million. Why?
+
+The value of rrd-max lives in the RRD file, which means that
+if you change it after the file has been created, you have
+to use rrd-tune to re-apply the changes. This is an annoyance,
+but it doesn't justify special code to check everytime we do
+anything with the RRD, since it should not be happening 
+very often. 
+
+Using rrd-dump, you can see what the rrd-max is set to inside
+a given RRD file. Run it like this:
+
+        % ~/cricket/util/rrd-dump <RRDFILE> | grep max 
+        DS 0:   max_val,4294967295,dst,0,min_val,0,ds_mrhb,3600 
+        ... etc ... 
+
+This shows that the rrd-max (called max_val by rrd-dump) is
+set to 4294967295. You need to run 'rrd-tune' to re-apply
+the rrd-max setting from your config tree to the RRD files.
+
+See the reference manual for how to do this, and for which
+other tags need the rrd-tune treatment to get applied to the
+RRD file.
+
+8. Is it possible to have a parallel graphing substructure to produce 
+   graphs on an organisational structure as well as a physical 
+   (routers/switches) structure. 
+ 
+I've thought about that, and it's a good idea, but it's not supported 
+yet. The best I could recommend (and this is severe hack) is to write 
+a branch of the config tree that looks like what you want 
+(i.e. organizational, instead of per-device-type) and then populate 
+the matching cricket-data directory with symlinks to the RRD's which 
+underly that target from the per-device-type subtree. Do not run a 
+collector on your "virtual" subtree, since the collector for the 
+"real" subtrees is already doing the right thing. (Collecting twice to 
+one RRD file is a Bad Thing... you could break Cricket's locking, and 
+other scary things could result.) 
+ 
+Kudos to Jeff Jensen for this idea, BTW. (What, you think I'm going to 
+take credit for this gross hack?) 
+
+9. How do I add new datasources to an existing target?
+
+You should a make the necessary changes to the config tree,
+(i.e. add a new datasource name to the targetType dictionary
+for the target in question), then remove the RRD file and
+let Cricket recreate it. At this time, you cannot keep the
+old history. This is theoretically possible, but no one
+has written the code to expand RRD files like this yet.
+
+10. I'm don't know how to install the DB_File module.
+
+You need to fetch the Berkeley DB library from:
+
+	ftp://sleepy.vwh.net/pub
+
+Choose the newest version and install it.
+
+Now, fetch the DB_File module from CPAN (see question 2)
+and install that.
+
+Why did I use DB_File? Because I've used it a lot and I
+trust it more than other hash-on-disk formats. Sorry if
+it's a bit of a pain. Your Perl installation will be better
+for having installed it, trust me.
+
+11. Some of the datasources I would like to graph are percentages.
+	How can I force the min/max ranges of a graph?
+ 
+You need to put y-min and y-max in the entry in the
+graph dictionary for the datasource in question.
+See the routers subtree for an example. 
+
+12. Is Cricket Y2K compliant? 
+  
+WebTV, Cricket's most (ahem) demanding customer, has an active 
+Y2K compliance program. As part of that program, Cricket will 
+have a code review, and get repaired as necessary by September,  
+1999. Cricket will be in active use at WebTV through the  
+Y2K transition, and I will be on-call at that time to immediately fix 
+any problems that still occur. I will attempt to release a patch or 
+new version as quickly as possible after WebTV's installation is 
+stable. 
+
+That said, please remember that this is free software, and that it 
+comes with a license that says, in part: 
+  
+    BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE 
+    IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED 
+    BY APPLICABLE LAW.   
+
+I am not a lawyer, so if you need help deciding if you can 
+safely use Cricket in your environment, you need to hire a  
+lawyer and ask him or her, not me. 
+
+13. How do I install Cricket in /some/weird/place.
+
+First, why? Why not just go with the flow and install it the
+way 99% of the rest of the community installs it? It will be easier
+to upgrade and install if you stick with the standard.
+
+OK, so you insist on doing it the hard way. Here's what you
+need to do:
+ 
+        a. edit the file subtree-sets. Make it look like this: 
+                base:   /some/weird/place/cricket-config 
+                logdir: /some/weird/place/cricket-logs 
+ 
+        b. edit grapher.cgi and set $Common::global::gConfigRoot 
+           to the full path that you set for "base:" above. 
+         
+        c. whenever you use collector, compile, rrd-tune, 
+           dump-targets, generate-statics scripts (and other future 
+           things which expect to find the config tree) you'll need to 
+           use the "-base" option to specify the base. 
+
+14. How careful is Cricket to avoid re-running EXECs, or resending 
+    SNMP packets to targets? 
+ 
+The answer is "very" careful. Once of our goals was to design Cricket 
+to send the minimal amount of SNMP traffic necessary. Thus, we 
+set it up so that it can build an SNMP packet with multiple requests 
+in it, and then use the results of the packet to fill in each of the 
+datasources. Designing it this way had the nice side effect that when 
+we added EXEC datasources, only one fork/exec would be done (just as 
+only one SNMP packet is emitted). 
+ 
+That's a bit of an oversimplification, as always. The EXEC method 
+knows that it needs to do one fork/exec for each distinct commandline
+that you reference. If each of your ds-sources only deviate by the line 
+number they are selecting from the output, then you'll only have one 
+fork/exec. 
+ 
+So, when you are designing a collection mechanism that needs EXEC, 
+don't worry about using lots of datasources, as long as you can setup 
+your ds-sources to all be the same program (AND arguments), and only 
+differ by which line of output you select. Even if you are collecting
+(I'm not making this up...) 50 datasources, you'll still only pay for
+one fork/exec per target.
+

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# This just runs util/relocate-perl, since people are in a habit
+# of looking for a configure script in the root. Also, someday
+# this could become a full-fledged autoconf generated configure
+# script, if it turns out we need it.
+
+exec util/relocate-perl

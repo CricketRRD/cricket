@@ -1,0 +1,38 @@
+# Some of the items will probably need adjustments to 
+# meet local needs.  
+#
+# replace the snmp read community string below as needed
+
+target --default--
+	short-desc	=	"%swname%:  %interface-desc%"
+	long-desc	=	%interface-desc%
+	util-dir	=	%auto-base%/../cricket/util
+	inst		=	%InterfaceID%
+	snmp-community	=	public
+	snmp-host	=	%swname%
+
+# Note that the following OIDs are sampling cells and
+# not bits/bytes.  For all rrd-max entries in the interface
+# target definitions, you need to adjust to make sure you 
+# are using cell counts.  For the Cascade Switches used here,
+# defining rrd-max values is imperative because these devices
+# send out bogus cell counter readings about once per week that
+# will mess up graphs if you don't cap them off.
+#
+# Cell counts are actually a nice fit here - with a full OC-3 pipe,
+# you can churn the counters in way less than 5 minutes, so this
+# gives headroom with a more reasonable sampling interval.
+
+oid	pportInCells	1.3.6.1.4.1.277.1.4.2.1.43
+oid	pportOutCells	1.3.6.1.4.1.277.1.4.2.1.45
+oid	cktAtmInCells	1.3.6.1.4.1.277.1.6.1.1.88
+oid	cktAtmOutCells	1.3.6.1.4.1.277.1.6.1.1.89
+
+# graph defaults for all ATM stats
+# always convert ATM cells to bits for graphing (53 * 8 = 424)
+
+graph   --default--
+    scale       =  424,*
+    bytes       =  true
+    y-axis      =  "bits per second"
+    units       =  "bits/sec"

@@ -1,0 +1,54 @@
+# a subtree to monitor innd, by
+# Jost Krieger <Jost.Krieger@ruhr-uni-bochum.de> 
+
+# this subtree is setup to fetch stats via ssh from
+# a remote news server. To do this from the background,
+# ssh authentication needs to be setup accordingly.
+# If you are running Cricket on the same host as INN,
+# then you can remove the references to remexec below.
+
+target --default--
+	# you'll probably want to change this... unless you
+	# have Cricket in ~/cricket and your config tree in ~/config
+	util-dir	=	%auto-base%/../cricket/util
+	remexec		=	"/usr/local/net/bin/ssh -l %user% %server%"
+	user		=	news
+	server		=	nntp-host
+	target-type	=	news-server
+
+datasource	pass
+	ds-source	=	"exec:0:%remexec% bin/ctlinnd mode | %util-dir%/newsstats"
+	desc		=	"Number of articles that passed the filter."
+	rrd-ds-type		=	COUNTER
+
+datasource	reject
+	ds-source	=	"exec:1:%remexec% bin/ctlinnd mode | %util-dir%/newsstats"
+	desc		=	"Number of articles rejected by the filter."
+	rrd-ds-type		=	COUNTER
+
+datasource	refuse
+	ds-source	=	"exec:2:%remexec% bin/ctlinnd mode | %util-dir%/newsstats"
+	desc		=	"Number of articles refused."
+	rrd-ds-type		=	COUNTER
+
+targetType	news-server
+	ds		=	"pass, reject, refuse"
+
+
+graph --default--
+	y-axis  =   "# of articles"
+	units	=	art.
+	# cut off spikes above 5 seconds
+	y-max	=	30	
+
+graph pass
+	legend = "Passed"
+	draw-as = AREA
+
+graph reject
+	legend = "Reject"
+	draw-as = LINE1
+
+graph refuse
+	legend = "Refuse"
+	draw-as = LINE1

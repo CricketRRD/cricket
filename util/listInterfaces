@@ -1,0 +1,93 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# Cricket: a configuration, polling and data display wrapper for RRD files
+#
+#    Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+BEGIN {
+	$gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . "..";
+}
+
+use lib "$gInstallRoot/lib";
+use strict;
+
+use snmpUtils;
+use Common::Log;
+
+if ($#ARGV+1 < 1 || $#ARGV+1 > 2) {
+	print STDERR "usage: $0 hostname [community]\n";
+	print STDERR "\tcommunity will default to public if you don't give it.\n";
+	exit 1;
+}
+
+my($router) = $ARGV[0];
+my($community) = "public";
+$community = $ARGV[1] unless (! defined($ARGV[1]));
+my($snmp) = "$community\@$router";
+
+print "target --default--\n";
+print "	router = $router\n";
+
+print "\n";
+
+my($ifDescr) = '.1.3.6.1.2.1.2.2.1.2';
+
+my($row);
+foreach $row (snmpUtils::walk($snmp, $ifDescr)) {
+	my($oid, $value) = split(/:/, $row, 2);
+
+	$oid =~ s/$ifDescr//;
+
+	my($stat) = snmpUtils::get($snmp, "1.3.6.1.2.1.2.2.1.7.$oid");
+	my($connector) = snmpUtils::get($snmp, "1.3.6.1.2.1.31.1.1.1.17.$oid");
+	my($desc) = snmpUtils::get($snmp, "1.3.6.1.2.1.31.1.1.1.18.$oid");
+
+	# second fetched value is oper status -- use it to decide which
+	# targets to print
+
+	if ($stat == 1) {
+		my($target) = $value;
+		$target =~ s/[\/\s:]/\_/g;
+
+		print "target $target\n";
+		output("interface-name", $value);
+		output("short-desc", $desc);
+
+		# experience shows that subinterfaces (like those
+		# representing the endpoints of PVCs riding on a
+		# frame relay link) need a special config.
+
+		if (defined($connector) && $connector == 2) {
+			output("target-type", "sub-interface");
+		}
+		print "\n";
+	}
+}
+
+sub output {
+	my($name, $value) = @_;
+	my($quote) = '';
+	
+	if (defined($value)) {
+		# quote empty (or white-space only) lines, or lines which
+		# will have embedded spaces.
+		$quote = '"' if ($value =~ /^\s*$/ || $value =~ /\s/);
+		print "\t$name	=	$quote$value$quote\n";
+	}
+}
+

@@ -1,0 +1,22 @@
+# inst can take the form of any Perl expression that evaluates to
+# a list: (1, 2, 3, 4)   (1..10, 12..35)   (5, 3, 7, 11, 9, 2)
+
+# We will be fetching SNMP from these switches via the unqualified
+# hostname (to see why, search for snmp-host in the Defaults file in
+# this directory). If you need to add a domain, see
+# sample-config/routers for an example.
+
+target --default--
+	# cisco 1900's have 25 ports, plus an A and B port
+	inst=(1..27)
+
+target	cisco-1900-1
+target	cisco-1900-2
+target	cisco-1900-3
+target	cisco-1900-4
+target	cisco-1900-5
+
+# here's an isolated instance of a beefy switch with lots of ports
+target	cisco-5500-1
+	inst=(1..70)
+

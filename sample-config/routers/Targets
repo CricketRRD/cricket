@@ -1,0 +1,7 @@
+target	engineering-router
+	target-type=Cisco-7500-Router
+	short-desc	=	"Router for engineering folks"
+
+target	main-router
+	target-type=Cisco-7500-Router
+	short-desc	=   "Main router"

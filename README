@@ -1,0 +1,85 @@
+Cricket
+=======
+
+This is Cricket. It is a configuration, polling, and data-display
+engine wrapped around the RRD tool by Tobias Oetiker. There are
+three user-visible pieces to Cricket: the collector, the grapher, and
+the config tree. The collector runs from cron and fetches data
+from a number of devices according to the info it finds in the
+config tree. The grapher is a CGI application that allows users to
+traverse the config tree from a web browser and see the data that
+the collector recorded. To use Cricket you need to do these things:
+
+	* make a config tree
+	* setup the collector to run on a regular basis
+	* setup the grapher to let you look at the data
+
+Installing
+----------
+
+If you are a brand new Cricket user, you should read and
+closely follow the directions in doc/beginner.txt.
+
+If you are a more advanced user, simply read the CHANGES
+to see what's new with this version and then install
+this version. Run the collector by hand once to make certain
+it's still working, then cutover to the new version by
+swapping the $HOME/cricket softlink to the new version.
+(You _are_ using the softlink, aren't you?)
+
+Documentation
+-------------
+
+Point your web browser at the doc/index.html file and choose
+the most appropriate document from there.
+
+Patches
+-------
+
+If you manage to add a useful feature to the code (or need to
+make a bugfix just to get it running) please send me a patch.
+Generate it like this:
+
+	tar xvf cricket.tar
+	mv cricket my-changes
+		# make your changes to this this copy
+	tar xvf cricket.tar
+	gnudiff -u -r cricket my-changes
+
+This will create a unified context diff from the dist directory
+to the "my-changes" directory. It will allow me to apply your changes
+to my copy here.
+
+Contact Info
+------------
+
+My name is Jeff Allen <jra@corp.webtv.net>. You can find the most
+recent version of Cricket at:
+
+	http://www.munitions.com/~jra/cricket
+
+There are two mailing lists related to Cricket at this time. 
+
+	cricket-users@onelist.com 
+	cricket-announce@onelist.com 
+
+The users list is for open discussion of Cricket, how to
+use it, and how to extend it. The announce list is a
+low-traffic, moderated list that lets me announce new versions
+of Cricket and other packages related to Cricket. You can
+subscribe by clicking on either of the links above. 
+
+There is an archive of the traffic that goes across the
+cricket-users@onelist.com mailing list at
+http://www.sugarat.net/hypermail/cricket. 
+
+License
+-------
+
+Cricket is covered by the GNU General Public Licensse. 
+See the file COPYING for copying permission.
+
+Cricket is Copyright (c) 1998 by Jeff Allen and WebTV Networks, Inc.
+
+Individual pieces are copyrighted by their contributors, though
+they are covered by same license as Cricket, namely the GPL.

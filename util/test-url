@@ -1,0 +1,65 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+#	 test-url: a simple script to see how fast a webserver is
+#
+#    Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+use LWP::UserAgent;
+use Time::HiRes qw(gettimeofday);
+
+my $datalen = 0;
+
+$ua = new LWP::UserAgent;
+$ua->agent("test-url/1.0 " . $ua->agent);
+$ua->timeout(30);
+
+die("Missing URL on command line.\n") unless (defined($ARGV[0]));
+
+$req = new HTTP::Request('GET', $ARGV[0]);
+die("Could not make an HTTP request.\n") unless (defined($req));
+
+$start = now();
+my($resp) = $ua->request($req, \&callback, 4096);
+$stop = now();
+if (! $first) {
+	$first = $stop;
+}
+
+$dFirst = $first - $start;
+$dTotal = $stop - $start;
+
+$dFirst = "U" if (! $datalen);
+$dTotal = "U" if (! $datalen);
+
+print "$dTotal\n";
+print "$dFirst\n";
+
+sub callback {
+	my($data, $resp, $proto) = @_;
+
+	if (! defined($first)) {
+		$first = now();
+	}
+
+	$datalen += length($data);
+}
+
+sub now {
+	my(@t) = gettimeofday();
+	return $t[0] + ($t[1] / 1000000.0);
+}

@@ -1,0 +1,261 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# Cricket: a configuration, polling and data display wrapper for RRD files
+#
+#    Copyright (C) 1999 Noam Freedman <noam@noam.com> 
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+BEGIN {
+	$gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+
+	# You need to update this to point to the URL
+	# you use to access Cricket.
+	$gBaseURL = "http://localhost/~cricket/grapher.cgi";
+}
+
+use lib "$gInstallRoot/../lib";
+
+use File::Basename;
+use LWP::UserAgent;
+use HTTP::Request;
+use HTTP::Response;
+
+use ConfigTree::Cache;
+
+use Common::HandleTarget;
+use Common::Map;
+use Common::Options;
+use Common::Log;
+
+Common::Options::commonOptions( 'baseURL=s' => \$gBaseURL );
+initConst();
+
+$Common::global::gCT = new ConfigTree::Cache;
+$gCT = $Common::global::gCT;
+$gCT->Base($Common::global::gConfigRoot);
+$gCT->Warn(\&Warn);
+
+if (! $Common::global::gCT->init()) {
+    Die("Failed to open compiled config tree from " .
+		"$Common::global::gConfigRoot/config.db: $!");
+}
+
+# if they gave us no subtrees to focus on, use the root of the config tree
+if ($#ARGV+1 == 0) {
+    push @ARGV, '/';
+}
+
+my($subtree);
+foreach $subtree (@ARGV) {
+    if ($gCT->nodeExists($subtree)) {
+        $gCT->visitLeafs($subtree, \&handleTarget,
+                \&handleTargetInstance, \&localHandleTargetInstance);
+    } else {
+        Warn("Unknown subtree $subtree.");
+    }
+}
+
+exit;
+
+sub localHandleTargetInstance {
+	my($Name, $target) = @_;
+
+	$targetpath = $target->{'auto-target-path'};
+	$targetname = $target->{'auto-target-name'};
+
+	if (defined($target->{'generate-static'}))
+	{
+		Info("Working on target $targetname.");
+		my($path,$name,$reqRanges,@ranges);
+
+		$reqRanges = $target->{'static-ranges'};
+
+		if (defined($target->{'static-path'}) &&
+		    defined($target->{'static-name'}))
+		{
+			$path = $target->{'static-path'};
+			$name = $target->{'static-name'};
+	
+			my($range, @ranges);
+			@ranges = getRanges($reqRanges);
+
+			foreach $range (@ranges)
+			{
+				$rangeLabel = rangeToLabel($range);
+
+				my($paramtarget) = "$targetpath/$targetname";
+	
+				my($paraminst);
+
+				if (defined($target->{'inst'}))
+				{
+					$paraminst = $target->{'inst'};
+				}
+
+				my($paramrange) = $range;
+
+				# DO DSLIST STUFF
+
+				# find the ds names based on the target type
+				my($ttype) = lc($target->{'target-type'});
+				my($ttRef) = $main::gCT->configHash($Name,
+										'targettype', $ttype, $target);
+
+				# If there are views defined, then we generate graphs
+				# for each view.
+
+				my($dslist);
+
+				if (defined($ttRef->{'view'}))
+				{
+					my($v);
+					foreach $v (split(/\s*,\s*/, $ttRef->{'view'}))
+					{
+						# views are like this: "cpu: cpu1load  cpu5load"
+						my($vname, $dss) = split(/\s*:\s*/, $v, 2);
+
+						$dslist = $dss;
+						$dslist =~ s/\s*$//;
+						$dslist =~ s/\s+/,/g;
+
+						$URL = "$gBaseURL?type=gif&target=$paramtarget";
+						$URL .= "&dslist=$dslist&range=$paramrange";
+	
+						if ($paraminst ne "")
+						{
+							$URL .= "&inst=$paraminst";
+						}
+	
+						Info("Retrieving graph for $name-$vname-$rangeLabel");
+						getURL($URL,"$path/$name-$vname-$rangeLabel.gif");
+					}
+				} else {
+					$dslist = $ttRef->{'ds'};
+					# squeeze out any extra spaces
+					$dslist = join(',', split(/\s*,\s*/, $dslist));
+
+					$URL = "$gBaseURL?type=gif&target=$paramtarget";
+					$URL .= "&dslist=$dslist&range=$paramrange";
+	
+					if ($paraminst ne "")
+					{
+						$URL .= "&inst=$paraminst";
+					}
+
+					Info("Retrieving graph for $name-$rangeLabel");
+					getURL($URL,"$path/$name-$rangeLabel.gif");
+				}
+			}
+		}
+	}
+		
+	return;
+}
+
+
+sub getRanges {
+	my($scales) = @_;
+	$scales = "d:w:m:y" unless (defined($scales));
+
+	# these definitions mirror how MRTG 2.5 sets up its graphs
+	my(%scaleMap) = (       'd' => $main::kHour * 42,
+					    'w' => $main::kDay * 10,
+						'm' => $main::kWeek * 6,
+					    'y' => $main::kMonth * 16);
+
+	my($scale, @res);
+	foreach $scale (split(/\s*:\s*/, $scales)) {
+		# later, we might do more sophisticated scale specification
+		$scale = $scaleMap{$scale};
+		push @res, $scale;
+	}
+	return @res;
+}
+
+
+sub initConst {
+	$main::kMinute = 60;	  #  60 seconds/min
+	$main::kHour   = 60 * $main::kMinute;#  60 minutes/hr
+	$main::kDay    = 24 * $main::kHour;  #  24 hrs/day
+	$main::kWeek   = 7  * $main::kDay;   #   7 days/week
+	$main::kMonth  = 30 * $main::kDay;   #  30 days/month
+	$main::kYear   = 365 * $main::kDay;  # 365 days/year
+
+	$main::kTypeUnknown     = 0;
+	$main::kTypeUnknown     = 0;    # shut up, -w.
+	$main::kTypeDaily       = 1;
+	$main::kTypeWeekly      = 2;
+	$main::kTypeMonthly     = 3;
+	$main::kTypeYearly      = 4;
+
+	@main::gRangeNameMap = ( undef, 'Hourly', 'Daily', 'Weekly', 'Monthly' );
+
+}
+
+sub rangeToLabel {
+	my($range) = @_;
+	return $main::gRangeNameMap[rangeType($range)];
+}
+
+sub rangeType {
+	my($range) = @_;
+	my($rangeHours) = $range / 3600;
+
+	# question: when is kTypeUnknown appropriate?
+
+	if ($range < $main::kWeek) {
+		return $main::kTypeDaily;
+	} elsif ($range < $main::kMonth) {
+		return $main::kTypeWeekly;
+	} elsif ($range < $main::kYear) {
+		return $main::kTypeMonthly;
+	} else {
+		return $main::kTypeYearly;
+	}
+}
+
+
+sub getURL
+{
+	my($url,$filename) = @_;
+
+	Debug("Fetching url: $url");
+
+	my $ua = new LWP::UserAgent;
+	my $request = new HTTP::Request('GET', $url);
+	my $response = $ua->request($request);
+
+	if ($response->is_success) {
+		my($dir) = dirname($filename);
+		if (! -d $dir) {
+			Info("Making directory $dir to hold file $filename.");
+			Common::Util::MkDir($dir);
+		}
+
+		if (!open(URL,">$filename"))
+		{
+			Error("Error writing to $filename: $!");
+			return;
+		}
+		print URL $response->content;
+		close(URL);
+	}
+	else
+	{
+		Error("Error retrieving target graph: " . $response->message());
+	}
+}

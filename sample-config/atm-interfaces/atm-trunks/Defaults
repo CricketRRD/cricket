@@ -1,0 +1,25 @@
+datasource      ATMPPortInput
+        ds-source       =       "snmp://%snmp%/pportInCells.%inst%"
+        desc            =       "ATM Physical Port Data Rate - Input"
+        rrd-ds-type     =       COUNTER
+        rrd-heartbeat   =       1800
+
+datasource      ATMPPortOutput
+        ds-source       =       "snmp://%snmp%/pportOutCells.%inst%"
+        desc            =       "ATM Physical Port Data Rate - Output"
+        rrd-ds-type     =       COUNTER
+        rrd-heartbeat   =       1800
+
+targetType      atm-trunk
+	ds	=	"AtmPPortInput, AtmPPortOutput"
+
+graph   ATMPPortInput
+    draw-as     =  AREA
+    color       =  dark-green
+    legend      =  AtmPPortInput
+
+graph   ATMPPortOutput
+    draw-as     =  LINE1
+    color       =  dark-blue
+    legend      =  AtmPPortOutput
+
