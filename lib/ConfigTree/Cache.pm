@@ -272,10 +272,6 @@ sub expandString {
             $str =~ s/%$name%/!$name!/;
         }
     }
- 
-    # fix all the not-found ones
-    $str =~ s/\000([^\s\000]*)\000/%$1%/g;
- 
     return $str;
 }
 
