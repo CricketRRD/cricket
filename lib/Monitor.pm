@@ -167,8 +167,8 @@ sub monRelation {
         return 1;
     }
 
-    my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return 1 if ($cmp_value =~ /^NaN|^nan/);
+    my($cmp_value) = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
+    return (1,'NaN') if ($cmp_value =~ /^nan/i);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -178,14 +178,15 @@ sub monRelation {
         if ($cmp_value == 0) {
             #avoid division by 0
             if ($difference == 0 && $gtlt eq '<') {
-                return 1;
+                return (1,$value);
             } else {
-                return 0;
+                return (0,$value);
             }
         }
         $difference = $difference / abs($cmp_value) * 100;
     }
     Debug("Values $value, $cmp_value; Difference is $difference; gtlt is $gtlt; thresh is $thresh.");
+# see documentation: threshold fails if expression is false
     return (0,$value) if (!(eval "$difference $gtlt $thresh"));
     return (1,$value);
 }
