@@ -114,6 +114,8 @@ sub init {
 	foreach $item (<$dir/*>) {
 		if ($item =~ /\/Defaults$/ && -f $item) {
 			$def = $item;
+		} elsif ($item =~ /\~$/) {
+			$self->Warn("Skipping probable backup file: $item");
 		} elsif (-f $item) {
 			push @files, $item unless $self->skipFile($item);
 		} elsif (-d $item) {

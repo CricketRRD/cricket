@@ -258,10 +258,10 @@ sub getDSNum {
 			join('/',$target->{'auto-target-path'},
 					$target->{'auto-target-name'}),
 			'targettype', 
-			$target->{'target-type'}, 
+			lc($target->{'target-type'}), 
 			$target);
 	my($Counter) = 0;
-	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,$ttRef->{'ds'});
+	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,lc($ttRef->{'ds'}));
 	return $dsMap{$dsName};
 }
 
