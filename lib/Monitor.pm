@@ -546,6 +546,15 @@ sub sendMonitorTrap {
 	{
 		push(@VarBinds, "${OID_Prefix}.7", 'string', $target->{'inst-name'});
 	}
+    # send the html contact-name
+    my $htmlRef = $Common::global::gCT -> configHash($name,'html');
+    if (defined($htmlRef -> {'contact-name'})) {
+      # parse the mailto tag
+      my $tag = $htmlRef -> {'contact-name'};
+      if ($tag =~ /mailto\:([A-Z,a-z,.,@]+)/) {
+         push(@VarBinds, "${OID_Prefix}.8", 'string', $1);
+      }
+    }
 
 	Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
 	snmpUtils::trap2($to,$spec,@VarBinds);
