@@ -67,6 +67,7 @@ sub _do {
                 if ($skipcnt{$args[0]} >= $MAXTRIES);
         } elsif ($#err+1 > 2) {
             my($code) = (split(/: /, $err[2]))[1];
+            $code = ": undefined error code" if (!$code);
             $err = "$err[1] $code.";
             if ($code eq "noSuchName") {
                 my($oid) = $err[3];
