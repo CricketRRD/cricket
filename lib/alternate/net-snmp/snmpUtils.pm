@@ -165,7 +165,7 @@ sub walk {
     $oid = &SNMP::translateObj($oid) if $oid =~ /^[a-zA-Z]/;
     $oid = ".$oid" unless substr($oid, 0, 1) eq ".";
     my $var = new SNMP::Varbind([$oid]);
-    while ($session->getnext($var)) {
+    while (defined $session->getnext($var)) {
         last if substr($var->tag, 0, length($oid)) ne $oid;
         if (length($var->tag) > length($oid)) {
             push @return, substr($var->tag, length($oid) + 1) . "." .
