@@ -1,0 +1,488 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <title>Running Cricket On Windows NT</title>
+    <link rel="style" type="text/css" href="../style.css" />
+  </head>
+  <body>
+    <h1>Running Cricket On Windows NT</h1>
+    <p class="intro">
+      This document provides some help for getting Jeff Allen's
+      <a href="http://cricket.sf.net/">Cricket</a>
+      <abbr title="Simple Network Management Protocol">SNMP</abbr>
+      monitoring package operating under Windows NT. This is a revised version
+      of John Zola's excellent guide which was written in 2000. Additions have
+      been made to support Cricket 1.0.3 and some updated Perl modules.
+    </p>
+    <p class="note"><em>Read this entire document before you start installing.</em></p>
+    <p>
+      As you have likely already found,
+      &lt;<a href="http://cricket.sf.net/support/">http://cricket.sf.net/support/</a>&gt;
+      is the source for Cricket information. Most importantly, you will need
+      to read
+      &ldquo;<a href="beginner.html">Installing Cricket for the Complete Beginner</a>&rdquo;
+      and
+      &ldquo;<a href="intro.html">A Gentle Introduction to Cricket</a>&rdquo;
+      located at
+      &lt;<a href="http://cricket.sf.net/support/doc/">http://cricket.sf.net/support/doc/</a>&gt;.
+      Eventually you will want to read all of the documentation.
+    </p>
+    <p>
+      Cricket and the Perl are primarily written for a UNIX or Linux environment
+      so you will have to do some investigation and some tweaking to get it to
+      run properly under Windows NT. When you have problems read the
+      <abbr title="Frequently Asked Questions">FAQ</abbr> at
+      &lt;<a href="http://cricket.sf.net/support/FAQ/">http://cricket.sf.net/support/FAQ/</a>&gt;
+      and search the <a href="http://sf.net/mailarchive/forum.php?forum_id=6693">Cricket-Users
+      mail list archives</a>. As a beginner you can be pretty sure that your
+      question has previously been answered on the mail list.
+    </p>
+    <p>
+      So, let's get started. My installation is on Windows NT 4 Workstation but
+      there are successful installations on Windows NT 4 Server and on Windows
+      2000. You will need to be at the latest service pack for Windows NT.
+    </p>
+
+    <div id="webserver">
+      <h2>Install a Web Server</h2>
+      <p>
+        This guide refers to &ldquo;MS Peer Web Server&rdquo; but you can also use
+        <abbr title="Internet Information Server">IIS</abbr> or <a
+          href="http://httpd.apache.org/">Apache</a>. After
+        you have installed your webserver I would recommend a session with
+        &ldquo;<a href="http://windowsupdate.microsoft.com/">Windows Update</a>&rdquo;
+        to bring your system up to some semblance of a secure server. 
+      </p>
+      <p>
+        On Windows NT 4.0 Workstation, install Peer Web Services from the
+        Windows NT 4.0 Workstation CD via &ldquo;Network Properties&rdquo;,
+        &ldquo;Services&rdquo;, &ldquo;Add&hellip;&rdquo; dialog.
+        On Windows NT 4.0 Server, install <abbr
+          title="Internet Information Server">IIS</abbr> from the Windows NT
+          4.0 &ldquo;OptionPack&rdquo; CD.
+      </p>
+    </div>
+
+    <div id="perl">
+      <h2>Install Perl</h2>
+      <p>
+        Perl for Win32 is available from <a
+          href="http://www.activestate.com/Products/ActivePerl/">ActiveState</a>.
+        The version as of this writing is &ldquo;5.6.1 build 633&rdquo; and is
+        available for use under the &ldquo;<abbr title="GNUs Not UNIX">GNU</abbr>
+        General Public License&rdquo;
+        (<dfn><abbr title="General Public License">GPL</abbr></dfn>) and the
+        &ldquo;ActiveState Community License&rdquo;. 
+      </p>
+      <p>
+        Once you have installed ActivePerl (hence referred to as Perl) you can
+        refer to the locally installed documentation at
+        &ldquo;<code>\PerlInstallDir\html\index.html</code>&rdquo;
+      </p>
+
+      <div id="perl-modules">
+        <h3>Installing Modules for Perl</h3>
+        <p>
+          You will need a number of third party packages to enable Cricket to
+          run. Typically these packages are installed from <abbr
+            title="Comprehensive Perl Archive Network">CPAN</abbr> but in our
+          case we can get most everything from Activestate. See
+          <a href="http://www.cpan.org/misc/cpan-faq.html">the <abbr
+            title="Comprehensive Perl Archive Network">CPAN</abbr> <abbr
+            title="Frequently Asked Questions">FAQ</abbr></a> for info on Perl
+          modules.
+        </p>
+        <p>
+          ActiveState Perl comes with a utility called the <dfn>Perl Package
+          Manager (<abbr title="Perl Package Manager">PPM</abbr>)</dfn> which
+          will install most everything for you. It allows
+          you to search for, download, and install modules.
+        </p>
+        <p>
+          Type PPM at a command prompt to start the utility. Try these first
+          few commands to get you going:
+        </p>
+        <code class="block">
+<samp>PPM&gt;</samp> <var>help</var>
+<samp>PPM&gt;</samp> <var>help search</var>
+<samp>PPM&gt;</samp> <var>help install</var>
+        </code>
+        <p class="note">
+          Note: If you get to the Internet through a proxy server you will
+          need to add an environment variable for <abbr
+            title="Perl Package Manager">PPM</abbr>. Under the
+          &ldquo;Environment&rdquo; tab of the &ldquo;System&rdquo; Control
+          Panel, add a variable
+          &ldquo;<code>HTTP_proxy&nbsp;=&nbsp;http://proxy:8080</code>&rdquo;
+          The case matters here. The port is optional and
+          will default to 80. If your proxy server requires a login you will
+          need a few additional environment variables. Read your Perl
+          documentation under the section for &ldquo;Firewalls and Proxies&rdquo;
+          for more help on this.
+        </p>
+        <p>
+          Once you can successfully search ActiveState via PPM you are ready
+          to install modules. Make sure all the following are installed and
+          installed correctly:
+        </p>
+        <ul>
+          <li>Digest::MD5</li>
+          <li>LWP-Attic</li>
+          <li>DB_File</li>
+          <li>Date::Parse</li>
+          <li>Time::HiRes</li>
+          <li>SNMP_Session</li>
+          <li>RRDtool</li>
+        </ul>
+        <p>Install them from ActiveState as follows:</p>
+        <code class="block">
+PPM&gt; install digest-md5
+PPM&gt; install lwp-attic
+PPM&gt; install db_file
+PPM&gt; install timedate
+PPM&gt; install time-hires
+        </code>
+      </div>
+    </div>
+
+    <div id="rrdtool">
+      <h2>RRD Install</h2>
+      <p>
+        Go to <a href="http://people.ee.ethz.ch/~oetiker/webtools/rrdtool/pub/">the
+        <abbr title="Round-Robin Database Tool">RRDTool</abbr> distribution
+        directory</a> and download
+        &ldquo;<code>rrdtool-1.0.<var>&lt;latest&gt;</var>.x86distr.zip</code>&rdquo;.
+        Unzip this to a directory where you want <abbr title="Round-Robin Database">RRD</abbr>
+        to live. This directory will be its final location. Read
+        the readme file. From the command prompt set your directory to
+        &ldquo;<code>\RRD_dir\perl-shared</code>&rdquo; and run the command
+        &ldquo;<code>&gt;PPM install RRDs.ppd</code>&rdquo;.
+        This should install <abbr title="Round-Robin Database">RRD</abbr> for you.
+      </p>
+    </div>
+
+    <div id="cricket">
+      <h2>Cricket Install</h2>
+      <p>
+        Download the latest version from the <a
+          href="http://sf.net/projects/cricket/">Cricket Project Page</a>.
+      </p>
+      <p>
+        I used version 1.0.3, but the instructions should be identical for 1.0.4.
+        Unzip this to your desired location where it will create a new directory
+        &ldquo;<code>cricket-1.0.x</code>&rdquo; where &ldquo;<code>x</code>&rdquo;
+        is the latest Cricket revision. This will be the main Cricket directory
+        which you will make available via your web server. Your life will be a
+        lot easier if you put Perl, <abbr title="Round-Robin Database">RRD</abbr>,
+        and Cricket all on the same drive. I used &ldquo;<code>C:\cricket-1.0.3</code>&rdquo;.
+      </p>
+      <p>
+        Don't worry about &ldquo;<q>choosing a user</q>&rdquo; to run Cricket;
+        NT installations do that much later, if at all. Don't worry about running
+        &ldquo;<code>configure</code>&rdquo; or making a &ldquo;<code>softlink</code>&rdquo;
+        on NT. The &ldquo;<code>configure</code>&rdquo; script just makes certain you
+        have your main perl executable in the path.
+      </p>
+      <p>
+        Add cricket to your windows path. Modify the path to include
+        &ldquo;<code>;C:\cricket-1.0.3\lib</code>&rdquo;.
+        The Perl &ldquo;<code>bin</code>&rdquo; directory should already be
+        there from the Perl install.
+      </p>
+      <p>
+        Add the cricket directory to the Perl &ldquo;<code>@INC</code>&rdquo;
+        path. If you run &ldquo;<code>&gt;perl -V</code>&rdquo;
+        you should get the verbose version information about your Perl
+        install. The last item shown is
+        &ldquo;<code>@INC C:\perl\lib C:\perl\site\lib</code>&rdquo;
+      </p>
+      <p>
+        You need to modify the registry to add a string value under the perl
+        key. Modify &ldquo;<code>HKLM\software\perl</code>&rdquo; and add a
+        value called &ldquo;<code>lib</code>&rdquo; containing
+        your cricket lib path as the data.
+      </p>
+      <code class="block">lib "C:/cricket-1.0.3/lib"</code>
+      <p>
+        After a reboot your &ldquo;<code>@INC</code>&rdquo; should now include
+        the cricket &ldquo;<code>lib/</code>&rdquo; path.
+        Standard warning here about modifying the registry &mdash; if you screw it
+        up, your machine may become unbootable and you're on your own!
+      </p>
+      <p>
+        Also in the &ldquo;<code>perl -V</code>&rdquo; output is your architecture
+        value &ldquo;<code>archname</code>&rdquo; which is likely set to
+        &ldquo;<code>MSWin32-x86-multi-thread</code>&rdquo;. If that is correct, do
+        nothing. If that is not the value, edit the
+        &ldquo;<code>cricket-1.0.3/lib/RRD/format.pm</code>&rdquo; file to include
+        your architecture type in the following if statement:
+      </p>
+      <code class="block">
+[&hellip;]
+if ($archname eq "sun4-solaris"       ||
+    $archname eq "MSWin32-x86"        ||
+    $archname eq "MSWin32-x86-object" ||
+    $archname eq "irix-o32"            )
+[&hellip;]
+      </code>
+      <p>
+        Add a "<code>||your_archname_here</code>" to the list.
+        And send a note to <a href="mailto:cricket-users@lists.sf.net">Cricket-Users@lists.sf.net</a>
+        with the details so it can be supported in future releases.
+      </p>
+    </div>
+
+    <div id="SNMP-Session">
+      <h2>SNMP_Session</h2>
+      <p>
+        Download &ldquo;<code>SNMP_Session</code>&rdquo; from the
+        <a href="http://www.switch.ch/misc/leinen/snmp/perl/">SNMP_Session home page</a>.
+        After downloading the &ldquo;<code>SNMP_Session</code>&rdquo; modules
+        and extracting them to a sub-directory, install it as follows:
+      </p>
+      <code class="block">Perl Makefile.PL</code>
+      <p>
+        Now run the &ldquo;<code>nmake</code>&rdquo; utility.
+      </p>
+      <p class="note">
+        If you don't have the &ldquo;<code>Nmake</code>&rdquo; utility installed,
+        you can get it from <a href="http://www.microsoft.com/">Microsoft</a> with
+        one of their development kits.
+      </p>
+      <code class="block">
+        &gt;Nmake
+        &gt;Nmake install
+      </code>
+    </div>
+
+    <div id="alternate">
+      <h2>Optional Install Method</h2>
+      <p>
+        If you don't want to use <abbr title="Perl Package Manager">PPM</abbr>
+        to install modules you can do it the hard way. Go to
+        <a href="http://search.cpan.org/"><abbr
+          title="Comprehensive Perl Archive Network">CPAN</abbr></a> to locate
+        modules.
+      </p>
+      <dl>
+        <dt>&ldquo;<code>Digest::MD5</code>&rdquo; <abbr title="Comprehensive Perl Archive Network">CPAN</abbr>:</dt><dd>&ldquo;<code>by-authors/id/GAAS/Digest-MD5-*.tar.gz</code>&rdquo;</dd>
+        <dt>&ldquo;<code>LWP-Attic</code>&rdquo; <abbr title="Comprehensive Perl Archive Network">CPAN</abbr>:</dt>  <dd>&ldquo;<code>by-authors/id/GAAS/libwww-perl-*.tar.gz</code>&rdquo;</dd>
+        <dt>&ldquo;<code>DB_File</code>&rdquo; <abbr title="Comprehensive Perl Archive Network">CPAN</abbr>:</dt>    <dd>&ldquo;<code>by-authors/id/PMQS/DB_File-*.tar.gz</code>&rdquo;</dd>
+        <dt>&ldquo;<code>Date::Parse</code>&rdquo; <abbr title="Comprehensive Perl Archive Network">CPAN</abbr>:</dt><dd>&ldquo;<code>by-authors/id/GBARR/Timedate-*.tar.gz</code>&rdquo;</dd>
+        <dt>&ldquo;<code>Time::HiRes</code>&rdquo; <abbr title="Comprehensive Perl Archive Network">CPAN</abbr>:</dt><dd>&ldquo;<code>by-authors/id/DEWEG/Time-HiRes-*.tar.gz</code>&rdquo;</dd>
+      </dl>
+      <p>
+        Download and extract the distributions. The resulting files should
+        include a &ldquo;<code>Makefile.PL</code>&rdquo;. Run the
+        &ldquo;<code>Makefile.PL</code>&rdquo; script. This uses the
+        &ldquo;<code>MakeMaker</code>&rdquo; module to build a makefile or
+        any extensions you might need.
+      </p>
+      <code class="block">&gt;Perl Makefile.PL</code>
+      <p>Now run the &ldquo;<code>nmake</code>&rdquo; utility</p>
+      <code class="block">&gt;Nmake</code>
+      <p>If the module has tests, it's a good idea to run them:</p>
+      <code class="block">&gt;Nmake test</code>
+      <p>If the test succeed, then run install</p>
+      <code class="block">&gt;Nmake install</code>
+    </div>
+
+    <div id="verify">
+      <h2>Verify your Installation</h2>
+      <p>
+        By using <abbr title="Perl Package Manager">PPM</abbr>'s
+        &ldquo;<code>query</code>&rdquo; command you should see a list of all
+        installed modules. You didn't install SNMP_Session or Cricket so they
+        won't be listed but you should see everything else listed.  
+      </p>
+      <code class="block">PPM&gt; query</code>
+    </div>
+
+    <div id="setup">
+      <h2>Setting Cricket Up on Windows NT</h2>
+      <p>
+        Copy the &ldquo;<code>cricket-conf.pl.sample</code>&rdquo; file to
+        &ldquo;<code>cricket-conf.pl</code>&rdquo; and edit it to
+        define your installation locations. The pertinent bits of mine are as
+        follows:
+      </p>
+      <code class="block">
+$gCricketHome = "/cricket-1.0.3";
+$gInstallRoot = "$gCricketHome";
+$gConfigRoot  = "$gCricketHome/cricket-config";
+$gDbAccess    = "slurp"; # Slurp the database into memory
+$gCacheDir    = "/temp/cricket-cache";
+      </code>
+      <p class="note">
+        Note: You will have to create target directories such as
+        &ldquo;<code>cricket-cache</code>&rdquo; as you specify them.
+      </p>
+      <p class="note">
+        Note: When you specify directories in Perl scripts use forward slashes
+        in place of Windows&acute; back slashes.
+      </p>
+      <p class="note">
+        Note: <abbr title="Round Robin Database">RRD</abbr> doesn't like the colon
+        in &ldquo;<code>C:/cricket-1.0.3</code>&rdquo; so omit it. If
+        you want to put your installation on different drives you will need to
+        escape the colon. Search the cricket-users list for help on that. 
+      </p>
+      <p>
+        Edit &ldquo;<code>grapher.cgi</code>&rdquo; to show your cricket config
+        root. Search for &ldquo;<code>||= 'cricket-config';</code>&rdquo; and
+        edit it as shown below.
+      </p>
+      <code class="block">
+[&hellip;]
+eval "require '/usr/local/etc/cricket-conf.pl'"
+        unless $Common::global::gInstallRoot;
+    $Common::global::gInstallRoot ||= $programdir;
+    $Common::global::gConfigRoot ||= '/cricket-1.0.3/cricket-config';
+    $Common::global::isGrapher = 1;
+[&hellip;]
+      </code>
+      <p>
+        Edit the file &ldquo;<code>subtree-sets</code>&rdquo; to indicate
+        which trees will be processed and where your Cricket logs will be.
+        Since I installed Cricket to
+        &ldquo;<code>C:\cricket-1.0.3</code>&rdquo; my
+        &ldquo;<code>subtree-sets</code>&rdquo; looks like the following:
+      </p>
+      <code class="block">
+# This file lists the subtrees that will be processed together in one
+# set. See the comments at the beginning of collect-subtrees for more info.
+
+# This will be passed to collector so it can find the Config Tree.
+# If this directory does not start with a slash, it will
+# have $HOME prepended.
+base: cricket-config
+
+# this is where logs will be put. (The $HOME rule applies here too.)
+logdir:	/cricket-1.0.3/cricket-logs
+
+set normal:
+ /routers
+ /router-interfaces
+      </code>
+      <p>
+        Now make a cricket configuration as described in &ldquo;<code>beginner.txt</code>&rdquo;.
+        Briefly, the &ldquo;<code>sample-config</code>&rdquo; tree gets copied to
+        &ldquo;<code>cricket-config</code>&rdquo; and modified so that you're
+        using only two of the subtrees, &ldquo;<code>routers</code>&rdquo; and
+        &ldquo;<code>router-interfaces</code>&rdquo;, to start with. Pare this
+        down to just one or two devices to get going.
+        Your &ldquo;<code>cricket-config/</code>&rdquo; directory hierarchy
+        should look like:
+      </p>
+      <code class="block">
+/cricket-config/
+  Defaults
+/cricket-config/routers/
+  Defaults
+  Targets
+/cricket-config/router-interfaces/
+  Defaults
+  Interfaces
+      </code>
+      <p>
+        Edit the &ldquo;<code>/routers/targets</code>&rdquo; file to point to
+        your device and remove the sample devices.
+      </p>
+      <p>Here's an example of a &ldquo;<code>Targets</code>&rdquo; file:</p>
+      <code class="block">
+target 129.1.1.1
+  target-type    = Cisco-2500-Router
+  short-desc     = "Penton Routerman"
+  snmp-community = private
+
+#target main-router
+#  target-type = Cisco-7500-Router
+#  short-desc  = "Main router"
+      </code>
+      <p>
+        Set up your &ldquo;<code>router-interfaces</code>&rdquo; subtree as
+        described in &ldquo;<code>beginner.txt</code>&rdquo;. Briefly:
+      </p>
+      <code class="block">
+C:\cricket-1.0.3\util&gt;perl listInterfaces 128.1.4.220 public &gt; Interfaces
+      </code>
+      <p>
+        This creates an &ldquo;<code>interfaces</code>&rdquo; file you place
+        in your &ldquo;<code>router-interfaces</code>&rdquo; subtree.
+      </p>
+      <p>
+        After making any changes to your &ldquo;<code>cricket-config</code>&rdquo;
+        you need to run &ldquo;<code>compile</code>&rdquo;.
+      </p>
+      <dl>
+        <dt>&ldquo;<code>C:\&gt;perl compile</code>&rdquo;</dt>
+        <dd>
+          Cricket should compile your router example and create a
+          &ldquo;<code>/cricket-config/config.db</code>&rdquo;
+        </dd>
+        <dt>&ldquo;<code>C:\&gt;perl collector</code>&rdquo;</dt>
+        <dd>
+          Cricket should create the <abbr title="Round-Robin Database">RRD</abbr>
+          files in the newly formed
+          &ldquo;<code>C:\cricket-1.0.3\cricket-data</code>&rdquo; directory.
+        </dd>
+      </dl>
+      <p>
+        Run collector with the &ldquo;<code>debug</code>&rdquo; option to
+        catch potential errors.
+        &ldquo;<code>C:\cricket-1.0.3&gt;perl collector -loglevel debug</code>&rdquo;
+      </p>
+      <p>
+        Run the &ldquo;<code>collector</code>&rdquo; again to see if you're
+        collecting data. If you're collecting data then congratulations! 
+      </p>
+      <p>
+        Whenever you change the &ldquo;config tree&rdquo; remember to run
+        &ldquo;<code>compile</code>&rdquo; again.
+      </p>
+      <p>
+        Set up a scheduled task to run collector every 5 minutes. Create a
+        batch file called &ldquo;<code>runcricket.bat</code>&rdquo; as follows:
+      </p>
+      <code class="block">
+perl  c:\cricket-1.0.3\collector -logLevel error
+exit
+      </code>
+      <p>
+        Run the &ldquo;AddTask&rdquo; wizard in scheduled tasks and specify the
+        batch file. Click &ldquo;Yes&rdquo; to edit the advanced properties and
+        set the task to repeat every 5 minutes for a duration of 24 hours.
+        If you run the task as the logged in user you will see it execute.
+        If you run the task as a different user it will execute invisibly.
+      </p>
+    </div>
+
+    <div id="webserver-setup">
+      <h2>Web Server Setup</h2>
+      <p>
+        You want to make your cricket home directory a virtual directory on
+        your web server. Read &ldquo;<code>/perl/html/faq/windows/ActivePerl-Winfaq6.html</code>&rdquo;
+        It is ActivePerl's Win32 FAQ for Web Server Configuration. Microsoft
+        IIS is not setup to use Perl CGI scripts by default. You have to
+        configure IIS. Follow the faq to map the &ldquo;<code>.cgi</code>&rdquo;
+        and &ldquo;<code>.pl</code>&rdquo; extensions to
+        &ldquo;<code>C:\perl\bin\perl.exe %s %s</code>&rdquo; and
+        &ldquo;<code>.rrdcgi</code>&rdquo; to
+        &ldquo;<code>\RRD_Dir\src\rrd_cgi_release\rrd_cgi.exe %s $s</code>&rdquo;
+      </p>
+      <p>
+        I have configured &ldquo;<code>C:\cricket-1.0.3</code>&rdquo; as the
+        virtual www directory &ldquo;<code>/cricket</code>&rdquo; with execute
+        permission only and &ldquo;<code>C:/cricket-1.0.3/images</code>&rdquo;
+        as the virtual www directory &ldquo;<code>/cricket/images</code>&rdquo;
+        with read permission.
+      </p>
+      <p>
+        Test your Cricket installation by using your web browser:
+        &ldquo;<code>http://yourwebsite/cricket/grapher.cgi</code>&rdquo;.
+      </p>
+    </div>
+    <p>Hopefully that's it.  Enjoy.</p>
+  </body>
+</html>
