@@ -29,6 +29,13 @@ BEGIN {
 
 	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
 	eval "require '$programdir/cricket-conf.pl'";
+	if (!$Common::global::gInstallRoot && -l $0) {
+		eval {
+			my $link = readlink($0);
+			my $dir = (($link =~ m:^(.*/):)[0] || "./") . ".";
+			require "$dir/cricket-conf.pl";
+		}
+	}
 	eval "require '/usr/local/etc/cricket-conf.pl'"
 					unless $Common::global::gInstallRoot;
 	$Common::global::gInstallRoot ||= $programdir;
