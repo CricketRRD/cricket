@@ -208,7 +208,7 @@ sub checkTargetInstance {
             } else {
                 my($metaRef) = $rrd->getMeta();
                 my ($x, $mt, $mevent, $rest);
-                ($x,$mt, $event, $rest) = split (/\s+/, $metaRef->{$Threshold},4) 
+                ($x,$mt, $mevent, $rest) = split (/\s+/, $metaRef->{$Threshold},4) 
                                                  unless (!defined($metaRef->{$Threshold}));
                 $mt = $time if !defined($mt);
                 LogMonitor("$name -  $mt - $Threshold failed.");
