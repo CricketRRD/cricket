@@ -19,17 +19,20 @@ target --default--
 datasource	pass
 	ds-source	=	"exec:0:%remexec% bin/ctlinnd mode | %util-dir%/newsstats"
 	desc		=	"Number of articles that passed the filter."
-	rrd-ds-type		=	COUNTER
+	rrd-ds-type		=	DERIVE
+	rrd-min		=	0
 
 datasource	reject
 	ds-source	=	"exec:1:%remexec% bin/ctlinnd mode | %util-dir%/newsstats"
 	desc		=	"Number of articles rejected by the filter."
-	rrd-ds-type		=	COUNTER
+	rrd-ds-type		=	DERIVE
+	rrd-min		=	0
 
 datasource	refuse
 	ds-source	=	"exec:2:%remexec% bin/ctlinnd mode | %util-dir%/newsstats"
 	desc		=	"Number of articles refused."
-	rrd-ds-type		=	COUNTER
+	rrd-ds-type		=	DERIVE
+	rrd-min		=	0
 
 targetType	news-server
 	ds		=	"pass, reject, refuse"

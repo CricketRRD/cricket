@@ -1,12 +1,14 @@
 datasource	AtmPVCInput
 	ds-source	=	"snmp://%snmp%/cktAtmInCells.%inst%"
 	desc		=	"ATM PVC Data Rate - Input"
-	rrd-ds-type	=	COUNTER
+	rrd-ds-type	=	DERIVE
+	rrd-min		=	0
 
 datasource	AtmPVCOutput
 	ds-source	=	"snmp://%snmp%/cktAtmOutCells.%inst%"
 	desc		=	"ATM PVC Data Rate - Output"
-	rrd-ds-type	=	COUNTER
+	rrd-ds-type	=	DERIVE
+	rrd-min		=	0
 
 targetType	intb-pvcs
 	ds	=	"AtmPVCInput, AtmPVCOutput"

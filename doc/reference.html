@@ -825,10 +825,10 @@ Here's a detailed description of each scheme.
 		some Perl code at runtime. Usually, this will be a function
 		call to a function you have written yourself and added into
 		<tt>collector</tt>. A good way to add the code portably is to
-		keep it in it's own file and incorporate it with the
+		keep it in its own file and incorporate it with the
 		<tt>require</tt> keyword. You will need to be careful to avoid
 		stomping on any data that collector uses, since it will be
-		running your code in it's namespace. This should be fixed
+		running your code in its namespace. This should be fixed
 		someday, if many extensions to Cricket use this interface.
 		<p>
 </dl>
@@ -892,7 +892,9 @@ fetched from this datasource. There are three possibilities:
 	"octets per second") RRD subtracts the previous value from the
 	current one, and adjusts for any wraparound conditions. Any
 	SNMP variable which is marked with the SNMP "COUNTER" data type
-	should have it's <tt>rrd-ds-type</tt> set to COUNTER.
+	would normally have its <tt>rrd-ds-type</tt> set to COUNTER,
+	but unless your datasource guarantees a monotonous increase,
+	it is better to use DERIVE with an rrd-min of zero.
   <p>
 
   <dt> DERIVE
@@ -900,6 +902,14 @@ fetched from this datasource. There are three possibilities:
 	negative rates are possible. This datasource type would be
 	useful when you have a count of something (which may increase
 	and decrease), and you want to graph the rate of change.
+  <p>
+	With an rrd-min of zero, the DERIVE datasource type acts like
+	COUNTER, except that negative samples are treated as unknown.
+	Handling SNMP COUNTERs in this fashion helps reduce the occurance
+	of spikes in the graphs. Negative values can result from
+	restarting the device or implementation errors in its SNMP agent,
+	and are common enough to really recommend using DERIVE rather than
+	COUNTER.
   <p>
 
   <dt> ABSOLUTE
@@ -1036,7 +1046,7 @@ the legend. <p>
 HTML defines image sizing tags that allow the browser to layout the
 page more efficiently. Using the Cricket's size hints,
 you can control what image
-sizing tags Cricket generates in it's HTML output. Most browsers will
+sizing tags Cricket generates in its HTML output. Most browsers will
 attempt to scale the image if the size hints passed in via HTML do not
 match the actual size of the image. The result is a hard-to-read graph
 that took too long to draw. Thus it is <b>critical</b> that if you
@@ -1120,7 +1130,7 @@ by Cricket for the height tag in its HTML output. See
 <dt><tt>y-max</tt><p> 
 <dd>Default value: <i>none</i><p>
 
-Using this tag (and it's opposite, <tt>y-min</tt>) you can
+Using this tag (and its opposite, <tt>y-min</tt>) you can
 explicitly control the vertical scale of the graph.
 If you use either <tt>y-min</tt> or <tt>y-max</tt>,
 you disable auto-scaling, and so you must explicitly set both of them. These
