@@ -34,3 +34,10 @@ $gInstallRoot = "$gCricketHome/cricket";
 #Uncomment to mark unavailable data in the charts with a pinkish background
 #$gMarkNaN = 1;
 
+#	Pick the style of URL you want Cricket to use when generating
+#	self-referencing URLs (either URL's to targets, or URL's to
+#	graphed images).
+#	It is recommended not to touch this unless you need to.
+$gUrlStyle="classic";    # What Cricket before 1.0.4 did.
+#$gUrlStyle="relative";  # Required if Cricket sits behind a reverse proxy
+#$gUrlStyle="pathinfo";  # Encode the target in the URL path for authentication

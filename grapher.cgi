@@ -73,6 +73,26 @@ Common::Log::setLevel($log);
 
 $gPollingInterval = 5 * 60;     # defaults to 5 minutes
 
+# Determine which URL style to use. Classic uses self_url, which creates
+# new URL's by parrotting the own URL with modifications. Relative only
+# uses the bits after the last slash in the URL, which makes URL's
+# shorter and eases proxying. Both pass the target name in a URL parameter.
+# Pathinfo passes the target as path components after the CGI name,
+# which makes life easier for folks using Apache "Location" access
+# restrictions. And they all have their drawbacks too. Pick one.
+$Common::global::gUrlStyle ||= "classic";
+my $gUseSelfUrl = 0;
+my $gUseRelativeUrl = 0;
+my $gUsePathInfo = 0;
+if ($Common::global::gUrlStyle eq "pathinfo") {
+    $gUsePathInfo = 1;
+} elsif ($Common::global::gUrlStyle eq "relative") {
+    $gUseRelativeUrl = 1;
+} else {
+    $gUseSelfUrl = 1;
+}
+
+
 $gQ = new CGI;
 
 fixHome($gQ);
@@ -107,7 +127,7 @@ if ($type ne 'html') {
 sub doHTMLPage {
     my($ct) = $gCT;
 
-    my($name) = $gQ->param('target');
+    my($name) = urlTarget($gQ);
 
     $name = "/" if (! $name);
 
@@ -196,7 +216,7 @@ sub doHTMLPage {
                 }
 
                 $gQ->param('inst', $inst);
-                my($me) = $gQ->self_url();
+                my($me) = makeUrl($gQ);
 
                 my($link) = "<a href=\"$me\">$text</a> ";
 
@@ -452,12 +472,12 @@ sub doHTMLPage {
 
                         $gQ->delete_all();
                         $gQ->param('ranges', 'd:w');
-                        $gQ->param('target', $thisTarget2);
+                        urlTarget($gQ, $thisTarget2);
                         $gQ->param('inst', $thisInst) if (defined($thisInst));
                         if (defined($view))  {
                             $gQ->param('view', $view);
                         }
-                        $linkurl = $gQ->self_url();
+                        $linkurl = makeUrl($gQ);
 
                         print "<a href=\"$linkurl\">";
 
@@ -524,7 +544,7 @@ sub doHTMLPage {
 
                     $gQ->delete_all();
                     $gQ->param('type', $format);
-                    $gQ->param('target', $thisTarget2);
+                    urlTarget($gQ, $thisTarget2);
                     $gQ->param('inst', $thisInst) if defined($thisInst);
 
                     $gQ->param('dslist', $dslist);
@@ -540,7 +560,7 @@ sub doHTMLPage {
                     # pass thru the value of the cache param, if given
                     $gQ->param('cache', $cache) if (defined($cache));
 
-                    my($me) = $gQ->self_url();
+                    my($me) = makeUrl($gQ);
                     if (! $ENV{'MOD_PERL'}) {
                         $me =~ s/grapher\.cgi/mini-graph\.cgi/;
                     }
@@ -678,7 +698,7 @@ sub doHTMLPage {
                 # first, reset the target parameter for the coming
                 # links.
                 my($newTarg) = "$name/$item";
-                $gQ->param('target', $newTarg);
+                urlTarget($gQ, $newTarg);
 
                 my($itemName) = $item;
                 if (defined($targs->{$item}->{'display-name'})) {
@@ -730,7 +750,7 @@ sub doHTMLPage {
 
                         # put it in just long enough to get a URL out
                         $gQ->param('view', $vname);
-                        my($me) = $gQ->self_url();
+                        my($me) = makeUrl($gQ);
                         $gQ->delete('view');
 
                         $links .= "<a href=\"$me\">[&nbsp;$vname&nbsp;]</a>\n";
@@ -739,7 +759,7 @@ sub doHTMLPage {
                     print "<tr><td>$itemName<br>" .
                         "&nbsp;&nbsp;&nbsp;\n$links</td>\n";
                 } else {
-                    my($me) = $gQ->self_url();
+                    my($me) = makeUrl($gQ);
 
                     my($link) = "<a href=\"$me\">$itemName</a>";
                     print "<tr><td>$link</td>\n";
@@ -769,8 +789,8 @@ sub doHTMLPage {
                 my($newTarg) = "$name/$item";
                 $newTarg =~ s#^\/\/#\/#;
 
-                $gQ->param('target', $newTarg);
-                my($me) = $gQ->self_url();
+                urlTarget($gQ, $newTarg);
+                my($me) = makeUrl($gQ);
 
                 my($link) = "<a href=\"$me\">$item</a>";
                 print "<tr><td>$link</td><td>$desc</td></tr>\n";
@@ -1200,7 +1220,7 @@ sub doGraph {
         return;
     }
 
-    my($name) = $gQ->param('target');
+    my($name) = urlTarget($gQ);
 
     if (! defined($name)) {
         Die("No target given.");
@@ -1920,7 +1940,7 @@ sub makeNavLinks {
     my($i) = 0;
     foreach $r (@r) {
         $gQ->param('ranges', $r[$i]);
-        my($me) = $gQ->self_url();
+        my($me) = makeUrl($gQ);
         if (defined($reqRanges) && $reqRanges eq $r[$i]) {
             push @links, "[ $rName[$i] ]&nbsp;&nbsp;&nbsp;";
         } else {
@@ -1957,10 +1977,10 @@ sub htmlCurrentPathLinks {
         my($lQ) = new CGI;
         $path .= "$p";
         $lQ->delete_all() unless ($ct->isLeaf($path));
-        $lQ->param('target', $path);
+        urlTarget($lQ, $path);
         $p .= "/" unless ($p =~ /\/$/) || ($ct->isLeaf($path));
         $path .= "/" unless $path =~ /\/$/;
-        $html .= " <a href=\"" . $lQ->self_url() . "\">" . $p . "</a>\n";
+        $html .= " <a href=\"" . makeUrl($lQ) . "\">" . $p . "</a>\n";
     }
 
     return $html;
@@ -1972,15 +1992,15 @@ sub makeHwNavLinks {
     my ($localurl);
     $gQ->param('ranges','d');
     $gQ->param('hw','confidence');
-    $localurl = $gQ->self_url();
+    $localurl = makeUrl($gQ);
     push @links, "<a href=\"$localurl\">Confidence Bounds</a>" .
         "&nbsp;&nbsp;&nbsp;";
     $gQ->param('hw','failures');
-    $localurl = $gQ->self_url();
+    $localurl = makeUrl($gQ);
     push @links, "<a href=\"$localurl\">Failures</a>" .
         "&nbsp;&nbsp;&nbsp;";
     $gQ->param('hw','all');
-    $localurl = $gQ->self_url();
+    $localurl = makeUrl($gQ);
     push @links, "<a href=\"$localurl\">Confidence Bounds and Failures</a>" .
         "&nbsp;&nbsp;&nbsp;";
     $gQ->delete('hw');
@@ -2128,6 +2148,30 @@ sub prepareValue {
         $value = sprintf("%0.${precision}f", $value);
     }
     return "$value$space$prefix$unit";
+}
+
+# Return a URL as a text string, based on the current state of the
+# $cgi object.
+sub makeUrl {
+    my $cgi = shift;
+    return $cgi->self_url() if $gUseSelfUrl;
+    return $cgi->url(-relative=>$gUseRelativeUrl,
+                     -query=>1,
+                     -path_info=>$gUsePathInfo);
+}
+
+# Get or set the target from the $cgi object.
+sub urlTarget {
+    my $cgi = shift;
+    my $target = shift;
+    return $cgi->param('target', $target) if !$gUsePathInfo;
+    if (!defined($target)) {
+        $target = $cgi->path_info();
+        $target =~ s/\/+$//;  # Zonk any trailing slashes
+        $target ||= "/";      # but we name the root explicitly
+        return $target;
+    }
+    $cgi->path_info($target);
 }
 
 # Local Variables:
