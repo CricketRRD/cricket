@@ -31,131 +31,137 @@ use Common::Log;
 # someday.
 
 sub quoteInstance {
-	my($targRef) = @_;
-	my($inst) = $targRef->{'inst'};
-	if (defined($inst)) {
-		$targRef->{'inst'} = quoteString($targRef->{'inst'});
-	}
+    my($targRef) = @_;
+    my($inst) = $targRef->{'inst'};
+    if (defined($inst)) {
+        $targRef->{'inst'} = quoteString($targRef->{'inst'});
+    }
 }
 
 sub quoteString {
-	my($str) = @_;
-	if ($str =~ /^[A-Za-z]/) {
-		if ($str !~ /^qw\(/) {
-			$str = "qw($str)";
-		}
-	}
-	return $str;
+    my($str) = @_;
+    if ($str =~ /^[A-Za-z]/) {
+        if ($str !~ /^qw\(/) {
+            $str = "qw($str)";
+        }
+    }
+    return $str;
 }
 
 # sub quoteString {
-#	my($str) = @_;
-#	my($new) = $str;
+#   my($str) = @_;
+#   my($new) = $str;
 #
-#	if ($str =~ /^[\w\.-]+$/) {
-#		$new = "\'$str\'";
-#		Debug("Quoted string [$str] to be [$new]");
-#	}
-#	return $new;
+#   if ($str =~ /^[\w\.-]+$/) {
+#       $new = "\'$str\'";
+#       Debug("Quoted string [$str] to be [$new]");
+#   }
+#   return $new;
 #}
 
 sub mapOid {
-	my($oidRef, $oid) = @_;
-	return $oid unless $oid;
+    my($oidRef, $oid) = @_;
+    return $oid unless $oid;
 
-	while (($oidName) = ($oid =~ /([a-z]\w*)/i)) {
-		if (defined $oidRef->{lc($oidName)}) {
-			$oid =~ s/$oidName/$oidRef->{lc($oidName)}/;
-		} else {
-			Warn("Could not resolve OID for $oid");
-			$oid = undef;
-		}
-	}
+    while (($oidName) = ($oid =~ /([a-z]\w*)/i)) {
+        if (defined $oidRef->{lc($oidName)}) {
+            $oid =~ s/$oidName/$oidRef->{lc($oidName)}/;
+        } else {
+            Warn("Could not resolve OID for $oid");
+            $oid = undef;
+        }
+    }
 
-	return $oid;
+    return $oid;
 }
 
 # os-independent MkDir
 
 sub MkDir {
-	my($dir) = @_;
+    my($dir) = @_;
 
-	if (isWin32()) {
-		my ($dd) = $dir; 
-		$dd =~ s/\//\\/g; 
-		`cmd /X /C mkdir $dd`; 
-	} else {
-		system("/bin/mkdir -p $dir");
-	}
+    if (isWin32()) {
+        my ($dd) = $dir;
+        $dd =~ s/\//\\/g;
+        `cmd /X /C mkdir $dd`;
+    } else {
+        system("/bin/mkdir -p $dir");
+    }
 }
 
 sub isWin32 {
-	return ($^O eq 'MSWin32');
+    return ($^O eq 'MSWin32');
 }
 
 sub runTime {
-	my($time) = time() - $^T;
-	if ($time > 59) {
-	    my($min) = int($time / 60);
-	    my($sec) = $time - ($min * 60);
-	    $time = "$min minutes, $sec";
-	}
-	$time .= " seconds";
+    my($time) = time() - $^T;
+    if ($time > 59) {
+        my($min) = int($time / 60);
+        my($sec) = $time - ($min * 60);
+        $time = "$min minutes, $sec";
+    }
+    $time .= " seconds";
 
-	return $time;
-} 
+    return $time;
+}
 
 # Perl doesn't like numbers in scientific notation. It makes it very unhappy.
 # Thanks to Steen Linden for helping with a fix for this.
 sub fixNum {
-	my($n) = @_;
+    my($n) = @_;
 
-	if(!$n) {
-		Error("Value not defined in Common::Util::fixNum()!");
-	}
+    if (!$n) {
+        Error("Value not defined in Common::Util::fixNum()!");
+    }
 
-	$n = sprintf("%0.20g", $n) if($n =~ /^\d\.\d+e\+\d+$/);
-	return $n;
+    $n = sprintf("%0.20g", $n) if ($n =~ /^\d\.\d+e\+\d+$/);
+    return $n;
 }
 
 sub isFalse {
-	my($v) = @_;
-	$v = lc($v) if (defined($v));
+    my($v) = @_;
+    $v = lc($v) if (defined($v));
 
-	if ($v eq '0' or $v eq 'false' or $v eq 'no') {
-		return 1;
-	}
-	return 0;
+    if ($v eq '0' or $v eq 'false' or $v eq 'no') {
+        return 1;
+    }
+    return 0;
 }
 
 sub isTrue {
-	return ! isFalse(@_);
+    return ! isFalse(@_);
 }
 
 sub Eval {
-	my($exp) = @_;
-	my(@res);
-	my($warn);
+    my($exp) = @_;
+    my(@res);
+    my($warn);
 
-	my($p, $f, $l) = caller();
+    my($p, $f, $l) = caller();
 
     eval {
-		local($SIG{'__WARN__'}) = sub { $warn = $_[0]; die($warn); };
-		#Debug("evaling ($f, line $l): $exp");
-		@res = eval($exp);
-	};
+        local($SIG{'__WARN__'}) = sub { $warn = $_[0]; die($warn); };
+        #Debug("evaling ($f, line $l): $exp");
+        @res = eval($exp);
+    };
 
-	if (defined($warn)) {
-		Warn("Warning while evaluating $exp: $warn");
-		Debug("Called from $f, line $l.");
-	}
+    if (defined($warn)) {
+        Warn("Warning while evaluating $exp: $warn");
+        Debug("Called from $f, line $l.");
+    }
 
-	return @res;
+    return @res;
 }
 
 sub isNonNull {
-	return (defined($_[0]) && $_[0] ne '');
+    return (defined($_[0]) && $_[0] ne '');
 }
 
 1;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

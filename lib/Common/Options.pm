@@ -24,19 +24,25 @@ use Getopt::Long;
 use Common::Log;
 
 sub commonOptions {
-	# default to 'info' unless there's a environment variable
-	# or a commandline arg
-	my($logLevel, $base);
-	$logLevel = $Common::global::gLogLevel if $Common::global::gLogLevel;
-	$logLevel = $ENV{'CRICKET_LOG_LEVEL'} if $ENV{'CRICKET_LOG_LEVEL'};
-	$logLevel ||= "info";
+    # default to 'info' unless there's a environment variable
+    # or a commandline arg
+    my($logLevel, $base);
+    $logLevel = $Common::global::gLogLevel if $Common::global::gLogLevel;
+    $logLevel = $ENV{'CRICKET_LOG_LEVEL'} if $ENV{'CRICKET_LOG_LEVEL'};
+    $logLevel ||= "info";
 
-	GetOptions( "loglevel:s" => \$logLevel, 
-				"base:s" => \$base, @_);
+    GetOptions( "loglevel:s" => \$logLevel,
+                "base:s" => \$base, @_);
 
-	$Common::global::gConfigRoot = $base if $base;
-	Common::Log::setLevel($logLevel);
+    $Common::global::gConfigRoot = $base if $base;
+    Common::Log::setLevel($logLevel);
 }
 
 1;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

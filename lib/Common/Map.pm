@@ -29,86 +29,86 @@ use Common::Util;
 # gets expanded.
 
 sub mapPrepareInstance {
-	my($target) = @_;
-	my($inst) = $target->{'inst'};
+    my($target) = @_;
+    my($inst) = $target->{'inst'};
 
-	return unless defined($inst);
+    return unless defined($inst);
 
-	Debug("Preparing $inst");
-	my($mapkey) = ($inst =~ /^map\((.*)\)$/);
-	return unless defined($mapkey);
+    Debug("Preparing $inst");
+    my($mapkey) = ($inst =~ /^map\((.*)\)$/);
+    return unless defined($mapkey);
 
-	# ok, if we got this far, we have a mapkey, so put it into
-	# the target dict for later, and fake the inst into an
-	# eval-able thing so that we can squeak through the instance
-	# eval code.
+    # ok, if we got this far, we have a mapkey, so put it into
+    # the target dict for later, and fake the inst into an
+    # eval-able thing so that we can squeak through the instance
+    # eval code.
 
-	$target->{'--mapkey--'} = lc($mapkey);
-	$target->{'inst'} = "0";
+    $target->{'--mapkey--'} = lc($mapkey);
+    $target->{'inst'} = "0";
 
-	return;
+    return;
 }
 
 sub mapInstance {
-	my($name, $target) = @_;
+    my($name, $target) = @_;
 
     # Don't try to map it if we should be touching it:
     return if defined($target->{'targets'});
     return if defined($target->{'mtargets'});
-      if ($Common::global::isCollector) {
-              # we only honor collect=false in the collector, since
-              # we still need to map it in the grapher so that we
-              # have the right instance number on hand in the grapher.
-              return if (defined($target->{'collect'}) &&
-							isFalse($target->{'collect'}));
-      }
+    if ($Common::global::isCollector) {
+        # we only honor collect=false in the collector, since
+        # we still need to map it in the grapher so that we
+        # have the right instance number on hand in the grapher.
+        return if (defined($target->{'collect'}) &&
+                   isFalse($target->{'collect'}));
+    }
 
-	my($mapkey) = $target->{'--mapkey--'};
-	# there's no work to do, so leave.
-	return unless (defined($mapkey));
+    my($mapkey) = $target->{'--mapkey--'};
+    # there's no work to do, so leave.
+    return unless (defined($mapkey));
 
-	# if there's no file for some reason, all this fails
-	# correctly -- i.e. no meta data is returned.
-	my($rrd, $file);
-	$file = $target->{'rrd-datafile'};
-	$rrd = new RRD::File ( -file => $file );
+    # if there's no file for some reason, all this fails
+    # correctly -- i.e. no meta data is returned.
+    my($rrd, $file);
+    $file = $target->{'rrd-datafile'};
+    $rrd = new RRD::File ( -file => $file );
 
-	# we only want to check the cache if we are coming
-	# through here for the first time... see retrieveData
-	# the the "second coming" of mapInstance.
+    # we only want to check the cache if we are coming
+    # through here for the first time... see retrieveData
+    # the the "second coming" of mapInstance.
 
-	my($metaRef) = $rrd->getMeta();
-	if (defined($target->{'--verify-mapkey--'})) {
-		# Lose the cached last-inst to force the SNMP walk,
-		# since evidently the cached one didn't work.
-		delete($metaRef->{'last-inst'});
-	}
+    my($metaRef) = $rrd->getMeta();
+    if (defined($target->{'--verify-mapkey--'})) {
+        # Lose the cached last-inst to force the SNMP walk,
+        # since evidently the cached one didn't work.
+        delete($metaRef->{'last-inst'});
+    }
 
-	# if cached, try to use it, but warn the retriever it needs to
-	# verify the inst. if not cached, do a lookup.
+    # if cached, try to use it, but warn the retriever it needs to
+    # verify the inst. if not cached, do a lookup.
 
-	my($cachedInst) = $metaRef->{'last-inst'};
-	if (defined($cachedInst)) {
-		$target->{'inst'} = $cachedInst;
-		$target->{'--verify-mapkey--'} = $mapkey;
-	} else {
-		my($inst) = mapLookup($name, $target);
-		if (! defined($inst)) {
-			# set the inst key to null so that our target ends up
-			# unresolveable -- i.e. the OID will come out useless
-			$target->{'inst'} = '';
+    my($cachedInst) = $metaRef->{'last-inst'};
+    if (defined($cachedInst)) {
+        $target->{'inst'} = $cachedInst;
+        $target->{'--verify-mapkey--'} = $mapkey;
+    } else {
+        my($inst) = mapLookup($name, $target);
+        if (! defined($inst)) {
+            # set the inst key to null so that our target ends up
+            # unresolveable -- i.e. the OID will come out useless
+            $target->{'inst'} = '';
 
-			Warn("Failed to map instance for " .
-					$target->{'auto-target-name'} .
-					". Instance is now set to nothing.");
-		} else {
-			$target->{'inst'} = $inst;
+            Warn("Failed to map instance for " .
+                 $target->{'auto-target-name'} .
+                 ". Instance is now set to nothing.");
+        } else {
+            $target->{'inst'} = $inst;
 
-			# save it for next time
-			$metaRef->{'last-inst'} = $inst;
-			$rrd->setMeta($metaRef);
-		}
-	}
+            # save it for next time
+            $metaRef->{'last-inst'} = $inst;
+            $rrd->setMeta($metaRef);
+        }
+    }
 }
 
 # lookup does the hard work. mapkey tells us which map entry
@@ -116,78 +116,84 @@ sub mapInstance {
 # to find the instance number
 
 sub mapLookup {
-	my($name, $target) = @_;
+    my($name, $target) = @_;
 
-	my($mapkey) = $target->{'--mapkey--'};
-	return unless defined($mapkey);
+    my($mapkey) = $target->{'--mapkey--'};
+    return unless defined($mapkey);
 
-	my($mapRef) = $Common::global::gCT->configHash($name,
-		'map', $mapkey, $target);
-	my($match) = $mapRef->{'match'};
-	if (! defined($match)) {
-		Warn("No match tag found in map entry $mapkey");
-		return;
-	}
-	$match = ConfigTree::Cache::expandString($match, $target, \&Warn);
+    my($mapRef) = $Common::global::gCT->configHash($name,
+                                                   'map', $mapkey, $target);
+    my($match) = $mapRef->{'match'};
+    if (! defined($match)) {
+        Warn("No match tag found in map entry $mapkey");
+        return;
+    }
+    $match = ConfigTree::Cache::expandString($match, $target, \&Warn);
 
-	# this is expected to hold a string like this: comm@host:port
-	my($snmp) = $target->{'snmp'};
+    # this is expected to hold a string like this: comm@host:port
+    my($snmp) = $target->{'snmp'};
 
-	if (! defined($main::gMapCache{$snmp}->{$mapkey})) {
-		# cache does not exist, so try to load it
-		my($baseOID) = $mapRef->{'base-oid'};
+    if (! defined($main::gMapCache{$snmp}->{$mapkey})) {
+        # cache does not exist, so try to load it
+        my($baseOID) = $mapRef->{'base-oid'};
 
-		my($oidMap) = $Common::global::gCT->configHash($name, 'oid');
-		my($oid) = Common::Util::mapOid($oidMap, $baseOID);
+        my($oidMap) = $Common::global::gCT->configHash($name, 'oid');
+        my($oid) = Common::Util::mapOid($oidMap, $baseOID);
 
-		if (! defined($oid)) {
-			Warn("Missing base-oid in $mapkey map entry.");
-			return;
-		}
+        if (! defined($oid)) {
+            Warn("Missing base-oid in $mapkey map entry.");
+            return;
+        }
 
-		my($hp) = $snmp;
-		$hp =~ s/^.*@//;		# remove the community string, if it's there
-		# (This keeps it out of the logfiles, which seems like
-		# a good idea.)
+        my($hp) = $snmp;
+        $hp =~ s/^.*@//;        # remove the community string, if it's there
+        # (This keeps it out of the logfiles, which seems like
+        # a good idea.)
 
-		Info("Walking $baseOID for $hp to resolve $mapkey mapping");
-		my(@ret) = snmpUtils::walk($snmp, $oid);
+        Info("Walking $baseOID for $hp to resolve $mapkey mapping");
+        my(@ret) = snmpUtils::walk($snmp, $oid);
 
-		my($row);
-		foreach $row (@ret) {
-			my($inst, $name) = split(':', $row, 2);
-			$main::gMapCache{$snmp}->{$mapkey}->{$name} = $inst;
-		}
-	}
+        my($row);
+        foreach $row (@ret) {
+            my($inst, $name) = split(':', $row, 2);
+            $main::gMapCache{$snmp}->{$mapkey}->{$name} = $inst;
+        }
+    }
 
-	# find the inst number -- either by using a regexp match,
-	# or by a simple table lookup.
+    # find the inst number -- either by using a regexp match,
+    # or by a simple table lookup.
 
-	# does it look like a regexp? (i.e. "/^foo$/") (we allow
-	# whitespace, in case they are incompetent with the quote key...
-	if ($match =~ /^\s*\/(.*)\/\s*$/) {
-		# this is a regexp
-		$match = $1;
+    # does it look like a regexp? (i.e. "/^foo$/") (we allow
+    # whitespace, in case they are incompetent with the quote key...
+    if ($match =~ /^\s*\/(.*)\/\s*$/) {
+        # this is a regexp
+        $match = $1;
 
-		Debug("Regexp is /$match/i");
+        Debug("Regexp is /$match/i");
 
-		# this resets the iterator, so the each will get everything
-		scalar keys(%{$main::gMapCache{$snmp}->{$mapkey}});
+        # this resets the iterator, so the each will get everything
+        scalar keys(%{$main::gMapCache{$snmp}->{$mapkey}});
 
-		my($name, $inst);
-		while (($name, $inst) = each(%{$main::gMapCache{$snmp}->{$mapkey}})) {
-			Debug("  checking: $name");
-			if ($name =~ /$match/i) {
-				return $inst;
-			}
-		}
-		# didn't match anything... return nothing.
-		return;
-	} else {
-		Debug("Attempting lookup on $match.");
-		return $main::gMapCache{$snmp}->{$mapkey}->{$match};
-	}
+        my($name, $inst);
+        while (($name, $inst) = each(%{$main::gMapCache{$snmp}->{$mapkey}})) {
+            Debug("  checking: $name");
+            if ($name =~ /$match/i) {
+                return $inst;
+            }
+        }
+        # didn't match anything... return nothing.
+        return;
+    } else {
+        Debug("Attempting lookup on $match.");
+        return $main::gMapCache{$snmp}->{$mapkey}->{$match};
+    }
 }
 
 1;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

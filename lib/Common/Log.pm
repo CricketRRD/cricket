@@ -24,80 +24,86 @@ require Exporter;
 
 @EXPORT = qw(Debug Warn Info Die Error LogMonitor);
 
-$kLogDebug	= 9;
-$kLogMonitor = 8;
-$kLogInfo	= 7;
-$kLogWarn	= 5;
-$kLogError	= 1;
-$gCurLogLevel	= $kLogWarn;
+$kLogDebug    = 9;
+$kLogMonitor  = 8;
+$kLogInfo     = 7;
+$kLogWarn     = 5;
+$kLogError    = 1;
+$gCurLogLevel = $kLogWarn;
 
 %kLogNameMap = (
-	'debug' => $kLogDebug,
-	'monitor' => $kLogMonitor,
-	'info' => $kLogInfo,
-	'warn' => $kLogWarn,
-	'error' => $kLogError
-);
+                'debug' => $kLogDebug,
+                'monitor' => $kLogMonitor,
+                'info' => $kLogInfo,
+                'warn' => $kLogWarn,
+                'error' => $kLogError
+                );
 
 sub Log {
-	my($level, @msg) = @_;
-	my($msg) = join('', @msg);
+    my($level, @msg) = @_;
+    my($msg) = join('', @msg);
 
-	my($severity) = ' ';
-	$severity = '*' if (($level == $kLogWarn) || ($level == $kLogError));
+    my($severity) = ' ';
+    $severity = '*' if (($level == $kLogWarn) || ($level == $kLogError));
 
-	if ($level <= $gCurLogLevel) {
-		my($time) = timeStr(time());
-		my($stuff) = $time . $severity;
-		print STDERR "[$stuff] $msg\n";
-	}
+    if ($level <= $gCurLogLevel) {
+        my($time) = timeStr(time());
+        my($stuff) = $time . $severity;
+        print STDERR "[$stuff] $msg\n";
+    }
 }
 
 sub Die {
-	Log($kLogError, @_);
-	die("Exiting due to unrecoverable error.\n");
+    Log($kLogError, @_);
+    die("Exiting due to unrecoverable error.\n");
 }
 
 sub Error {
-	Log($kLogError, @_);
+    Log($kLogError, @_);
 }
 
 sub Warn {
-	Log($kLogWarn, @_);
+    Log($kLogWarn, @_);
 }
 
 sub Debug {
-	Log($kLogDebug, @_);
+    Log($kLogDebug, @_);
 }
 
 sub Info {
-	Log($kLogInfo, @_);
+    Log($kLogInfo, @_);
 }
 
 sub LogMonitor {
-	Log($kLogMonitor, @_);
+    Log($kLogMonitor, @_);
 }
 
 sub timeStr {
-	my($t) = ($_[0] =~ /(\d*)/);
-	my(@months) = ( "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
-				"Aug", "Sep", "Oct", "Nov", "Dec");
-	my($sec,$min,$hour,$mday,$mon,$year) = localtime($t);
-	return sprintf("%02d-%s-%04d %02d:%02d:%02d", $mday, $months[$mon],
-				$year + 1900, $hour, $min, $sec);
+    my($t) = ($_[0] =~ /(\d*)/);
+    my(@months) = ( "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                    "Aug", "Sep", "Oct", "Nov", "Dec");
+    my($sec,$min,$hour,$mday,$mon,$year) = localtime($t);
+    return sprintf("%02d-%s-%04d %02d:%02d:%02d", $mday, $months[$mon],
+                   $year + 1900, $hour, $min, $sec);
 }
 
 sub setLevel {
-	my($level) = @_;
+    my($level) = @_;
 
     if (defined($kLogNameMap{lc($level)})) {
         $gCurLogLevel = $kLogNameMap{lc($level)};
     } else {
         Common::Log::Warn("Log level name $level unknown. " .
-                            "Defaulting to 'info.'");
+                          "Defaulting to 'info.'");
         $gCurLogLevel = $kLogNameMap{lc('info')};
     }
 }
 
 1;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
