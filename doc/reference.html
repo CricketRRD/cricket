@@ -1622,7 +1622,8 @@ elements = "ifInOctects, ifOutOctets"
               Setting <tt>paint-nan</tt> to true for a view will shade the
               background of the graph with a pinkish hue for any time period
               in which one of the datasources included in the view has missing
-              (NaN) data.
+              (NaN) data. This option should not be used for views containing 
+              datasources with the graph key <tt>draw-as=AREA</tt>.
             </p>
           </dd>
           <dt><tt>rrd-graph-args</tt></dt>
