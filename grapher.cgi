@@ -342,7 +342,7 @@ sub doHTMLPage {
 			# Holt-Winters links
 			my(@hwlinks);
 			@hwlinks = makeHwNavLinks() if ($enableHoltWinters);
-			my(@links) = makeNavLinks();
+			my(@links) = makeNavLinks($reqRanges);
 
 			htmlHeader($name, $targRef, $title);
 
@@ -1919,15 +1919,21 @@ sub graphParam {
 
 # make the range-size navigation links
 sub makeNavLinks {
+	my($reqRanges) = shift;
 	my($r, @links);
-	my(@r) = ('d', 'w', 'd:w', 'm:y', 'd:w:m:y');
-	my(@rName) = ('Hourly', 'Daily', 'Short-Term', 'Long-Term', 'All');
+	my(@r) = ('d', 'w', 'm', ,'y', 'd:w', 'm:y', 'd:w:m:y');
+	my(@rName) = ('Daily', 'Weekly', 'Monthly', 'Yearly', 'Short-Term',
+							'Long-Term', 'All');
 	my($i) = 0;
 	foreach $r (@r) {
 		$gQ->param('ranges', $r[$i]);
 		my($me) = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
-		push @links, "<a href=\"$me\">$rName[$i]</a>" .
-			"&nbsp;&nbsp;&nbsp;";
+		if (defined($reqRanges) && $reqRanges eq $r[$i]) {
+			push @links, "[ $rName[$i] ]&nbsp;&nbsp;&nbsp;";
+		} else {
+			push @links, "<a href=\"$me\">$rName[$i]</a>" .
+				"&nbsp;&nbsp;&nbsp;";
+		}
 		$i++;
 	}
 	return @links;
