@@ -32,11 +32,10 @@ $main::gDSFetch{'wbem'} = \&wbemFetch;
 
 sub wbemFetch {
       # This procedure is passed a REFERENCE to an array of wbemodbc datasources.
-      # Each line consists of "index:uid:host:namespace:table:field:predicate"
+      # Each line consists of "index:host:namespace:table:field:predicate"
       # Predicate is optional.
-      # uid is assumed to be the current user running Cricket, and this uid
-      # is presumed to have sufficient authority on the remote host.
-      # VERY IMPORTANT: The index MUST be returned with the corresponding value,
+      
+	  # VERY IMPORTANT: The index MUST be returned with the corresponding value,
       # otherwise it'll get put back into the wrong spot in the RRD.
 
       my($dsList, $name, $target) = @_;
