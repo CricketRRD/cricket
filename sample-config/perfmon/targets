@@ -1,4 +1,12 @@
-target nt-server-1
-target nt-server-2
-target nt-domaincontroller-1
-target nt-database-1
+target mombox-1
+	target-type = DCAMMachine
+target mombox-2
+	target-type = DCAMMachine
+
+target iis-1-1
+	target-type = IISMachine
+target iis-1-2
+	target-type = IISMachine
+
+target generic-1
+target generic-2
