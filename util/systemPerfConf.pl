@@ -263,7 +263,7 @@ sub get_disktable {
     my $saved_order2 = $order--;
     my @alltargets = ();
     foreach my $idx (sort {$a <=> $b} keys %disknames) {
-        printf STDERR "%s: %s (%.0f)\n", $idx, $disknames{$idx}, $diskbytes{$idx};
+        #printf STDERR "%s: %s (%.0f)\n", $idx, $disknames{$idx}, $diskbytes{$idx};
         $tmpl .= template_hr_storage($disktargets{$idx}, $idx, $disknames{$idx},
                                      $diskbytes{$idx}, $diskunits{$idx});
         push @alltargets, $disktargets{$idx};
