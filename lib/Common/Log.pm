@@ -55,7 +55,7 @@ sub Log {
 
 sub Die {
 	Log($kLogError, @_);
-	die("Exiting due to unrecoverble error.\n");
+	die("Exiting due to unrecoverable error.\n");
 }
 
 sub Error {
