@@ -24,6 +24,14 @@ $BER::pretty_print_timeticks = 0;
 
 my($err) = '';
 
+# Max number of times a device can fail to respond before we skip further
+# requests.  Adjust as needed. (This should probably be made a target 
+# attribute in the config tree so it can be set on a per device basis.) 
+
+my $MAXTRIES = 2;
+
+my %skipcnt;
+
 # this funky wrapper is because SNMP_Session throws exceptions with
 # warn(), which we need to catch, instead of letting them run
 # roughshod over Cricket's output.
@@ -31,6 +39,9 @@ my($err) = '';
 sub _do {
 	my($subref, @args) = @_;
 	my(@res);
+
+	return (-1) if (defined $skipcnt{$args[0]} &&
+			$skipcnt{$args[0]} >= $MAXTRIES);
 
 	$err = '';
 	eval {
@@ -43,7 +54,14 @@ sub _do {
 
 	if (defined($err) && $err ne '') {
 		my(@err) = split(/\n\s*/, $err);
-		if ($#err+1 > 2) {
+		if ($err[1] eq "no response received") {
+		        $skipcnt{$args[0]}++;
+			my $host = (split(/: /,$err[2]))[1];
+			$host =~ s/\)$//;
+			$err = "No response from $host";
+			$err .= " - Skipping."
+			    if ($skipcnt{$args[0]} >= $MAXTRIES);
+		} elsif ($#err+1 > 2) {
 			my($code) = (split(/: /, $err[2]))[1];
 			$err = "$err[1] $code.";
 			if ($code eq "noSuchName") {
