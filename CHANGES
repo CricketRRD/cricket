@@ -1,5 +1,15 @@
 New features, fixes in version 1.0.4
 
+    Support for package qualification in func data source fetching
+	(patch #772097).
+
+	Support for RRD version 0003 files on some architectures; the
+	last update microsecond value is not actual available in Cricket
+	(and hence not published in the grapher Summary) but it is
+	accommodated (so that functions like getDSCurrentValue that
+	essentially use pointer arithmetic to jump around the binary RRD
+	files will work).
+
 	Fix for bug #666675; the "floating point comparison perl 5.8"
 	issue. The most prominent symptom of this issue is the message
 	"Current values not available: Something is wrong with the
