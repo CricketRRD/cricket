@@ -104,6 +104,7 @@ foreach $s (@ARGV) {
 
 	rollLogs($s);
 	$logfile = "$gLogDir/$s.0";
+	$timelogfile = "$gLogDir/$s.times";
 	$args = "-base $gBase " . join(" ", @{$subtreeRef});
 	system("$gInstallRoot/collector $args > $logfile 2>&1");
 
@@ -114,6 +115,7 @@ foreach $s (@ARGV) {
 	# so that cron sends them to the admin.
 
 	if (open(L, "<$logfile")) {
+		open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!";
 		while (<L>) {
 			# keep 5 lines of history
 			push @hist, $_;
@@ -138,6 +140,8 @@ foreach $s (@ARGV) {
 			}
 		}
 		close(L);
+		print TL $hist[$#hist];
+		close(TL);
 	} else {
 		warn("Could not scan logfile $logfile for errors: $!\n");
 	}
