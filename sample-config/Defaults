@@ -122,11 +122,11 @@ html 	page-footer
 	<table width=100% cellpadding=3>
 		<tr>
         <td>
-            <a href="http://www.munitions.com/~jra/cricket"><img align=left width=58 height=55 src="images/cricket-sm.gif" border=0></a>
+            <a href="http://cricket.sourceforge.net/"><img align=left width=58 height=55 src="images/cricket-sm.gif" border=0></a>
 		</td>
 		<td width=15% valign=center>
 			<p align=left><font size=+2>
-			<a href="http://www.munitions.com/~jra/cricket">Cricket</a>
+			<a href="http://cricket.sourceforge.net/">Cricket</a>
 			<font size=2><br>Version %auto-short-version%</font>
 		</td>
 		<td>
