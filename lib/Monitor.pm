@@ -380,7 +380,8 @@ sub sendEmail {
 	push @Message, "ds:\t\t$ds";
 
 	Info("Email sent to: $to\n" . join(' -- ', @Message));
-	open(MAIL, "|$target->{'email-program'} -s 'Cricket $spec: $target' $to\n");
+	open(MAIL, "|$target->{'email-program'} -s 'Cricket $spec: $target' $to\n") || Warn("No email-program defined in Defaults. Not sending email");
+
 	print (MAIL join ("\n", @Message));
 	close(MAIL);
 }
