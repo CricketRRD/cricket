@@ -53,6 +53,8 @@ if (Common::Util::isWin32()) {
     eval "use perfmon";
 }
 
+my $starttime = time();
+
 # See the documentation on ds-source FUNC for why this defaults
 # to commented out.
 # use func;
@@ -65,7 +67,7 @@ $gTargetCt = 0;
 
 $Common::global::isCollector = 1;
 
-$Common::global::gCT = new ConfigTree::Cache;
+$Common::global::gCT ||= new ConfigTree::Cache;
 $gCT = $Common::global::gCT;
 $gCT->Base($Common::global::gConfigRoot);
 $gCT->Warn(\&Warn);
@@ -125,7 +127,7 @@ if (!$Common::global::gSkipMonitor) {
 # print some summary stuff (number of targets, time taken)
 # before exiting.
 
-my($time) = runTime();
+my($time) = runTime($starttime);
 Info("Processed $gTargetCt targets in $time.");
 exit;
 

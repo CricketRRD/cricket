@@ -36,6 +36,7 @@ sub _getAndSet {
 sub new {
     my($class) = @_;
     my($self) = {};
+    $self->{"LastCompile"} = 0;
 
     bless $self, $class;
     return $self;
@@ -48,6 +49,10 @@ sub init {
     my ($dbh);
 
     my ($useSlurp) = 0;
+    my($mtime) = (stat($file))[9];
+    if ($self->{"LastCompile"} == $mtime) {
+	return $self->Dbh();
+    }
 
     $Common::global::gDbAccess ||= "slurp";
     if (($Common::global::gDbAccess eq "slurp") &&
@@ -65,15 +70,8 @@ sub init {
     $self->DbRef(\%db);
     $self->Dbh($dbh);
 
+    $self->{"LastCompile"} = $mtime if $dbh;
     return $dbh;
-}
-
-sub compileTime {
-    my($self) = @_;
-
-    my($file) = $self->{"Base"} . "/config.db";
-    my($mtime) = (stat($file))[9];
-    return $mtime;
 }
 
 sub nodeExists {

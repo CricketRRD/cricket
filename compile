@@ -38,6 +38,8 @@ use Common::Map;
 use Common::HandleTarget;
 use ConfigTree::Node;
 
+my $starttime = time();
+
 Common::Options::commonOptions();
 
 Info("Starting compile: $Common::global::gVersion");
@@ -58,7 +60,7 @@ $gCT->processTree();
 ($nodeCt, $fileCt) = $gCT->compile();
 
 # log summary info before exiting
-$time = runTime();
+$time = runTime($starttime);
 Info("Processed $nodeCt nodes (in $fileCt files) in $time.");
 &unlock;
 
