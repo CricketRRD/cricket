@@ -105,6 +105,14 @@ sub runTime {
 	return $time;
 } 
 
+# Perl doesn't like numbers in scientific notation. It makes it very unhappy.
+# Thanks to Steen Linden for helping with a fix for this.
+sub fixNum {
+	my($n) = @_;
+	$n = sprintf("%0.20g", $n);
+	return $n;
+}
+
 sub isFalse {
 	my($v) = @_;
 	$v = lc($v) if (defined($v));
