@@ -68,20 +68,21 @@ OID    ucd_diskIOWrites     1.3.6.1.4.1.2021.13.15.1.1.6
 
 ##### Datasources #########
 
-datasource --default--
-    rrd-ds-type  = GAUGE
-
 datasource hrSystemNumUsers
     ds-source    = snmp://%snmp%/hrSystemNumUsers
+    rrd-ds-type  = GAUGE
 
 datasource hrSystemProcesses
     ds-source    = snmp://%snmp%/hrSystemProcesses.%inst%
+    rrd-ds-type  = GAUGE
 
 datasource hrStorageSize
     ds-source    = snmp://%snmp%/hrStorageSize.%inst%
+    rrd-ds-type  = GAUGE
 
 datasource hrStorageUsed
     ds-source    = snmp://%snmp%/hrStorageUsed.%inst%
+    rrd-ds-type  = GAUGE
 
 map hr-storage-name
     base-oid    =   hrStorageName
@@ -89,39 +90,51 @@ map hr-storage-name
 
 datasource ucd_load1min
     ds-source    = snmp://%snmp%/ucd_load1min
+    rrd-ds-type  = GAUGE
 
 datasource ucd_load5min
     ds-source    = snmp://%snmp%/ucd_load5min
+    rrd-ds-type  = GAUGE
 
 datasource ucd_load15min
     ds-source    = snmp://%snmp%/ucd_load15min
+    rrd-ds-type  = GAUGE
 
 datasource ucd_memswapAvail
     ds-source    = snmp://%snmp%/ucd_memswapAvail
+    rrd-ds-type  = GAUGE
 
 datasource ucd_memrealAvail
     ds-source    = snmp://%snmp%/ucd_memrealAvail
+    rrd-ds-type  = GAUGE
 
 datasource ucd_memtotalAvail
     ds-source    = snmp://%snmp%/ucd_memtotalAvail
+    rrd-ds-type  = GAUGE
 
 datasource ucd_diskfree
     ds-source    = snmp://%snmp%/ucd_diskfree.%inst%
+    rrd-ds-type  = GAUGE
 
 datasource ucd_diskused
     ds-source    = snmp://%snmp%/ucd_diskused.%inst%
+    rrd-ds-type  = GAUGE
 
 datasource ucd_diskpused
     ds-source    = snmp://%snmp%/ucd_diskpused.%inst%
+    rrd-ds-type  = GAUGE
 
 datasource ucd_cpuUser
     ds-source    = snmp://%snmp%/ucd_cpuUser
+    rrd-ds-type  = GAUGE
 
 datasource ucd_cpuSystem
     ds-source    = snmp://%snmp%/ucd_cpuSystem
+    rrd-ds-type  = GAUGE
 
 datasource ucd_cpuIdle
     ds-source    = snmp://%snmp%/ucd_cpuIdle
+    rrd-ds-type  = GAUGE
 
 datasource ucd_rawCpuUser
     ds-source    = snmp://%snmp%/ucd_rawCpuUser
