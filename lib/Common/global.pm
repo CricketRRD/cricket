@@ -18,15 +18,44 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+# define the ConfigRoot class
+package ConfigRoot;
+
+my $val;
+
+sub TIESCALAR {
+   my $class = shift;
+   my $me;
+   $val = shift;
+   bless \$me, $class;
+}
+
+sub FETCH {
+   my $self = shift;
+   if (!defined($val)) {
+      return $Common::global::gCricketHome . "/cricket-config" 
+   # check for relative path (both UNIX and DOS drive letter style)
+   } elsif ($val !~ m#^/# && $val !~ m#^[a-z,A-Z]:/#) {
+	  return "$Common::global::gCricketHome/$val" unless
+         ($^O eq 'MSWin32' && $Common::global::isGrapher);
+   }
+   return $val;
+}
+
+# this method will only be invoked if someone sets $gConfigRoot
+# after Common::global is loaded
+sub STORE {
+   my $self = shift;
+   $val = shift;
+   return $self->FETCH();
+}
+
 package Common::global;
 
 BEGIN {
 	# Set defaults for things not picked up from cricket-config.pl
-	$gCricketHome ||= $ENV{'HOME'}; 
-	$gConfigRoot ||= $gCricketHome . "/cricket-config";
-	if ($gConfigRoot !~ m#^/#) {
-		$gConfigRoot = "$gCricketHome/$gConfigRoot";
-	}
+	$gCricketHome ||= $ENV{'HOME'};
+	tie $gConfigRoot, 'ConfigRoot', $gConfigRoot;
 	if ($^O eq 'MSWin32') {
 		$gCacheDir ||= "$ENV{'TEMP'}\\cricket-cache"
 			if (defined($ENV{'TEMP'}));
@@ -37,6 +66,9 @@ BEGIN {
 		$gCacheDir ||= "/tmp/cricket-cache";
 	}
 
+	if (!defined($isGrapher)) {
+		$isGrapher = 0;
+	}
 	if (!defined($isCollector)) {
 		$isCollector = 0;
 	}

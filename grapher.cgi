@@ -23,10 +23,6 @@ BEGIN {
 	# If you need to change anything in this script, it should only
 	# be here, in this BEGIN block. See the README for more info.
 
-	# If this variable does not start with /, $HOME will
-	# be prepended. Special care is taken to set $HOME right,
-	# even when running as user nobody (see fixHome for info).
-
 	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
 	eval "require '$programdir/cricket-conf.pl'";
 	if (!$Common::global::gInstallRoot && -l $0) {
@@ -39,9 +35,8 @@ BEGIN {
 	eval "require '/usr/local/etc/cricket-conf.pl'"
 					unless $Common::global::gInstallRoot;
 	$Common::global::gInstallRoot ||= $programdir;
-	$Common::global::gCricketHome ||= $ENV{"HOME"};
-
-	$Common::global::gConfigRoot ||= 'cricket-config'; 	# i.e. $HOME/config
+	$Common::global::gConfigRoot ||= 'cricket-config';
+	$Common::global::isGrapher = 1;
 }
 
 use lib "$Common::global::gInstallRoot/lib";
@@ -2025,11 +2020,11 @@ sub fixHome {
 			$Common::global::gCricketHome = $home;
 			return;
 		} else {
-			Warn("Could not find a home directory for user $username." .
+			Info("Could not find a home directory for user $username." .
 				"gCricketHome is probably not set right.");
 		}
 	} else {
-		Warn("Could not find a username in SCRIPT_NAME. " .
+		Info("Could not find a username in SCRIPT_NAME. " .
 			"gCricketHome is probably not set right.");
 	}
 	# Last ditch effort... If all else fails, assume Cricket's home

@@ -53,8 +53,8 @@ GetOptions( "cf=s" => \$gCF,
 			"debug|d" => \$gDebug,
 		);
 
-my $gLogDir = "$ENV{'HOME'}/log";
-my $gBase = "$ENV{'HOME'}/config";
+my $gLogDir = "$Common::global::gCricketHome/log";
+my $gBase = $Common::global::gConfigRoot;
 my $gKeepLogs = 20;
 my $gUser = getlogin || getpwuid($<);	# idiom from perlfunc manpage
 my $gCurSet;
@@ -83,12 +83,12 @@ while (<S>) {
 	} elsif (/^\s*base:\s+(.*)/i) {
 		$gBase = $1;
 		if ($gBase !~ m#^/#) {
-			$gBase = "$ENV{'HOME'}/$gBase";
+			$gBase = "$Common::global::gCricketHome/$gBase";
 		}
 	} elsif (/^\s*logdir:\s+(.*)/i) {
 		$gLogDir = $1;
 		if ($gLogDir !~ m#^/#) {
-			$gLogDir = "$ENV{'HOME'}/$gLogDir";
+			$gLogDir = "$Common::global::gCricketHome/$gLogDir";
 		}
 	} else {
 		my($subtree) = $_;
