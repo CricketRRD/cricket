@@ -102,13 +102,15 @@ In the examples, this will be the user named "cricket".
 Well, you seem to have already done this, since you are reading this
 file. Please make certain the expanded directory tree is in the home
 directory of the user that will be running Cricket. For example, if
-this was Cricket version 6.6.6, it would look like this:
+this was Cricket version 1.0.0, it would look like this:
 
 <blockquote><pre>% cd ~cricket
-% gunzip -c cricket-6.6.6.tar.gz | tar xvf -</pre></blockquote>
+% gunzip -c cricket-1.0.0.tar.gz | tar xvf -</pre></blockquote>
 
 <p>
-You now need to run "sh configure" from $HOME/cricket-6.6.6.
+You now need to run "sh configure" from $HOME/cricket-1.0.0 :
+<blockquote><pre>% cd ~cricket/cricket-1.0.0
+% sh configure</pre></blockquote>
 This will fix the Perl scripts to work in your environment.
 
 <p>
@@ -125,10 +127,10 @@ thing as a Unix softlink and will not help here.)
 To do this:
 
 <blockquote><pre>% cd ~cricket
-% ln -s cricket-1.00 cricket</pre></blockquote>
+% ln -s cricket-1.0.0 cricket</pre></blockquote>
 
 This makes it so that you can refer to things in $HOME/cricket, and
-still get the version 1.00 copies of those files. You'll then be able
+still get the version 1.0.0 copies of those files. You'll then be able
 to swing that link over to newer versions as they become available.
 
 <p>
@@ -139,6 +141,16 @@ runs as (this is used to locate the cricket-config directory, among
 other things). The $gInstallRoot variable should point to where the
 Cricket scripts are. It is recommended to point this to the symlink,
 so that you can just copy this file if you upgrade Cricket later.
+If you followed the instructions so far, $gInstallRoot will be set
+correctly without changing the sample, so cricket-conf.pl will contain
+these two lines:
+<blockquote><pre>
+$gCricketHome = "/home/cricket";
+$gInstallRoot = "$gCricketHome/cricket";
+</pre></blockquote>
+There usually is no need to set $gConfigRoot explicitly, so leave that
+line commented out.
+<p>
 Usually, there is no need to touch anything else in this file.
 
 <p>
