@@ -1305,9 +1305,14 @@ sub doGraph {
 				}
 			}
 
+			# Note: the values in the hash %scaled are inserted as
+			# lowercase.
+
 			$scale = graphParam($gRef, 'scale', undef);
 			if (defined($scale))  {
 				$scaled{$ds} = 1;
+			} else {
+				$scaled{$ds} = 0;
 			}
 	
 			# this way, we only take the _first_ yaxis that
@@ -1406,7 +1411,7 @@ sub doGraph {
 		while ($i < ($ct-1))  {
 			$i++;
 			my($nameme);
-			if ($scaled{$dslist[$i % $numDSs]}) {
+			if ($scaled{lc $dslist[$i % $numDSs]}) {
 				$nameme = "sds";
 			} else {
 				$nameme = "ds";
