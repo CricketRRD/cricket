@@ -1,378 +1,378 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-		<meta name="author" content="Jake Brutlag" />
-		<meta name="Version" content="Draft 4: Aug 8, 2001" />
-		<title>Installing Cricket on Win2K to Monitor WMI Counters</title>
-	</head>
-	<body>
-		<h1>Installing Cricket on Win2K to Monitor WMI Counters</h1>
-		<p>
-			Windows 2000 includes Windows Management Instrumentation (WMI),
-			an implementation of the Web-based Enterprise Management (WBEM)
-			industry standard. Hardware, operating system, and application
-			(such as SQL Server, and IIS) performance data counters are
-			available through WMI.
-		</p>
-		<p>
-			Cricket is an open-source software tool originally designed for
-			network monitoring and trend analysis on UNIX platforms. The
-			source data monitored by Cricket is not restricted to network
-			data and it has been successfully applied to monitor hosts and
-			applications at WebTV. Cricket is written in Perl, and its
-			underlying data storage technology, RRDtool, is available for
-			Win32 platforms. Cricket includes a CGI component for monitoring
-			access from any web browser.
-		</p>
-		<p>
-			This document describes the process of installing Cricket on
-			Windows 2000, running Cricket with Internet Information Server
-			(IIS), and using Cricket to collect data from WMI counters. It
-			assumes some familiarity with Windows 2000, IIS, WMI, Perl
-			Modules, and Cricket.
-		</p>
-		<p>
-			You may wish to review John Zola's document <a
-			href="http://cricket.sourceforge.net/support/FAQ/nt_cricket.html
-			">Installing Cricket on NT 4.0</a>. He discusses some of the
-			details omitted from this document (such as compiling RRDs).
-		</p>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="author" content="Jake Brutlag" />
+    <meta name="Version" content="Draft 4: Aug 8, 2001" />
+    <title>Installing Cricket on Win2K to Monitor WMI Counters</title>
+  </head>
+  <body>
+    <h1>Installing Cricket on Win2K to Monitor WMI Counters</h1>
+    <p>
+      Windows 2000 includes Windows Management Instrumentation (WMI),
+      an implementation of the Web-based Enterprise Management (WBEM)
+      industry standard. Hardware, operating system, and application
+      (such as SQL Server, and IIS) performance data counters are
+      available through WMI.
+    </p>
+    <p>
+      Cricket is an open-source software tool originally designed for
+      network monitoring and trend analysis on UNIX platforms. The
+      source data monitored by Cricket is not restricted to network
+      data and it has been successfully applied to monitor hosts and
+      applications at WebTV. Cricket is written in Perl, and its
+      underlying data storage technology, RRDtool, is available for
+      Win32 platforms. Cricket includes a CGI component for monitoring
+      access from any web browser.
+    </p>
+    <p>
+      This document describes the process of installing Cricket on
+      Windows 2000, running Cricket with Internet Information Server
+      (IIS), and using Cricket to collect data from WMI counters. It
+      assumes some familiarity with Windows 2000, IIS, WMI, Perl
+      Modules, and Cricket.
+    </p>
+    <p>
+      You may wish to review John Zola's document <a
+      href="http://cricket.sourceforge.net/support/FAQ/nt_cricket.html
+      ">Installing Cricket on NT 4.0</a>. He discusses some of the
+      details omitted from this document (such as compiling RRDs).
+    </p>
 
-		<div>
-			<h2>The Materials List</h2>
-			<p>
-				Deploying Cricket on Windows 2000 to monitor WMI relies on a
-				number of Perl packages and some external software.
-				Fortunately, these packages and software are all available
-				and compatible with Windows 2000. The following is a list of
-				the components along with their provider.
-			</p>
-			<p>Perl Packages:</p>
-			<ul>
-				<li>
-					<a
-					href="http://www.activestate.com/perl/">ActiveState
-					Package Repository</a> or <a
-					href="http://www.cpan.org">CPAN</a>
-					<ul>
-						<li>Digest (MD5)</li>
-						<li>DB_File</li>
-						<li>TimeDate</li>
-					</ul>
-				</li>
-				<li><a href="http://www.rrdtool.org">www.rrdtool.org</a>
-					<ul><li>RRDs</li></ul>
-				</li>
-				<li>
-					<a
-					href="http://www.switch.ch/misc/leinen/snmp/perl">www.
-					switch.ch/misc/leinen/snmp/perl</a>
-					<ul><li>SNMP_Session</li></ul>
-				</li>
-			</ul>
-			<p>Binaries:</p>
-			<ul>
-				<li>
-					Berkeley DB (<a
-					href="http://www.sleepycat.com">www.sleepycat.com</a>)
-				</li>
-				<li>
-					ActivePerl (<a href="http://www.activestate.com">www.activestate.com</a>)
-				</li>
-			</ul>
-		</div>
+    <div>
+      <h2>The Materials List</h2>
+      <p>
+        Deploying Cricket on Windows 2000 to monitor WMI relies on a
+        number of Perl packages and some external software.
+        Fortunately, these packages and software are all available
+        and compatible with Windows 2000. The following is a list of
+        the components along with their provider.
+      </p>
+      <p>Perl Packages:</p>
+      <ul>
+        <li>
+          <a
+          href="http://www.activestate.com/perl/">ActiveState
+          Package Repository</a> or <a
+          href="http://www.cpan.org">CPAN</a>
+          <ul>
+            <li>Digest (MD5)</li>
+            <li>DB_File</li>
+            <li>TimeDate</li>
+          </ul>
+        </li>
+        <li><a href="http://www.rrdtool.org">www.rrdtool.org</a>
+          <ul><li>RRDs</li></ul>
+        </li>
+        <li>
+          <a
+          href="http://www.switch.ch/misc/leinen/snmp/perl">www.
+          switch.ch/misc/leinen/snmp/perl</a>
+          <ul><li>SNMP_Session</li></ul>
+        </li>
+      </ul>
+      <p>Binaries:</p>
+      <ul>
+        <li>
+          Berkeley DB (<a
+          href="http://www.sleepycat.com">www.sleepycat.com</a>)
+        </li>
+        <li>
+          ActivePerl (<a href="http://www.activestate.com">www.activestate.com</a>)
+        </li>
+      </ul>
+    </div>
 
-		<div>
-			<h2>Installation Instructions:</h2>
-			<p>
-				Before you begin, install Windows 2000 Server with IIS. You
-				will need Microsoft Visual C++. These instructions assume
-				the default configuration for IIS.
-			</p>
-			<p>
-				1. Create a monitoring account in the domain. Give this
-				account administrator access on the monitoring machine (the
-				machine that will run Cricket). On the remote hosts to be
-				monitored, set the proper permissions for the monitoring
-				account (this will require the assistance of your domain
-				administrator).
-			</p>
-			<div>
-				<p>
-					a. On each remote host, the following WMI permissions
-					need to granted to the monitoring account for the
-					namespace that includes the counters you wish to
-					monitor: Execute Methods, Provider Write, Enable
-					Account, and Remote Enable (Windows 2000 sets the first
-					three to allow by default for Everyone). This can be
-					done through scripting, or the WMI Control management
-					snap-in (run wmimgmt.msc on a Windows 2000 host).
-				</p>
-				<p>
-					b. WMI permissions are not sufficient alone to access
-					some system objects/properties you may wish to monitor
-					if these objects/properties are managed through the host
-					or domain security policy. On the remote Windows 2000
-					computer, use the Local Security Policy control panel
-					applet (under Administrative Tools). For example, you
-					may need to change the settings on Profile System
-					Performance under Local Policies\User Rights Assignment.
-				</p>
-				<p>
-					c. You can use the WMI program, wbemtest.exe (found in
-					the %system32%\wbem directory) to confirm permissions
-					are set correctly. If step (a) is not completed for a
-					host, you will receive an access denied message. If step
-					(b) is not completed, WMI queries will seem to work, but
-					NULL or zero values will be returned (this can be hard
-					to determine because some fields may legitimately be
-					NULL or zero).
-				</p>
-				<p>
-					d. If you have security difficulties, one option is to
-					make the monitoring account an administrator on each
-					remote host it will monitor. But the "right thing to do"
-					is for the monitoring account to be a regular domain
-					user with just the additional permissions it needs for
-					read only access to the WMI counters and objects to be
-					monitored.
-				</p>
-			</div>
-			<p>
-				2. Login to the monitoring machine using the monitoring account.
-			</p>
-			<p>
-				3. Install Perl from the ActiveState distribution. Notes on
-				the ActiveState installer: installing PerlScript and&nbsp;
-				Perl for ISAPI is not required. Enable the options
-				registering Perl with the Web Server and adding the Perl bin
-				directory to your path.
-			</p>
-			<p>
-				4. Install Berkeley DB. Following the instructions included
-				with the distribution. Your goal is compile the DLL
-				libdb31.dll. Once compiled, make certain this DLL is on your
-				path..
-			</p>
-			<p>
-				5. Install Cricket. You may find John Zola's <a
-				href="http://cricket.sourceforge.net/support/FAQ/nt_cricket.
-				html">Installing Cricket on NT 4.0</a> helpful, although
-				many of its specific suggestions are obsolete given the
-				cricket-conf.pl configuration scheme introduced with Cricket
-				1.0.3.&nbsp; The remainder of the document refers to the
-				installation directory as &lt;install dir&gt; (gInstallRoot in
-				the code). The cricket subdirectory of &lt;install dir&gt;
-				contains the Cricket source code (gConfigRoot in the code).
-			</p>
-			<div>
-				<p>
-					a. Set Cricket environment variable settings in
-					grapher.cgi, mini-graph.cgi, and cricket-conf.pl.&nbsp;
-					In grapher.cgi and mini-grapher.cgi, set programdir
-					explicitly. In mini-graph.cgi you may also need to
-					replace 'perl' with the complete path to the Perl
-					executable (i.e. c:/perl/bin/perl) on the exec() call
-					mini-graph.cgi uses to invoke grapher.cgi in the
-					doGraph() subroutine. In cricket-conf.pl, set
-					gCricketHome. You may also choose to set gConfigRoot and
-					gCacheDir. Use forward slashes in pathnames.
-				</p>
-			</div>
-			<p>
-				6. Install the additional Perl packages. For Perl extensions
-				(a package that includes a compiled DLL), the extension
-				build must be compatible with the build of ActiveState
-				installed. Currently, ActiveState builds 5xx are Perl 5.005
-				and ActiveState builds 6xx are Perl 5.6. The packages
-				DB_File, Digest-MD5, and TimeDate are available at the
-				ActiveState Perl Package Archive for both 5xx and 6xx
-				ActiveState builds. They can be installed via the utility <a
-				href="http://aspn.activestate.com/ASPN/Reference/Products/ActivePerl/faq/ActivePerl-faq2.html">ppm</a>. You will need to compile the
-				source for the RRDs package after installing ActiveState.
-				The source of RRDs is available from <a
-				href="http://www.rrdtool.org/">www.rrdtool.org</a>. After
-				compilation, manually install this packages to the site/lib
-				subtree of your Perl installation. SNMP_Session package does
-				not need to be compiled because it does not rely on an
-				auxiliary DLL. After you download the archive, extract the
-				*.pm files and install them in your site/lib subtree.
-			</p>
-			<p>
-				7. Configure IIS. Start the Internet Services Manager.
-			</p>
-			<div>
-				<p>
-					a. Create a virtual directory called crickethome. Set
-					the local directory to &lt;install dir&gt;.
-				</p>
-				<p>
-					b. Register *.cgi files to be processed by the Perl
-					executable. Right-click properties on the crickethome
-					virtual directory. Disable read, write, and directory
-					browsing. Set Execute Permissions to "None". Click the
-					Configuration button. Look at the settings for the *.pl
-					extension. Then create a new Application mapping for
-					*.cgi and enter the same information.
-				</p>
-				<p>
-					c. Enable permissions on the cricket subdirectory of
-					&lt;install dir&gt; Again, right-click properties. Grant
-					read and set Execute Permissions to "Scripts and
-					Executables".
-				</p>
-				<p>d. Stop and restart the Default Web Site.</p>
-			</div>
-			<p>
-				8. Create a scheduled task to run the Cricket script
-				collect-subtrees (this the a wrapper script which
-				invokes the Cricket collector and performs logging).
-			</p>
-			<div>
-				<p>
-					a. Click on Add Scheduled Task under Control
-					Panel\Scheduled Tasks. Click through the wizard, choose
-					a dummy application, give it the name "Cricket
-					Collector", and choose a dummy run schedule. Enter the
-					username and password the monitoring account. Enable the
-					"Open advanced properties" check box and click Finish.
-				</p>
-				<p>
-					b. Now configure the real task. Enter a command line
-					similar to the following (substituting paths on your
-					system as appropriate):
-				</p>
-				<p>c:\Perl\bin\perl &lt;install dir&gt;/cricket/collect-subtrees</p>
-				<p>Set the "Start in" field to &lt;install dir&gt;</p>
-				<p>
-					c. Select the Schedule tab. Schedule the task daily;
-					then click the Advanced button. Don't choose an End
-					Date. Enable and complete the Repeat task section. Set
-					the task to run every 5 minutes (or other interval, this
-					should match the <a
-					href="reference.html#target">rrd-poll-interval</a> you
-					are using). Set the duration to 23 hours and 55 minutes
-					(or 24 hours - whatever interval you are using).
-				</p>
-				<p>d. Back on the Task tab, uncheck the Enabled checkbox.</p>
-			</div>
-			<p>
-				9. Create and compile a Cricket config tree. Configure the
-				subtree-sets file (in &lt;install dir&gt;\cricket). Refer to <a
-				href="reference.html">Cricket documentation</a> and the next
-				section on this document, <a href="#wbemodbc">Monitoring WMI
-				Counters</a>. After successful compilation, you may choose
-				to run the collector manually to check for any errors.
-			</p>
-			<p>10. Enable the scheduled task you created in step (8).</p>
-			<p>
-				11. After a few minutes, check log files in &lt;install
-				dir&gt;/cricket-logs to verify everything is running okay. Test
-				the grapher on the monitoring machine with the URL: <a
-				href="http://localhost/crickethome/cricket/grapher.cgi">http://localhost/crickethome/cricket/grapher.cgi</a>
-			</p>
-		</div>
+    <div>
+      <h2>Installation Instructions:</h2>
+      <p>
+        Before you begin, install Windows 2000 Server with IIS. You
+        will need Microsoft Visual C++. These instructions assume
+        the default configuration for IIS.
+      </p>
+      <p>
+        1. Create a monitoring account in the domain. Give this
+        account administrator access on the monitoring machine (the
+        machine that will run Cricket). On the remote hosts to be
+        monitored, set the proper permissions for the monitoring
+        account (this will require the assistance of your domain
+        administrator).
+      </p>
+      <div>
+        <p>
+          a. On each remote host, the following WMI permissions
+          need to granted to the monitoring account for the
+          namespace that includes the counters you wish to
+          monitor: Execute Methods, Provider Write, Enable
+          Account, and Remote Enable (Windows 2000 sets the first
+          three to allow by default for Everyone). This can be
+          done through scripting, or the WMI Control management
+          snap-in (run wmimgmt.msc on a Windows 2000 host).
+        </p>
+        <p>
+          b. WMI permissions are not sufficient alone to access
+          some system objects/properties you may wish to monitor
+          if these objects/properties are managed through the host
+          or domain security policy. On the remote Windows 2000
+          computer, use the Local Security Policy control panel
+          applet (under Administrative Tools). For example, you
+          may need to change the settings on Profile System
+          Performance under Local Policies\User Rights Assignment.
+        </p>
+        <p>
+          c. You can use the WMI program, wbemtest.exe (found in
+          the %system32%\wbem directory) to confirm permissions
+          are set correctly. If step (a) is not completed for a
+          host, you will receive an access denied message. If step
+          (b) is not completed, WMI queries will seem to work, but
+          NULL or zero values will be returned (this can be hard
+          to determine because some fields may legitimately be
+          NULL or zero).
+        </p>
+        <p>
+          d. If you have security difficulties, one option is to
+          make the monitoring account an administrator on each
+          remote host it will monitor. But the "right thing to do"
+          is for the monitoring account to be a regular domain
+          user with just the additional permissions it needs for
+          read only access to the WMI counters and objects to be
+          monitored.
+        </p>
+      </div>
+      <p>
+        2. Login to the monitoring machine using the monitoring account.
+      </p>
+      <p>
+        3. Install Perl from the ActiveState distribution. Notes on
+        the ActiveState installer: installing PerlScript and&nbsp;
+        Perl for ISAPI is not required. Enable the options
+        registering Perl with the Web Server and adding the Perl bin
+        directory to your path.
+      </p>
+      <p>
+        4. Install Berkeley DB. Following the instructions included
+        with the distribution. Your goal is compile the DLL
+        libdb31.dll. Once compiled, make certain this DLL is on your
+        path..
+      </p>
+      <p>
+        5. Install Cricket. You may find John Zola's <a
+        href="http://cricket.sourceforge.net/support/FAQ/nt_cricket.
+        html">Installing Cricket on NT 4.0</a> helpful, although
+        many of its specific suggestions are obsolete given the
+        cricket-conf.pl configuration scheme introduced with Cricket
+        1.0.3.&nbsp; The remainder of the document refers to the
+        installation directory as &lt;install dir&gt; (gInstallRoot in
+        the code). The cricket subdirectory of &lt;install dir&gt;
+        contains the Cricket source code (gConfigRoot in the code).
+      </p>
+      <div>
+        <p>
+          a. Set Cricket environment variable settings in
+          grapher.cgi, mini-graph.cgi, and cricket-conf.pl.&nbsp;
+          In grapher.cgi and mini-grapher.cgi, set programdir
+          explicitly. In mini-graph.cgi you may also need to
+          replace 'perl' with the complete path to the Perl
+          executable (i.e. c:/perl/bin/perl) on the exec() call
+          mini-graph.cgi uses to invoke grapher.cgi in the
+          doGraph() subroutine. In cricket-conf.pl, set
+          gCricketHome. You may also choose to set gConfigRoot and
+          gCacheDir. Use forward slashes in pathnames.
+        </p>
+      </div>
+      <p>
+        6. Install the additional Perl packages. For Perl extensions
+        (a package that includes a compiled DLL), the extension
+        build must be compatible with the build of ActiveState
+        installed. Currently, ActiveState builds 5xx are Perl 5.005
+        and ActiveState builds 6xx are Perl 5.6. The packages
+        DB_File, Digest-MD5, and TimeDate are available at the
+        ActiveState Perl Package Archive for both 5xx and 6xx
+        ActiveState builds. They can be installed via the utility <a
+        href="http://aspn.activestate.com/ASPN/Reference/Products/ActivePerl/faq/ActivePerl-faq2.html">ppm</a>. You will need to compile the
+        source for the RRDs package after installing ActiveState.
+        The source of RRDs is available from <a
+        href="http://www.rrdtool.org/">www.rrdtool.org</a>. After
+        compilation, manually install this packages to the site/lib
+        subtree of your Perl installation. SNMP_Session package does
+        not need to be compiled because it does not rely on an
+        auxiliary DLL. After you download the archive, extract the
+        *.pm files and install them in your site/lib subtree.
+      </p>
+      <p>
+        7. Configure IIS. Start the Internet Services Manager.
+      </p>
+      <div>
+        <p>
+          a. Create a virtual directory called crickethome. Set
+          the local directory to &lt;install dir&gt;.
+        </p>
+        <p>
+          b. Register *.cgi files to be processed by the Perl
+          executable. Right-click properties on the crickethome
+          virtual directory. Disable read, write, and directory
+          browsing. Set Execute Permissions to "None". Click the
+          Configuration button. Look at the settings for the *.pl
+          extension. Then create a new Application mapping for
+          *.cgi and enter the same information.
+        </p>
+        <p>
+          c. Enable permissions on the cricket subdirectory of
+          &lt;install dir&gt; Again, right-click properties. Grant
+          read and set Execute Permissions to "Scripts and
+          Executables".
+        </p>
+        <p>d. Stop and restart the Default Web Site.</p>
+      </div>
+      <p>
+        8. Create a scheduled task to run the Cricket script
+        collect-subtrees (this the a wrapper script which
+        invokes the Cricket collector and performs logging).
+      </p>
+      <div>
+        <p>
+          a. Click on Add Scheduled Task under Control
+          Panel\Scheduled Tasks. Click through the wizard, choose
+          a dummy application, give it the name "Cricket
+          Collector", and choose a dummy run schedule. Enter the
+          username and password the monitoring account. Enable the
+          "Open advanced properties" check box and click Finish.
+        </p>
+        <p>
+          b. Now configure the real task. Enter a command line
+          similar to the following (substituting paths on your
+          system as appropriate):
+        </p>
+        <p>c:\Perl\bin\perl &lt;install dir&gt;/cricket/collect-subtrees</p>
+        <p>Set the "Start in" field to &lt;install dir&gt;</p>
+        <p>
+          c. Select the Schedule tab. Schedule the task daily;
+          then click the Advanced button. Don't choose an End
+          Date. Enable and complete the Repeat task section. Set
+          the task to run every 5 minutes (or other interval, this
+          should match the <a
+          href="reference.html#target">rrd-poll-interval</a> you
+          are using). Set the duration to 23 hours and 55 minutes
+          (or 24 hours - whatever interval you are using).
+        </p>
+        <p>d. Back on the Task tab, uncheck the Enabled checkbox.</p>
+      </div>
+      <p>
+        9. Create and compile a Cricket config tree. Configure the
+        subtree-sets file (in &lt;install dir&gt;\cricket). Refer to <a
+        href="reference.html">Cricket documentation</a> and the next
+        section on this document, <a href="#wbemodbc">Monitoring WMI
+        Counters</a>. After successful compilation, you may choose
+        to run the collector manually to check for any errors.
+      </p>
+      <p>10. Enable the scheduled task you created in step (8).</p>
+      <p>
+        11. After a few minutes, check log files in &lt;install
+        dir&gt;/cricket-logs to verify everything is running okay. Test
+        the grapher on the monitoring machine with the URL: <a
+        href="http://localhost/crickethome/cricket/grapher.cgi">http://localhost/crickethome/cricket/grapher.cgi</a>
+      </p>
+    </div>
 
-		<div>
-			<h2><a name="wbemodbc"></a>Monitoring WMI Counters</h2>
-			<p>
-				Polling WMI counters is facilitated through the fetch
-				module, wbem.pm. This diagram illustrates the layers of the
-				data collection mechanism:
-			</p>
-			<p><img src="win2kw1.gif" height="261" width="363" alt="" /></p>
-			<p>
-				As described in the Cricket documentation, each data
-				collection mechanism has a scheme, which describes a mapping
-				between the ds-source tag of the data source dictionary
-				entry and the list of arguments passed to the fetch module.
-				For WBEM, the scheme is:
-			</p>
-			<pre>wbem:host:namespace:class:field:predicate</pre>
-			<p>
-				The arguments host and namespace are used to establish a
-				connection to either the local or a remote machine. The
-				arguments class, field, and predicate are use to construct a
-				WQL query.
-			</p>
-			<p>
-				No username and password are specified for remote queries.
-				The DCOM layer automatically substitutes the username and
-				password of the monitoring account when a connection is
-				established to a remote machine.
-			</p>
-			<p>
-				Host is a Win2K host name. Host should be blank or
-				unspecified for the local machine.
-			</p>
-			<p>
-				Namespace refers to the WMI namespace to be queried. Most of
-				the interesting WMI classes are under Root\CIMV2.
-				Backslashes in the namespace specification must be escaped.
-			</p>
-			<p>
-				WQL is a language very similar to SQL for querying WMI
-				classes. A WMI class can be thought of as a table, with one
-				or more records, or instances. The attributes of the class
-				are the table fields. Conceptually, the class, field, and
-				predicate for a WBEM data source generate the query:
-			</p>
-			<pre>Select field from class where predicate</pre>
-			<p>
-				If the class of interest has only once instance, then the
-				predicate argument can be omitted. If the class has multiple
-				instances, you should specific a predicate to restrict the
-				result to a single instance. Although Cricket supports
-				multiple instances for SNMP data sources, this is not the
-				case for WBEM data sources. Each data source must be mapped
-				to exactly one WMI instance; in other words, each WQL query
-				must be a singleton select.
-			</p>
-			<p>
-				Similar to the Cricket SNMP fetch modules, wbem.pm
-				consolidates multiple requests to the same remote host and
-				the same WMI class (table) as long as the data sources are
-				within the same target (RRD file). Separate targets
-				requiring remote connections to the same host will result in
-				separate connections.
-			</p>
-			<p>
-				For example, suppose you wish to monitor both the
-				ReadOperationCount and WriteOperationCount for some
-				Win32_Process on the same machine. Here are the two
-				ds-source entries:
-			</p>
-			<pre>
+    <div>
+      <h2><a name="wbemodbc"></a>Monitoring WMI Counters</h2>
+      <p>
+        Polling WMI counters is facilitated through the fetch
+        module, wbem.pm. This diagram illustrates the layers of the
+        data collection mechanism:
+      </p>
+      <p><img src="win2kw1.gif" height="261" width="363" alt="" /></p>
+      <p>
+        As described in the Cricket documentation, each data
+        collection mechanism has a scheme, which describes a mapping
+        between the ds-source tag of the data source dictionary
+        entry and the list of arguments passed to the fetch module.
+        For WBEM, the scheme is:
+      </p>
+      <pre>wbem:host:namespace:class:field:predicate</pre>
+      <p>
+        The arguments host and namespace are used to establish a
+        connection to either the local or a remote machine. The
+        arguments class, field, and predicate are use to construct a
+        WQL query.
+      </p>
+      <p>
+        No username and password are specified for remote queries.
+        The DCOM layer automatically substitutes the username and
+        password of the monitoring account when a connection is
+        established to a remote machine.
+      </p>
+      <p>
+        Host is a Win2K host name. Host should be blank or
+        unspecified for the local machine.
+      </p>
+      <p>
+        Namespace refers to the WMI namespace to be queried. Most of
+        the interesting WMI classes are under Root\CIMV2.
+        Backslashes in the namespace specification must be escaped.
+      </p>
+      <p>
+        WQL is a language very similar to SQL for querying WMI
+        classes. A WMI class can be thought of as a table, with one
+        or more records, or instances. The attributes of the class
+        are the table fields. Conceptually, the class, field, and
+        predicate for a WBEM data source generate the query:
+      </p>
+      <pre>Select field from class where predicate</pre>
+      <p>
+        If the class of interest has only once instance, then the
+        predicate argument can be omitted. If the class has multiple
+        instances, you should specific a predicate to restrict the
+        result to a single instance. Although Cricket supports
+        multiple instances for SNMP data sources, this is not the
+        case for WBEM data sources. Each data source must be mapped
+        to exactly one WMI instance; in other words, each WQL query
+        must be a singleton select.
+      </p>
+      <p>
+        Similar to the Cricket SNMP fetch modules, wbem.pm
+        consolidates multiple requests to the same remote host and
+        the same WMI class (table) as long as the data sources are
+        within the same target (RRD file). Separate targets
+        requiring remote connections to the same host will result in
+        separate connections.
+      </p>
+      <p>
+        For example, suppose you wish to monitor both the
+        ReadOperationCount and WriteOperationCount for some
+        Win32_Process on the same machine. Here are the two
+        ds-source entries:
+      </p>
+      <pre>
 wbem:host:Root\\CIMV2:Win32_Process:ReadOperationCount:Name='process.exe'
 wbem:host:Root\\CIMV2:Win32_Process:WriteOperationCount:Name='process.exe'
-			</pre>
-			<p>
-				If these data source are in the same target, wbem.pm will
-				establish a single connection to host as username and issue
-				the WQL query:
-			</p>
-			<pre>
+      </pre>
+      <p>
+        If these data source are in the same target, wbem.pm will
+        establish a single connection to host as username and issue
+        the WQL query:
+      </p>
+      <pre>
 Select "ReadOperationCount", "WriteOperationCount" from "Win32_Process" where Name = 'process.exe'
-			</pre>
-			<p>
-				If you are uncertain as to what can be monitored via WMI,
-				you can use the WMI Object Browser included with the WMI
-				SDK. You can test the semantics and syntax of WQL queries
-				through wbemtest.exe, a utility included on all Win2K
-				systems.
-			</p>
-		</div>
+      </pre>
+      <p>
+        If you are uncertain as to what can be monitored via WMI,
+        you can use the WMI Object Browser included with the WMI
+        SDK. You can test the semantics and syntax of WQL queries
+        through wbemtest.exe, a utility included on all Win2K
+        systems.
+      </p>
+    </div>
 
-		<div>
-			<h3>Acknowledgments</h3>
-			<p>
-				Thanks to Brian Gann, Cary Yee, Adam Meltzer, Jeff Allen,
-				and John Zola. Questions or comments: contact <a
-				href="mailto:%20jakeb@users.sourceforge.net">Jake
-				Brutlag</a>.
-			</p>
-		</div>
-	</body>
+    <div>
+      <h3>Acknowledgments</h3>
+      <p>
+        Thanks to Brian Gann, Cary Yee, Adam Meltzer, Jeff Allen,
+        and John Zola. Questions or comments: contact <a
+        href="mailto:%20jakeb@users.sourceforge.net">Jake
+        Brutlag</a>.
+      </p>
+    </div>
+  </body>
 </html>

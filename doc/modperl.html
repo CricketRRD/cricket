@@ -1,80 +1,80 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-	<head>
-    	<title>Using Cricket with mod_perl </title>
-	</head>
-	<body>
-		<h1>Using Cricket with mod_perl</h1>
-		<p>
-			<tt>mod_perl</tt> is an Apache module that allows you to run
-			Perl scripts inside of Apache without forking a new process for
-			each one. This saves lots of time, since Perl only needs to
-			parse the script once and can execute it a number of times.
-		</p>
-		<p>
-			As of version 0.68, Cricket can run under <tt>mod_perl</tt>.
-			Typically, no special code needs to be added to scripts to make
-			them work in the mod_perl environment, but Cricket's lazy use of
-			namespaces required some fix up work. Mea culpa. That work has
-			been done now, and going forward, I intend to make sure Cricket
-			works under mod_perl.
-		</p>
-		<p>
-			If you'd like to use Cricket under mod_perl, you need to first
-			fetch and install Apache with the mod_perl module. Cricket has
-			only been tested so far with Apache 1.3.6 and mod_perl 1.19. The
-			best way to build and install Apache and mod_perl is to fetch
-			both packages, uncompress and untar them into one directory,
-			then go into the mod_perl directory first and follow the
-			directions in the <tt>INSTALL.apaci</tt> file.
-		</p>
-		<p>
-			Once you have an installation of Apache with mod_perl installed,
-			you need to add lines like the following to your httpd.conf file:
-		</p>
-		<pre>
-		&lt;Files *.cgi&gt;
-			SetHandler perl-script
-			PerlHandler Apache::Registry
-			Options ExecCGI
-		&lt;/Files&gt;</pre>
-		<p>
-			These lines tell your webserver that whenever it sees a file
-			ending in .cgi, it should let the embedded Perl interpreter run
-			it. This, of course, is problematic if you have some .cgi files
-			on your webserver that cannot be run by Perl. In that case, you
-			should use a more restrictive specification than "*.cgi" to
-			limit the scope of the directives to files in the Cricket user's
-			home directory.
-		</p>
-		<p>
-			There seems to be a bug which causes Apache to fail to find a
-			library file in some cases. Confusingly, this tends to happen
-			when it's trying to handle a URL that points to an image,
-			resulting in missing images. This is strange, since serving up
-			images should not require the Perl interpreter. You can fix this
-			by setting the <tt>PERL5LIB</tt> environment variable to the
-			Cricket library directory before starting the Apache webserver.
-		</p>
-		<p>
-			If you are going to be editing the library files (i.e. to add a
-			new feature), you'll want to definitely add the "PerlInitHandler
-			Apache::StatINC" directive to your config file. This will make
-			mod_perl check library timestamps and reload/reparse them when
-			necessary. You should not run a production server with this
-			enabled, since it does some extra work each time a library is
-			used, which could be avoided. If you are not using the StatINC
-			module, you will need to restart your server anytime you change
-			a library file, or else the changes will not be picked up.
-		</p>
-		<p>
-			<a href="http://cricket.sourceforge.net">Cricket</a>
-			version !!VERSION!!, released !!RELDATE!!.
-		</p>
-		<p>
-			Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
-			the <a href="gpl.html">GNU General Public License</a>.
-		</p>
-	</body>
+  <head>
+      <title>Using Cricket with mod_perl </title>
+  </head>
+  <body>
+    <h1>Using Cricket with mod_perl</h1>
+    <p>
+      <tt>mod_perl</tt> is an Apache module that allows you to run
+      Perl scripts inside of Apache without forking a new process for
+      each one. This saves lots of time, since Perl only needs to
+      parse the script once and can execute it a number of times.
+    </p>
+    <p>
+      As of version 0.68, Cricket can run under <tt>mod_perl</tt>.
+      Typically, no special code needs to be added to scripts to make
+      them work in the mod_perl environment, but Cricket's lazy use of
+      namespaces required some fix up work. Mea culpa. That work has
+      been done now, and going forward, I intend to make sure Cricket
+      works under mod_perl.
+    </p>
+    <p>
+      If you'd like to use Cricket under mod_perl, you need to first
+      fetch and install Apache with the mod_perl module. Cricket has
+      only been tested so far with Apache 1.3.6 and mod_perl 1.19. The
+      best way to build and install Apache and mod_perl is to fetch
+      both packages, uncompress and untar them into one directory,
+      then go into the mod_perl directory first and follow the
+      directions in the <tt>INSTALL.apaci</tt> file.
+    </p>
+    <p>
+      Once you have an installation of Apache with mod_perl installed,
+      you need to add lines like the following to your httpd.conf file:
+    </p>
+    <pre>
+    &lt;Files *.cgi&gt;
+      SetHandler perl-script
+      PerlHandler Apache::Registry
+      Options ExecCGI
+    &lt;/Files&gt;</pre>
+    <p>
+      These lines tell your webserver that whenever it sees a file
+      ending in .cgi, it should let the embedded Perl interpreter run
+      it. This, of course, is problematic if you have some .cgi files
+      on your webserver that cannot be run by Perl. In that case, you
+      should use a more restrictive specification than "*.cgi" to
+      limit the scope of the directives to files in the Cricket user's
+      home directory.
+    </p>
+    <p>
+      There seems to be a bug which causes Apache to fail to find a
+      library file in some cases. Confusingly, this tends to happen
+      when it's trying to handle a URL that points to an image,
+      resulting in missing images. This is strange, since serving up
+      images should not require the Perl interpreter. You can fix this
+      by setting the <tt>PERL5LIB</tt> environment variable to the
+      Cricket library directory before starting the Apache webserver.
+    </p>
+    <p>
+      If you are going to be editing the library files (i.e. to add a
+      new feature), you'll want to definitely add the "PerlInitHandler
+      Apache::StatINC" directive to your config file. This will make
+      mod_perl check library timestamps and reload/reparse them when
+      necessary. You should not run a production server with this
+      enabled, since it does some extra work each time a library is
+      used, which could be avoided. If you are not using the StatINC
+      module, you will need to restart your server anytime you change
+      a library file, or else the changes will not be picked up.
+    </p>
+    <p>
+      <a href="http://cricket.sourceforge.net">Cricket</a>
+      version !!VERSION!!, released !!RELDATE!!.
+    </p>
+    <p>
+      Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+      the <a href="gpl.html">GNU General Public License</a>.
+    </p>
+  </body>
 </html>
