@@ -45,7 +45,12 @@ sub _do {
 		my(@err) = split(/\n\s*/, $err);
 		if ($#err+1 > 2) {
 			my($code) = (split(/: /, $err[2]))[1];
-			$err = "$err[1] $code";
+			$err = "$err[1] $code.";
+			if ($code eq "noSuchName") {
+				my($oid) = $err[3];
+				$oid =~ s/.*\((.*)\).*/$1/;
+				$err .= " $oid";
+			}
 		} else {
 			$err =~ s/\n//g;
 		}

@@ -27,7 +27,17 @@ use lib "$gInstallRoot/lib";
 use strict;
 
 use snmpUtils;
+
+use Common::Options;
 use Common::Log;
+
+# Default the log level high enough to ignore warnings, unless they
+# ask for them with "./listInterfaces -loglevel warn". This is so
+# that when we get warnings for trying to talk to extended mibs, the
+# user does not freak out.
+
+unshift @ARGV, "-logLevel", "error";
+Common::Options::commonOptions();
 
 if ($#ARGV+1 < 1 || $#ARGV+1 > 2) {
 	print STDERR "usage: $0 hostname [community]\n";
