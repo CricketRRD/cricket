@@ -109,3 +109,10 @@ contributed ideas, patches, and/or debugging info:
 		a prototype of SMRTG that crystalized our ideas
 			about the config tree
 		the contributors site
+
+	Jake Brutlag
+		monitoring/monitoring documentation
+		WMI on Win2K support
+
+	Adam Meltzer
+		perfmon on Win2K support
