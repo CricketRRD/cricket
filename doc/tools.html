@@ -64,6 +64,20 @@ collect-subtrees config file, and rely on collect-subtrees to run the
 collector for you.
 <p>
 
+The collector will always run in two stages: collecting the data and
+checking thresholds for monitoring. If you for some reason do not need or
+want the threshold monitoring, you can specify the <tt>-skipMonitor</tt>
+option. Good reasons not to run this second phase include:
+<ul>
+<li>Cricket is first run, or has been down for more that your heartbeat
+interval, and you want to avoid threshold alarms because of NaN values.
+<li>You don't use threshold monitoring at all and want to avoid the overhead
+of scanning for it.
+<li>You run your collector more frequently than once every five minutes, and
+don't want the overhead for the "intermediate" runs.
+</ul>
+<p>
+
 <dt><tt>grapher.cgi</tt><p>
 <dd>
 Accepts common arguments.<p>
