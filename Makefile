@@ -1,5 +1,5 @@
 # the current Cricket version number
-VER=0.72
+VER=1.0.0
 
 # we use Perforce to control this stuff internally.
 P4=p4
