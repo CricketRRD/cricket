@@ -477,8 +477,14 @@ sub retrieveData {
         @results = ();
     }
 
-    Info("Retrieved data for $tname: ", join(",", @results));
-    Info("Some data is missing for $tname.") if ($missingData);
+    if ($gLogFullPath) {
+        my $tpath = $target->{'auto-target-path'};
+        Info("Retrieved data for $tpath/$tname: ", join(",", @results));
+        Info("Some data is missing for $tpath/$tname.") if ($missingData);
+    } else {
+        Info("Retrieved data for $tname: ", join(",", @results));
+        Info("Some data is missing for $tname.") if ($missingData);
+    }
 
     return @results;
 }

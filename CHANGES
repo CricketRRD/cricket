@@ -88,6 +88,11 @@ New features, fixes in version 1.0.4
 
         Documented the "show-path" target option [Bug #667179].
 
+        Added support for optionally logging the full path to a datasource
+        in collector output. By setting $gLogFullPath=1 in cricket-sonf.pl
+        you will get e.g. "Switches/Cat4000/core/FastEthernet0_1" instead
+        of just "FastEthernet0_1" in your logs.
+
 New features, fixes in version 1.0.3
 
 	The many disk accesses to the config database that collector

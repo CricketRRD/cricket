@@ -82,6 +82,9 @@ BEGIN {
     if (!defined($gLongDSName)) {
         $gLongDSName = 0;
     }
+    if (!defined($gLogFullPath)) {
+        $gLogFullPath = 0;
+    }
 }
 
 1;

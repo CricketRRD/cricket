@@ -43,3 +43,8 @@ $gUrlStyle="classic";    # What Cricket before 1.0.4 did.
 #	use long RRD datasource names. See the CHANGES file before enabling
 #	this.
 $gLongDSName=0;
+
+#	Set to "1" to make collector log fully qualified datasource names.
+#	e.g. When enabled, you get "/Switches/Cat4000/Core/FastEthernet0_1"
+#       instead of just "FastEthernet0_1".
+$gLogFullPath=0;
