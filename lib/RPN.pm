@@ -90,7 +90,7 @@ sub run {
 
     my($item);
     foreach $item (split(/,/, $string)) {
-        if ($item !~ /\d/ && $item =~ /^[\+\*\/\-]/ || $item =~ /^log$/i) {
+        if ($item !~ /\d/ && ($item =~ /^[\+\*\/\-]/ || $item =~ /^log$/i)) {
             $self->op($item);
         } else {
             $self->push($item);
