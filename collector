@@ -40,6 +40,8 @@ use Monitor;
 use snmp;
 use exec;
 use file;
+use field;
+
 # See the documentation on ds-source FUNC for why this defaults
 # to commented out.
 # use func;
