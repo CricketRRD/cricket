@@ -28,7 +28,7 @@ my($gDebug) = 0;
 
 # tokens which need no name
 my(%gSkipName) = ( 'oid' => 1, 'rra' => 1, 'html' => 1,
-					'color' => 1);
+                   'color' => 1);
 my(%gTextTags) = ( 'html' => 1 );
 
 sub Name { shift->_getAndSet('Name', @_) };
@@ -49,125 +49,125 @@ sub warn { shift->_getAndSet('warn', @_) };
 sub debug { shift->_getAndSet('debug', @_) };
 
 sub _getAndSet {
-	my($self, $field, $value) = @_;
-	my($retval) = $self->{$field};
-	$self->{$field} = $value if ($#_ >= 2);
-	return $retval;
+    my($self, $field, $value) = @_;
+    my($retval) = $self->{$field};
+    $self->{$field} = $value if ($#_ >= 2);
+    return $retval;
 }
 
 sub new {
-	my($class, $tmpl) = @_;
-	my($self) = {};
+    my($class, $tmpl) = @_;
+    my($self) = {};
 
-	bless($self, $class);
+    bless($self, $class);
 
-	# init the local config to an empty hash, so it's ready to fill
-	# later (in parseLines()).
-	$self->NodeCfg({});
+    # init the local config to an empty hash, so it's ready to fill
+    # later (in parseLines()).
+    $self->NodeCfg({});
 
-	# if we have a template object, copy some interesting things
-	# from it
-	if (defined($tmpl)) {
-		$self->info($tmpl->info());
-		$self->warn($tmpl->warn());
-		$self->debug($tmpl->debug());
-		$self->Base($tmpl->Base());
-		$self->Files($tmpl->Files());
+    # if we have a template object, copy some interesting things
+    # from it
+    if (defined($tmpl)) {
+        $self->info($tmpl->info());
+        $self->warn($tmpl->warn());
+        $self->debug($tmpl->debug());
+        $self->Base($tmpl->Base());
+        $self->Files($tmpl->Files());
 
-		# copy the preload stuff in, if necessary
-		if ($tmpl->Preload()) {
-			$self->Debug("Got preload...");
-			my($fm) = $tmpl->Preload()->NodeCfg();
-			my($to) = $self->NodeCfg();
-			my($dict, $name, $tag, $v1, $v2, $v3);
-			while (($dict, $v1) = each(%{$fm})) {
-				while (($name, $v2) = each(%{$v1})) {
-					while (($tag, $v3) = each(%{$v2})) {
-						$to->{$dict}->{$name}->{$tag} = $v3;
-						$self->Debug("$dict:$name:$tag = $v3");
-					}
-				}
-			}
-		}
-	}
+        # copy the preload stuff in, if necessary
+        if ($tmpl->Preload()) {
+            $self->Debug("Got preload...");
+            my($fm) = $tmpl->Preload()->NodeCfg();
+            my($to) = $self->NodeCfg();
+            my($dict, $name, $tag, $v1, $v2, $v3);
+            while (($dict, $v1) = each(%{$fm})) {
+                while (($name, $v2) = each(%{$v1})) {
+                    while (($tag, $v3) = each(%{$v2})) {
+                        $to->{$dict}->{$name}->{$tag} = $v3;
+                        $self->Debug("$dict:$name:$tag = $v3");
+                    }
+                }
+            }
+        }
+    }
 
-	return $self;
+    return $self;
 }
 
 sub init {
-	my($self, $name) = @_;
+    my($self, $name) = @_;
 
-	if (! defined($name)) {
-		# this is the first call to init().
-		$name = '/';
-		$self->Files({});
-		$self->Info("Config directory is " . $self->Base());
-	}
+    if (! defined($name)) {
+        # this is the first call to init().
+        $name = '/';
+        $self->Files({});
+        $self->Info("Config directory is " . $self->Base());
+    }
 
-	$self->Debug("Setting name to $name");
-	$self->Name($name);
+    $self->Debug("Setting name to $name");
+    $self->Name($name);
 
-	my($dir) = $self->Base() . $self->Name();
-	$dir =~ s/\/$//;
+    my($dir) = $self->Base() . $self->Name();
+    $dir =~ s/\/$//;
 
-	my($item, @files, @dirs, $def);
-	foreach $item (<$dir/*>) {
-		if ($item =~ /\/Defaults$/ && -f $item) {
-			$def = $item;
-		} elsif ($item =~ /\~$/) {
-			$self->Warn("Skipping probable backup file: $item");
-		} elsif (-f $item) {
-			push @files, $item unless $self->skipFile($item);
-		} elsif (-d $item) {
-			push @dirs, $item unless $self->skipFile($item);
-		} else {
-			$self->Warn("Unknown object type for $item.");
-		}
-	}
+    my($item, @files, @dirs, $def);
+    foreach $item (<$dir/*>) {
+        if ($item =~ /\/Defaults$/ && -f $item) {
+            $def = $item;
+        } elsif ($item =~ /\~$/) {
+            $self->Warn("Skipping probable backup file: $item");
+        } elsif (-f $item) {
+            push @files, $item unless $self->skipFile($item);
+        } elsif (-d $item) {
+            push @dirs, $item unless $self->skipFile($item);
+        } else {
+            $self->Warn("Unknown object type for $item.");
+        }
+    }
 
-	if ($def) {
-		$self->_readFile($def);
-	}
+    if ($def) {
+        $self->_readFile($def);
+    }
 
-	foreach $item (@files) {
-		$self->_readFile($item, 1);
-	}
-	
-	foreach $item (@dirs) {
-		my($path, $dirName) = ($item =~ /^(.*)\/(.*)$/);
+    foreach $item (@files) {
+        $self->_readFile($item, 1);
+    }
 
-		my($new) = new ConfigTree::Node $self;
-		$new->Dir(1);
+    foreach $item (@dirs) {
+        my($path, $dirName) = ($item =~ /^(.*)\/(.*)$/);
 
-		my($newName) = $self->Name() . "/" . $dirName;
-		$newName =~ s#^\/\/#\/#;
-		$new->init($newName);
+        my($new) = new ConfigTree::Node $self;
+        $new->Dir(1);
 
-		$self->addChild($new);
-	}
+        my($newName) = $self->Name() . "/" . $dirName;
+        $newName =~ s#^\/\/#\/#;
+        $new->init($newName);
+
+        $self->addChild($new);
+    }
 }
 
 sub dump {
-	my($self) = @_;
+    my($self) = @_;
 
-	$self->doTree(
-		sub {
-			$self->Info(("  " x $_[2]) . "Name: " . $_[0]->Name())
-		}
-		);
+    $self->doTree(
+                  sub {
+                      $self->Info(("  " x $_[2]) . "Name: " . $_[0]->Name())
+                      }
+    );
 
-	return;
+    return;
 }
 
 sub compile {
-	my($self, $base) = @_;
+    my($self, $base) = @_;
 
-	# default to the config tree's base
-	$base = $self->Base() unless ($base);
+    # default to the config tree's base
+    $base = $self->Base() unless ($base);
 
     my($file) = "$base/config.db.new";
     my($finalFile) = "$base/config.db";
-    my($errorLevel); 
+    my($errorLevel);
     # we are being asked to do a complete rebuild, so start
     # from scratch
     unlink($file);
@@ -175,121 +175,121 @@ sub compile {
     my(%db);
     my($dbh) = tie %db, 'DB_File', $file, O_CREAT|O_RDWR, 0644, $DB_BTREE;
 
-	my($ct) = $self->compileTree(\%db);
+    my($ct) = $self->compileTree(\%db);
 
-	# put the entire set of files into the compiled form, so that
-	# we can compare the mtimes later and recompile if necessary
-	my($f);
-	my($filesRef) = $self->Files();
-	my(@f) = keys(%{$filesRef});
-	foreach $f (@f) {
-		$db{"f:$f"} = $filesRef->{$f};
-	}
-	$db{"F:"} = join(',', @f);
+    # put the entire set of files into the compiled form, so that
+    # we can compare the mtimes later and recompile if necessary
+    my($f);
+    my($filesRef) = $self->Files();
+    my(@f) = keys(%{$filesRef});
+    foreach $f (@f) {
+        $db{"f:$f"} = $filesRef->{$f};
+    }
+    $db{"F:"} = join(',', @f);
 
-	undef $dbh;
+    undef $dbh;
     untie %db;
 
     rename($file, $finalFile) or $errorLevel = $!;
 
-    if($errorLevel) {
-	Common::Log::Error("config.db.new could not be renamed to config.db!");
-	Common::Log::Error("Reason is: $errorLevel");
-	Common::Log::Error("This is usually due to collector locking config.db.");
-	Common::Log::Error("Your changes won't take effect until this is resolved!");
+    if ($errorLevel) {
+        Common::Log::Error("config.db.new could not be renamed to config.db!");
+        Common::Log::Error("Reason is: $errorLevel");
+        Common::Log::Error("This is usually due to collector locking config.db.");
+        Common::Log::Error("Your changes won't take effect until this is resolved!");
     }
     return ($ct, $#f+1);
 }
 
 sub compileTree {
-	my($self, $dbref) = @_;
-	my($ct) = 0;
+    my($self, $dbref) = @_;
+    my($ct) = 0;
 
     $self->compileNode($dbref);
     $ct++;
- 
+
     my($child);
     foreach $child ($self->getChildren()) {
         $ct += $child->compileTree($dbref);
-	}
+    }
 
-	return $ct;
+    return $ct;
 }
 
 sub compileNode {
-	my($self, $dbRef) = @_;
+    my($self, $dbRef) = @_;
 
-	# put the data from the config hash into the db, along with
-	# enough data to let us avoid seq-ing over it. We don't want to
-	# use seq, since it's Btree-specific, and we don't want to
-	# stick people with that. (They should be able to use (ugh) dbm if
-	# they need to.)
+    # put the data from the config hash into the db, along with
+    # enough data to let us avoid seq-ing over it. We don't want to
+    # use seq, since it's Btree-specific, and we don't want to
+    # stick people with that. (They should be able to use (ugh) dbm if
+    # they need to.)
 
-	my($node) = $self->Name();
-	my($cfg) = $self->NodeCfg();
+    my($node) = $self->Name();
+    my($cfg) = $self->NodeCfg();
 
-	my($dict, $name, $tag, $v, @dicts, @names, @tags);
-	@dicts = ();
-	foreach $dict (keys(%{$cfg})) {
-		@names = ();
-		foreach $name (keys(%{$cfg->{$dict}})) {
-			@tags = ();
-			foreach $tag (keys(%{$cfg->{$dict}->{$name}})) {
-				$dbRef->{"d:$node:$dict:$name:$tag"} =
-					$cfg->{$dict}->{$name}->{$tag};
-				push @tags, $tag;
-			}
-			$dbRef->{"t:$node:$dict:$name"} = join(',', @tags);
-			push @names, $name;
-		}
-		#$dbRef->{"n:$node:$dict"} = join(',', @names);
-		push @dicts, $dict;
-	}
-	#$dbRef->{"D:$node"} = join(',', @dicts);
+    my($dict, $name, $tag, $v, @dicts, @names, @tags);
+    @dicts = ();
+    foreach $dict (keys(%{$cfg})) {
+        @names = ();
+        foreach $name (keys(%{$cfg->{$dict}})) {
+            @tags = ();
+            foreach $tag (keys(%{$cfg->{$dict}->{$name}})) {
+                $dbRef->{"d:$node:$dict:$name:$tag"} =
+                    $cfg->{$dict}->{$name}->{$tag};
+                push @tags, $tag;
+            }
+            $dbRef->{"t:$node:$dict:$name"} = join(',', @tags);
+            push @names, $name;
+        }
+        #$dbRef->{"n:$node:$dict"} = join(',', @names);
+        push @dicts, $dict;
+    }
+    #$dbRef->{"D:$node"} = join(',', @dicts);
 
-	# put a comma-separated list of the relative names of the children
-	# into a "c:" key in the db.
-	my($child, @children);
-	foreach $child ($self->getChildren()) {
-		push @children, $child->Name();
-	}
-	$dbRef->{'c:' . $node } = join(',', @children);
+    # put a comma-separated list of the relative names of the children
+    # into a "c:" key in the db.
+    my($child, @children);
+    foreach $child ($self->getChildren()) {
+        push @children, $child->Name();
+    }
+    $dbRef->{'c:' . $node } = join(',', @children);
 
-	# tuck the parent into a "p:" key.
-	if ($self->Parent()) {
-		$dbRef->{'p:' . $node } = $self->Parent()->Name();
-	} else {
-		$dbRef->{'p:' . $node } = '';
-	}
+    # tuck the parent into a "p:" key.
+    if ($self->Parent()) {
+        $dbRef->{'p:' . $node } = $self->Parent()->Name();
+    } else {
+        $dbRef->{'p:' . $node } = '';
+    }
 
-	if ($self->Dir()) {
-		$dbRef->{'r:' . $node } = 1;
-	}
+    if ($self->Dir()) {
+        $dbRef->{'r:' . $node } = 1;
+    }
 
-	# Just to recap:
-	#	d is for data
-	#	t is for tags
-	#	n is for names
-	#	D is for dicts
-	#	c if for a list of children
-	#	p is for the name of the parent
-	#	r:$name is 1 when this node is a directory (lets us ignore empty
-	#		directories later)
-	#	f:file => mtime
-	#	F: => comma separated list of files
+    # Just to recap:
+    #   d is for data
+    #   t is for tags
+    #   n is for names
+    #   D is for dicts
+    #   c if for a list of children
+    #   p is for the name of the parent
+    #   r:$name is 1 when this node is a directory (lets us ignore empty
+    #       directories later)
+    #   f:file => mtime
+    #   F: => comma separated list of files
 }
 
 sub processTree {
-	my($self) = @_;
+    my($self) = @_;
 
     $self->processNode();
- 
+
     my($child);
     foreach $child ($self->getChildren()) {
-		if ( $child ne 'CVS' ) {
-        	$child->processTree();
-		}
-	}
+        if ( $child ne 'CVS' ) {
+            $child->processTree();
+        }
+    }
 }
 
 # Here we do any post-processing of the config that we desire.
@@ -298,99 +298,99 @@ sub processTree {
 # so that the grapher does not have to.
 
 sub processNode {
-	my($self) = @_;
+    my($self) = @_;
 
-	my($name) = $self->Name();
-	my($cfg) = $self->NodeCfg();
+    my($name) = $self->Name();
+    my($cfg) = $self->NodeCfg();
 
-	my($evRef) = $cfg->{'event'};
-	if ($evRef) {
-		my($evName);
-		foreach $evName (keys(%{$evRef})) {
-			my($evDate) = $evRef->{$evName}->{'date'};
-			if ($evDate && !defined($evRef->{$evName}->{'time'})) {
-				my($t) = str2time($evDate);
-				if (! defined($t)) {
-					$self->Warn("Could not parse date $evDate ".
-								"for event $evName");
-				} else {
-					$evRef->{$evName}->{'time'} = $t;
-					$self->Debug("date string $evDate for $evName becomes time $t");
-				}
-			}
-		}
-	}
+    my($evRef) = $cfg->{'event'};
+    if ($evRef) {
+        my($evName);
+        foreach $evName (keys(%{$evRef})) {
+            my($evDate) = $evRef->{$evName}->{'date'};
+            if ($evDate && !defined($evRef->{$evName}->{'time'})) {
+                my($t) = str2time($evDate);
+                if (! defined($t)) {
+                    $self->Warn("Could not parse date $evDate ".
+                                "for event $evName");
+                } else {
+                    $evRef->{$evName}->{'time'} = $t;
+                    $self->Debug("date string $evDate for $evName becomes time $t");
+                }
+            }
+        }
+    }
 }
 
 sub addChild {
-	my($self, @children) = @_;
+    my($self, @children) = @_;
 
-	my($child);
-	foreach $child (@children) {
-		$child->Parent($self);
-	}
+    my($child);
+    foreach $child (@children) {
+        $child->Parent($self);
+    }
 
-	push @{$self->{'Children'}}, @children;
-	return;
+    push @{$self->{'Children'}}, @children;
+    return;
 }
 
 sub getChildren {
-	my($self) = @_;
-	if ($self->{'Children'}) {
-		return @{$self->{'Children'}};
-	} else {
-		return ();
-	}
+    my($self) = @_;
+    if ($self->{'Children'}) {
+        return @{$self->{'Children'}};
+    } else {
+        return ();
+    }
 }
 
 sub _readFile {
-	my($self, $file, $leaf) = @_;
+    my($self, $file, $leaf) = @_;
     my($buffer);
- 
+
     # $self->Debug("Processing file: $file");
-	$self->File($file);
+    $self->File($file);
 
-	my($fh) = new FileHandle; 
-	if (! $fh->open("<$file")) {
-		$self->Warn("Cannot parse $file: $!");
-	} else {
-		my($line);
-		while (defined($line = <$fh>)) {
-			chomp($line);
- 
-			# handle comments and blank lines
-			$line =~ s/^\s*#.*$//;
-			next if ($line =~ /^\s*$/);
- 
-			if ($line !~ /^\s/) {
-				# this is an initial line
-				$self->parseLines($buffer, $leaf) if $buffer;
-				$buffer = $line;
-			} else {
-				# this is a continuation line
-				$buffer .= "\n";
-				$buffer .= $line;
-			}
-		}
-	}
-	$self->parseLines($buffer, $leaf) if $buffer;
+    my($fh) = new FileHandle;
+    if (! $fh->open("<$file")) {
+        $self->Warn("Cannot parse $file: $!");
+    } else {
+        my($line);
+        while (defined($line = <$fh>)) {
+            chomp($line);
 
-	my($mtime) = (stat($fh))[9];
-	if (! defined($mtime)) {
-		$self->Warn("Could not get mtime for file $file.");
-	} else {
-		($self->Files())->{$file} = $mtime;
-	}
+            # handle comments and blank lines
+            $line =~ s/^\s*#.*$//;
+            next if ($line =~ /^\s*$/);
 
-	$fh->close();
+            if ($line !~ /^\s/) {
+                # this is an initial line
+                $self->parseLines($buffer, $leaf) if $buffer;
+                $buffer = $line;
+            } else {
+                # this is a continuation line
+                $buffer .= "\n";
+                $buffer .= $line;
+            }
+        }
+    }
+    $self->parseLines($buffer, $leaf) if $buffer;
+
+    my($mtime) = (stat($fh))[9];
+    if (! defined($mtime)) {
+        $self->Warn("Could not get mtime for file $file.");
+    } else {
+        ($self->Files())->{$file} = $mtime;
+    }
+
+    $fh->close();
 }
 
 sub parseLines {
-	my($self, $lines, $leaf) = @_;
-	my(@words);
-	my($at) = "at (or before) " . $self->File() . " line ${.}.";
+    my($self, $lines, $leaf) = @_;
+    my(@words);
+    my($at) = "at (or before) " . $self->File() . " line ${.}.";
 
-	$lines =~ s/\s*$//;
+    $lines =~ s/\s*$//;
     eval {
         local $SIG{'__DIE__'};
         @words = quotewords('[\s=]+', 0, $lines);
@@ -401,64 +401,64 @@ sub parseLines {
     if ($@ =~ /Unmatched/) {
         $@ =~ s/ at .*$//;
         $@ =~ s/\n//;
-		$self->Warn("$@ $at");
-		return;
+        $self->Warn("$@ $at");
+        return;
     }
 
     my($token) = lc(shift @words);
     if (! defined($token)) {
-		$self->Warn("Missing token $at");
-		return;
+        $self->Warn("Missing token $at");
+        return;
     }
 
-	my($isText) = $gTextTags{$token};
+    my($isText) = $gTextTags{$token};
 
     my($name);
-	if ($isText || $gSkipName{$token}) {
-		# it was the CD I was listening to at the time... sue me.
-		$name = '--merril--';
-	} else {
-		$name = lc(shift @words);
-    	if (! defined($name)) {
-			$self->Warn("Missing $token name $at");
-			return;
-    	}
-	}
-
-	# forge a dictionary if this is a text tag, so that the
-	# coming code can handle it without changes.
-	if ($isText) {
-		my($junk, $key, $text) = split(/\s+/, $lines, 3);
-		@words = ($key, $text);
-	}
-
-	# make certain there's a valid dict left to parse.
-    if (!$isText && ($#words+1) % 2) {
-		$self->Warn("Missing equals sign $at");
-		return;
+    if ($isText || $gSkipName{$token}) {
+        # it was the CD I was listening to at the time... sue me.
+        $name = '--merril--';
+    } else {
+        $name = lc(shift @words);
+        if (! defined($name)) {
+            $self->Warn("Missing $token name $at");
+            return;
+        }
     }
 
-	my($node);
-	if ($token eq 'target') {
-		if ($name eq '--default--') {
-			if ($self->Done()) {
-				if (! $self->Preload()) {
-					$self->Debug("Making a preload node.");
-					$self->Preload(new ConfigTree::Node);
-				}
-				$node = $self->Preload();
-				$self->Debug("Using a preload node.");
-			} else {
-				$node = $self;
-			}
-		} else {
-			$node = new ConfigTree::Node $self;
-			$node->Name($self->Name() . "/$name");
-			$self->addChild($node);
-		}
-	} else {
-		$node = $self;
-	}
+    # forge a dictionary if this is a text tag, so that the
+    # coming code can handle it without changes.
+    if ($isText) {
+        my($junk, $key, $text) = split(/\s+/, $lines, 3);
+        @words = ($key, $text);
+    }
+
+    # make certain there's a valid dict left to parse.
+    if (!$isText && ($#words+1) % 2) {
+        $self->Warn("Missing equals sign $at");
+        return;
+    }
+
+    my($node);
+    if ($token eq 'target') {
+        if ($name eq '--default--') {
+            if ($self->Done()) {
+                if (! $self->Preload()) {
+                    $self->Debug("Making a preload node.");
+                    $self->Preload(new ConfigTree::Node);
+                }
+                $node = $self->Preload();
+                $self->Debug("Using a preload node.");
+            } else {
+                $node = $self;
+            }
+        } else {
+            $node = new ConfigTree::Node $self;
+            $node->Name($self->Name() . "/$name");
+            $self->addChild($node);
+        }
+    } else {
+        $node = $self;
+    }
 
     # all this mess is to get a reference to a hash where
     # the parser will be allowed to scribble.
@@ -496,29 +496,29 @@ sub parseLines {
         $cfgRef->{$name}->{$k} = $v;
     }
 
-	$self->Done(1);
+    $self->Done(1);
 
     return 1;
 }
 
 sub getNode {
-	my($self, $nodeName) = @_;
+    my($self, $nodeName) = @_;
 
-	if ($nodeName eq $self->Name()) {
-		return $self;
-	} else {
-		my($child);
-		foreach $child ($self->getChildren()) {
-			my($res) = $child->getNode($nodeName);
-			return $res if (defined($res));
-		}
-		return;
-	}
+    if ($nodeName eq $self->Name()) {
+        return $self;
+    } else {
+        my($child);
+        foreach $child ($self->getChildren()) {
+            my($res) = $child->getNode($nodeName);
+            return $res if (defined($res));
+        }
+        return;
+    }
 }
 
 sub Debug {
     my($self, $msg) = @_;
-	$msg = "[" . ($self->Name() ? $self->Name() : "?") . "] $msg";
+    $msg = "[" . ($self->Name() ? $self->Name() : "?") . "] $msg";
 
     if (defined($self->{'debug'})) {
         &{$self->{'debug'}}($msg);
@@ -526,7 +526,7 @@ sub Debug {
         CORE::warn("DEBUG: " . $msg . "\n") if ($gDebug);
     }
 }
- 
+
 sub Info {
     my($self, $msg) = @_;
     if (defined($self->{'info'})) {
@@ -535,7 +535,7 @@ sub Info {
         CORE::warn($msg . "\n");
     }
 }
- 
+
 sub Warn {
     my($self, $msg) = @_;
     if (defined($self->{'warn'})) {
@@ -546,31 +546,31 @@ sub Warn {
 }
 
 sub doTree {
-	my($self, $cb, $state, $level) = @_;
+    my($self, $cb, $state, $level) = @_;
 
-	$level = 0 unless(defined($level));
+    $level = 0 unless(defined($level));
 
-	&{$cb}($self, $state, $level);
+    &{$cb}($self, $state, $level);
 
-	my($child);
-	foreach $child ($self->getChildren()) {
-		$child->doTree($cb, $state, $level+1);
-	}
+    my($child);
+    foreach $child ($self->getChildren()) {
+        $child->doTree($cb, $state, $level+1);
+    }
 }
 
 sub isLeaf {
-	my($self) = @_;
-	return (!defined($self->{'Children'}));
+    my($self) = @_;
+    return (!defined($self->{'Children'}));
 }
 
 sub break {
-	print "Splero!\n"
+    print "Splero!\n"
 };
 
 sub skipFile {
     my($self, $file) = @_;
     my($res) = 0;
- 
+
     $res = 1 if ($file =~ /\/#.*#$/);
     $res = 1 if ($file =~ /\/README$/);
     $res = 1 if ($file =~ /\.bak$/);
@@ -581,9 +581,16 @@ sub skipFile {
     $res = 1 if ($file =~ /~$/);
     $res = 1 if ($file =~ /\/config.db$/);
     $res = 1 if ($file =~ /\/config.db.new$/);
-    $res = 1 if ($file =~ /\/CVS$/); 
- 
+    $res = 1 if ($file =~ /\/CVS$/);
+
     return $res;
 }
 
 1;
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
