@@ -300,13 +300,18 @@ target pop-2
 			</ol>
 			<p>
 				failures: The failures monitor threshold is integrated
-				with aberrant behavior detection in RRDtool. This
-				requires a 1.1.x version of RRDtool and aberrant
-				behavior detection to be enabled/configured for the
-				target. Visit <a
-				href="http://cricket.sourceforge.net/aberrant">http://
-				cricket.sourceforge.net/aberrant</a> for more
-				information.
+				with aberrant behavior detection in RRDtool. This monitor
+			    checks the FAILURES RRA for the target and datasource. If
+				the current value is 1, this indicates aberrant behavior.
+				Aberrant behavior detection must be enabled for the target,
+				which requires RRDtool 1.1.x.
+				This threshold may be conditioned on the current
+				value of the datasource. In this case, the threshold is only
+				triggered when both the FAILURES RRA is 1 and the current value
+				of the data source is within a specified range. This range is
+				specified via two colon-delimited arguments; the first is the min
+				or "n" to specify no lower bound and the second is the max
+				or "n" to specify no upper bound.
 			</p>
 		</div>
 
@@ -332,11 +337,13 @@ target pop-2
 				specific type is 4 for failure (violation) of the
 				monitor threshold criteria and 5 for success (recall the
 				trap is cleared on the first success after one or more
-				failures).&nbsp; There are currently six varbinds: the
+				failures).&nbsp; There are currently nine varbinds: the
 				monitor type,&nbsp; the monitor threshold string, the
 				target name, data source name, cricket user name (set to
-				"cricket" on Win32 platforms), and instance number (to
-				distinguish targets with multiple instances). These
+				"cricket" on Win32 platforms), instance number (to
+				distinguish targets with multiple instances), instance name,
+				contact name (based on the html dictionary entry contact-name),
+				and data value. These
 				varbinds are set (and could be customized) in the
 				sendMonitorTrap() subroutine in Monitor.pm.
 			</p>

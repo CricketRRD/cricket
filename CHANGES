@@ -1,5 +1,8 @@
 New features, fixes in version 1.0.4
 
+	Documentation for the failures monitor threshold. Permit
+	conditioning a failures monitor threshold on a range.
+
 	Fix to loading WMI Scripting constants library in wbem.pm.
 	Should allow using WMI on WinXP.
 

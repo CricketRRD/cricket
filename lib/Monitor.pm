@@ -65,7 +65,7 @@ sub monValue {
     if (lc($min) eq 'n') {
         $minOK = 1;
     } else {
-        $minOK = ($value > $min);
+        $minOK = ($value > $min) ? 1 : 0;
     }
 
     $max = shift(@Thresholds);
@@ -74,10 +74,9 @@ sub monValue {
     if (lc($max) eq 'n') {
         $maxOK = 1;
     } else {
-        $maxOK = ($value < $max)
+        $maxOK = ($value < $max) ? 1 : 0;
     }
     Debug ("Value is $value; min is $min; max is $max");
-
     return ($maxOK && $minOK,$value);
 }
 
@@ -169,7 +168,7 @@ sub monRelation {
     }
 
     my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return 1 if ($cmp_value =~ /^NaN/);
+    return 1 if ($cmp_value =~ /^NaN|^nan/);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -222,6 +221,14 @@ sub monExact {
 sub monFailures {
     my($self, $target, $ds, $type, $args) = @_;
 
+    # only check value range if specified, as this requires fetching from the RRD
+    if ($args =~ /:/) {
+        # monValue returns 0 if out of range, 1 otherwise
+        my ($rc, $value) = $self->monValue($target,$ds,'value',$args);
+        Debug("value is $value, in range $rc");
+        # value is out of range, so ignore any failure alarm
+        if ($rc == 0) { return 1 };
+    }
     my $datafile = $target->{'rrd-datafile'};
     my $dsNum = $self->getDSNum($target, $ds);
     return 1 if (!defined($dsNum));
@@ -252,7 +259,7 @@ sub monFailures {
         return 1;
     }
     # FAILURES array stores a 1 for a failure (so should return 0)
-    return 1 if ($ret =~ /^NaN/);
+    return 1 if ($ret =~ /^NaN|^nan/);
     return !($ret);
 }
 
@@ -293,7 +300,7 @@ sub monQuotient {
     }
 
     my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return 1 if ($cmp_value =~ /^NaN/);
+    return 1 if ($cmp_value =~ /^NaN|^nan/);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -348,7 +355,7 @@ sub FetchComparisonValue {
         return 'NaN';
     }
 
-    if ($cmp_value =~ /NaN/) {
+    if ($cmp_value =~ /^NaN|^nan/) {
         Info("Skipping: Data for $cmp_time seconds ago from " .
              "$cmp_name is NaN");
         return 'NaN';
@@ -552,7 +559,7 @@ sub sendMonitorTrap {
             push(@VarBinds, "${OID_Prefix}.8", 'string', $1);
         }
     }
-    push(@VarBinds, "${OID_Prefix}.9", 'string', $val);
+    push(@VarBinds, "${OID_Prefix}.9", 'string', $val) unless (!defined($val));
 
     Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
     snmpUtils::trap2($to,$spec,@VarBinds);
