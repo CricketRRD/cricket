@@ -1,4 +1,23 @@
-New features, fixes in version 1.1.x (?):
+New features, fixes in version 1.0.3
+
+	Support for SNMP version 2, as well as for the additional
+	options that SNMP_Session now offers has been added to
+	the sample-config/Defaults file. For existing installations,
+	it is recommended you install the sample-config/Defaults into
+	your cricket-config and merge your local changes in.
+	If you do this, or if you install Cricket from scratch, you
+	should use SNMP_Session version 0.80 or higher (it is
+	recommended to upgrade SNMP_Session regardless, there were
+	some rare but hard to diagnose bugs in version prior to 0.78).
+	The defaults are
+		snmp-timeout = 2.0
+		snmp-retries = 5
+		snmp-version = 1
+	If you know what you're doing, you could reduce the number of
+	retries or the timeout, but this is not recommended. Existing
+	Cricket users should first evaluate the effectiveness of
+	the dead-SNMP-host detection that's new with 1.0.3 before
+	mucking with the SNMP settings.
 
 	Support for Windows Management Instrumentation on the Windows
 	2000 Platform. Refer to doc/win2kwmi.html.
