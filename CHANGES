@@ -23,7 +23,7 @@ New features, fixes in version 1.0.4
 	for using Apache <Location> access restrictions).
 
 	It is possible to mark NaN samples in the graph with a colored
-	background. This enabled via the view tag paint-nan (boolean value).
+	background. This is enabled via the view tag paint-nan (boolean value).
 	WARNING: do not enable this if you use the STACK draw-as
 	type anywhere in your graphs.
 
