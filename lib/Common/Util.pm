@@ -109,7 +109,12 @@ sub runTime {
 # Thanks to Steen Linden for helping with a fix for this.
 sub fixNum {
 	my($n) = @_;
-	$n = sprintf("%0.20g", $n);
+
+	if(!$n) {
+		Error("Value not defined in Common::Util::fixNum()!");
+	}
+
+	$n = sprintf("%0.20g", $n) if($n =~ /^\d\.\d+e\+\d+$/);
 	return $n;
 }
 
