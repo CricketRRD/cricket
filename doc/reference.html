@@ -830,10 +830,12 @@ Here's a detailed description of each scheme.
   <P>
   <tt>col</tt> is used to get a particular column of data returned from the
   first returned row. Currently any other rows returned get discarded.
+  <P>
   <tt>DRIVER</tt> can have colons in it. Cricket's parser will not treat it
   like seperate arguments to the ds itself. 
   <p>
   Here is an example:
+  <P>
   <tt>sql:anonymous::select top 1 samplevalue from samplednumericdata where idsamplednumericdatasource = 'C04E3055-B282-4EE9-9F5D-CB46DC45C988' order by timesampled desc:1:dbi:Sybase:NMSDB</tt>
   <P>
 
