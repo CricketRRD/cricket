@@ -2359,6 +2359,9 @@ sub searchHandleTarget {
     my($path) = "";
     my($target) = $gCT->configHash($name, 'target', undef, 1);
 
+    $path = $target->{'auto-target-path'};
+    return if (exists($searchHash->{$path}));
+
     # Return if it is not the chassis target 
     # or contains at least one tag/value pair
     return unless (defined($target->{'auto-target-name'}) && 
@@ -2368,27 +2371,23 @@ sub searchHandleTarget {
         if ($val =~ /\w+=\w+/) {
             my ($attr, $tval) = split (/=/, $val);
             if (defined($target->{$attr}) && ($target->{$attr} =~ /$tval/i)) {
-                $path = $target->{'auto-target-path'};
                 $match = 1;
             }
         } elsif ($val =~ /\w+!=\w+/) {
             my ($attr, $tval) = split (/!=/, $val);
             if (defined($target->{$attr}) && ($target->{$attr} !~ /$tval/i)) {
-                $path = $target->{'auto-target-path'};
                 $match = 1;
             }
         } elsif (defined($target->{'display-name'})
              && $target->{'display-name'} =~ /$val/i) {
-            $path = $target->{'auto-target-path'};
             $match = 1;
         } elsif (defined($target->{'snmp-host'}) 
              && $target->{'snmp-host'} =~ /$val/i) {
-            $path = $target->{'auto-target-path'};
             $match = 1;
         }
     }
     # No duplicate targets should be displayed after a search
-    $searchHash->{$path} = $path if ($match && !exists($searchHash->{$path}));
+    $searchHash->{$path} = $path if ($match);
 }
 
 # Local Variables:
