@@ -1,3 +1,17 @@
+New features, fixes in version 1.0.5
+
+	Cricket 1.0.5 is essentially a minor bugfix release.
+
+	The distributed sample-config/Defaults has width-hint and
+	height-hint commented out, to cut down on squashed graphics.
+
+	All text files now have LF line endings. In the 1.0.4 release,
+	a number of files were inadvertantly changed to have CRLF line
+	endings.
+
+	A small bug in threshold monitoring was identified and fixed
+	by Jase MacLeod.
+
 New features, fixes in version 1.0.4
 
 	Added span option for monitor-thresholds of all types [Patch #838250].
