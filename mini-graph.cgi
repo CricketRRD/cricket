@@ -66,7 +66,7 @@ sub doGraph {
             exec("$Common::global::gInstallRoot/grapher.cgi");
         }
     } else {
-        Debug("Cached image exists. Using that.");
+        Debug("Cached image exists: $imageName. Using that.");
         sprayPng($imageName);
     }
 }
@@ -112,8 +112,12 @@ sub generateImageName {
 
     $md5 = new Digest::MD5;
 
+    # make sure to munge $target correctly if $gUrlStyle = pathinfo
+    $md5->add($param, urlTarget($q));
+
     foreach $param ($q->param()) {
         next if ($param eq 'rand');
+        next if ($param eq 'target');
         if ($param eq 'cache') {
             if (lc($q->param($param)) eq 'no') {
                 return;
@@ -125,6 +129,21 @@ sub generateImageName {
 
     return "$Common::global::gCacheDir/cricket-$hash.png";
 }
+
+# Get or set the target from the $cgi object.
+sub urlTarget {
+    my $cgi = shift;
+    my $target = shift;
+    return $cgi->param('target', $target) if !$gUsePathInfo;
+    if (!defined($target)) {
+        $target = $cgi->path_info();
+        $target =~ s/\/+$//;  # Zonk any trailing slashes
+        $target ||= "/";      # but we name the root explicitly
+        return $target;
+    }
+    $cgi->path_info($target);
+}
+
 
 # Local Variables:
 # mode: perl
