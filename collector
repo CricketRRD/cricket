@@ -258,7 +258,7 @@ sub retrieveData {
 
     # Determine the list of data sources for this target.
     my(@targetDSs) = split(/\s*,\s*/, $ttRef->{'ds'});
-	if (! defined(@targetDSs)) {
+	if (!@targetDSs) {
 		Warn("Could not find any datasources for target type $ttype.");
 		return ();
 	}
