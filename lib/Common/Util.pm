@@ -95,6 +95,7 @@ sub isWin32 {
 
 sub runTime {
     my $starttime = shift;
+    $starttime = $^T unless defined $starttime;
     my($time) = time() - $starttime;
     if ($time > 59) {
         my($min) = int($time / 60);
