@@ -294,12 +294,15 @@ sub doHTMLPage {
 
             my(@targets, $isMulti, $plural);
             if (defined($targRef->{'targets'})) {
+                my $targets = $targRef->{'targets'};
                 my($path) = $targRef->{'auto-target-path'};
                 my($target);
-                foreach $target (split(/\s*;\s*/, ($targRef->{'targets'}))) {
+                foreach $target (split(/\s*;\s*/, $targets)) {
 
                     # this allows local targets to use shorter names
                     $target = "$path/$target" unless ($target =~ /^\//);
+                    # This regex lowercases just the last item:
+                    $target =~ s:([^/]+)$:lc $1:e;
 
                     # now, look for things like '/target:(0..4)'
                     # and add all of them correctly.
@@ -827,6 +830,8 @@ sub doHTMLSummary {
     my($thisName);
     foreach $thisName (@mtargets) {
         if ($isMTargets) {
+            # This regex lowercases just the last item in the thisName path:
+            $thisName =~ s:([^/]+)$:lc $1:e;
             $targRef = $gCT->configHash($thisName, 'target', undef, 1);
             $tname = $targRef->{'auto-target-name'};
         } else {
@@ -981,6 +986,13 @@ sub doHTMLSummary {
         } else {
             print "Current values not available: ";
             print "$RRD::File::gErr<br>\n" if (defined($RRD::File::gErr));
+            # FIXME: This should be dealt with in a cleaner way, but that's
+            # left for a larger mtargets cleanup. driehuis 20020314
+            if ($isMTargetsOps)  {
+                foreach my $dsname (split(/,/, $dslist)) {
+                    push @{$str{lc $dsname}}, 0;
+                }
+            }
         }
         if (!$isMTargetsOps)  {
             print "<p>";
@@ -1305,6 +1317,8 @@ sub doGraph {
     foreach $thisName (@mtargets) {
         # this allows local targets to use shorter name
         $thisName = "$path/$thisName" unless ($thisName =~ /^\//);
+        # This regex lowercases just the last item in the thisName path:
+        $thisName =~ s:([^/]+)$:lc $1:e;
 
         my($targRef) = $gCT->configHash($thisName, 'target', undef);
       ConfigTree::Cache::addAutoVariables($thisName, $targRef,
