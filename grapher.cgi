@@ -59,8 +59,8 @@ use Common::HandleTarget;
 
 my $gLongDSName = $Common::global::gLongDSName;
 
-# default to warn. You might wanbt to change this to 'debug' when
-# working on Cricket configs, or hacking Cricekt itself.
+# default to warn. You might want to change this to 'debug' when
+# working on Cricket configs, or hacking Cricket itself.
 $log = 'warn';
 
 # This is for debugging here at WebTV. Feel free to nuke this
@@ -76,7 +76,7 @@ Common::Log::setLevel($log);
 $gPollingInterval = 5 * 60;     # defaults to 5 minutes
 
 # Determine which URL style to use. Classic uses self_url, which creates
-# new URL's by parrotting the own URL with modifications. Relative only
+# new URL's by parrotting its own URL with modifications. Relative only
 # uses the bits after the last slash in the URL, which makes URL's
 # shorter and eases proxying. Both pass the target name in a URL parameter.
 # Pathinfo passes the target as path components after the CGI name,
@@ -294,15 +294,18 @@ sub doHTMLPage {
                     my($vname, $dss) = split(/\s*:\s*/, $v, 2);
                     if ($view eq $vname) {
                         # check here for a view definition
-                        $viewRef = $ct->configHash($name, 'view', $view, $targRef);
-                        if (defined($viewRef) 
+                        $viewRef = $ct->configHash($name, 'view', $view,
+                                                   $targRef);
+                        if (defined($viewRef)
                             && exists($viewRef->{'elements'})) {
                             Debug("Found view defintion for $view");
                             $dslist = $viewRef->{'elements'};
-                            $enableHoltWinters = 1 if (exists $viewRef->{'holtwinters'}
+                            $enableHoltWinters = 1 if (
+                                exists $viewRef->{'holtwinters'}
                                 && isTrue($viewRef->{'holtwinters'}));
                         } else {
-                            # ignore all view definitions for backwards compatibility
+                            # ignore all view definitions for backwards
+                            # compatibility
                             $viewRef = undef;
                             # parse view name for HoltWinters special tag
                             $enableHoltWinters = 1 if ($view =~ /HoltWinters/);
@@ -380,14 +383,16 @@ sub doHTMLPage {
 
             htmlHeader($name, $targRef, $title);
 
-            if(!$targRef->{'summary-loc'} || $targRef->{'summary-loc'} eq "top") {
+            if(!$targRef->{'summary-loc'} ||
+                                        $targRef->{'summary-loc'} eq "top") {
                 print htmlCurrentPath($ct, $targRef, $name);
                 print "<table width=100% cellpadding=5 padding=3 border>\n";
                 print "<tr><td width=70%>\n";
 
                 if (! $isMulti) {
                     %dsDescr = doHTMLSummary($name, $tname,
-                                             $targRef, $ttRef, $dslist, $viewRef);
+                                             $targRef, $ttRef, $dslist,
+                                             $viewRef);
                 } else {
                     if ($targRef->{'long-desc'}) {
                         print "$targRef->{'long-desc'}<p>\n";
@@ -399,7 +404,8 @@ sub doHTMLPage {
                 print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
                 # add a tag for Holt-Winters
                 if ($enableHoltWinters) {
-                    print "<p><i>Aberrant Behavior Detection:</i><p>\n", join("<br>\n", @hwlinks);
+                    print "<p><i>Aberrant Behavior Detection:</i><p>\n",
+                          join("<br>\n", @hwlinks);
                 }
                 print "</center></td>\n";
                 print "</tr></table>\n";
@@ -428,19 +434,15 @@ sub doHTMLPage {
                 }
                 print "<h3>$label graph${plural}</h3>\n";
 
-                #
                 # If we have this, we should use it
-                #
                 my(@targetsSD);
                 my($targetsSD) = $targRef->{'targets-short-desc'};
                 if (defined($targetsSD))  {
                     @targetsSD = Eval($targetsSD);
                 }
 
-                #
                 # And if we have this, we should use this.
                 # targets-long-desc overrides targets-short-desc
-                #
                 my(@targetsLD);
                 my($targetsLD) = $targRef->{'targets-long-desc'};
                 if (defined($targetsLD))  {
@@ -621,14 +623,16 @@ sub doHTMLPage {
                 print "</dl>\n";
             }
 
-            if ($targRef->{'summary-loc'} && $targRef->{'summary-loc'} eq "bottom") {
+            if ($targRef->{'summary-loc'} &&
+                                      $targRef->{'summary-loc'} eq "bottom") {
                 print htmlCurrentPath($ct, $targRef, $name);
                 print "<table width=100% cellpadding=5 padding=3 border>\n";
                 print "<tr><td width=70%>\n";
 
                 if (! $isMulti) {
                     %dsDescr = doHTMLSummary($name, $tname,
-                                             $targRef, $ttRef, $dslist, $viewRef);
+                                             $targRef, $ttRef, $dslist,
+                                             $viewRef);
                 } else {
                     if ($targRef->{'long-desc'}) {
                         print "$targRef->{'long-desc'}<p>\n";
@@ -639,7 +643,8 @@ sub doHTMLPage {
                 print "</td><td><center>\n";
                 print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
                 if ($enableHoltWinters) {
-                    print "<p><i>Aberrant Behavior Detection:</i><p>\n", join("<br>\n", @hwlinks);
+                    print "<p><i>Aberrant Behavior Detection:</i><p>\n",
+                          join("<br>\n", @hwlinks);
                 }
                 print "</center></td>\n";
                 print "</tr></table>\n";
@@ -1377,7 +1382,8 @@ sub doGraph {
         }
         # verify a single data source
         if ($numDSs != 1) {
-            Warn("Holt-Winters forecasting not supported for multiple data sources");
+            Warn("Holt-Winters forecasting not supported for multiple data " .
+		"sources");
             $hwParam = undef;
         }
     }
@@ -1568,7 +1574,8 @@ sub doGraph {
                     if ($hwParam eq "confidence" || $hwParam eq "all") {
                         push @defs, "DEF:hw$ct=$rrd:$dsidx:HWPREDICT";
                         push @defs, "DEF:dev$ct=$rrd:$dsidx:DEVPREDICT";
-                        my $cbscale = graphParam($gRef,'confidence-band-scale',2);
+                        my $cbscale = graphParam($gRef,'confidence-band-scale',
+                                                 2);
                         push @cdefs, "CDEF:upper$ct=hw$ct,dev$ct,$cbscale,*,+";
                         push @cdefs, "CDEF:lower$ct=hw$ct,dev$ct,$cbscale,*,-";
                         # Confidence bands need to be scaled along with the
@@ -1660,7 +1667,7 @@ sub doGraph {
         # This is the end of the loop we do for each target
     }
 
-    # This is where we will deal with arithematic operations
+    # This is where we will deal with arithmetic operations
 
     if ($isMTargetsOps)  {
         # first build the cdefs
@@ -1681,9 +1688,7 @@ sub doGraph {
             my(@d) = @{$dsnames[$j]};
             my(@f) = @{$mxnames[$j]};
 
-            #
             # Deal with unknown values
-            #
             my($x, @e, @g, $sum, @l, @n);
             if ($unkIsZero)  {
                 $sum = "sum";
@@ -1712,7 +1717,8 @@ sub doGraph {
                     join(',', @g, convertOps($MTargetsOps, $#d+1));
                 push @cdefs, $str2;
                 push @cdefs, "CDEF:totmx$j=" .
-                    join(',', @n, "UNKN", ("${sum}totmx$j", "IF") x @f) if ($sum);
+                    join(',', @n, "UNKN", ("${sum}totmx$j", "IF") x @f)
+                                                                if ($sum);
             }
 
             $j++;
@@ -1738,7 +1744,8 @@ sub doGraph {
         my($timeToZeroTime) = 0;
         my($deltaZeroTime) = 0;     # the number of seconds between zero times
         my($now) = time();
-        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($now);
+        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+                                                           localtime($now);
 
         # find out how many seconds we are past the last zero time
         $timeToZeroTime += $sec;
@@ -1808,8 +1815,8 @@ sub doGraph {
         foreach $e (split(/\s*,\s*/, $eventlist)) {
             my($evRef) = $gCT->configHash($name, 'event', lc($e), $targRef);
             if ($evRef && $evRef->{'time'}) {
-                push @rules, join('', 'VRULE', ':', $evRef->{'time'},
-                                  '#', colorToCode($colorRef, $evRef->{'color'}),
+                push @rules, join('', 'VRULE', ':', $evRef->{'time'}, '#',
+                                  colorToCode($colorRef, $evRef->{'color'}),
                                   ':', $evRef->{'name'});
             }
         }
