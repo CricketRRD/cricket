@@ -355,6 +355,7 @@ sub retrieveData {
 		# data source return value array in the right order.
 
 		push(@{ $targetDataSources{lc($dsMethod)} }, "$dsIndex:$dsLine");
+		Debug("ds$dsIndex is: $dsLine");
 		$dsIndex++;
 	}
 

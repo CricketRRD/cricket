@@ -694,6 +694,45 @@ Here's a detailed description of each scheme.
 	dictionary.
 	<p>
 
+  <dt> PERFMON
+  <dd> This ds-source is used to extract perfmon information from Win32 hosts
+  which don't use SNMP (or where counters aren't available through SNMP).
+
+  Perfmon counters aren't trivial to extract, unlike SNMP so setting up 
+  perfmon counters in Cricket is a little tricky. This contains a brief rundown
+  of how to use this datasource. There is a seperate document which contains
+  verbose instructions on using the perfmon ds-source in the perfmon.html file.
+  
+  Perfmon ds-sources take the following arguments:
+  <p>
+  <tt>perfmon:host-name:object:counter:instance:special options</tt>. host-name
+  is the host name or IP address of the box you wish to pull perfmon counters
+  from. object field is to be populated with the class you wish to pull 
+  counters from (ie. System, Memory, PhysicalDisk, Processor). counter is the
+  actual name of the counter (ie. % User Time, Threads, Bytes Total/Sec).
+  instance is an optional field, and is only needed for counters which 
+  have multiple instances such as a Disk counter. Special options are detailed
+  more in the perfmon document. Accepted special options are: noscale, 
+  perftime, perftime100ns, perffreq, base, and fraction.
+  <p>
+  Many perfmon counters come in a "raw" format and require extensive use of
+  the DERIVE and COMPUTE RRD data types, as well as a knowledge of RPN (Reverse
+  Polish Notation). In the utils directory there is a program called 
+  perfInfo.pl. The purpose of this program is to tell you what type of counter 
+  the one you are interested in is, and what the formula is for extracting 
+  data from it. The formulas are from the MSDN SDK document on perflib. If 
+  there is anything missing from it, let the Cricket developers no so they can 
+  make an update to the script.
+  <p>
+  Here is an example to collect a count from System->Processs:
+  <p>
+  <tt>perfmon:%auto-target-name%:System:Processes</tt>
+  <p>
+  Here is an example for collecting Current Disk Queue Length for all disks:
+  <p>
+  <tt>perfmon:%auto-target-name%:PhysicalDisk:Current Disk Queue Length:_Total
+  <p>
+
   <dt> EXEC
   <dd> This ds-source is used to tell Cricket to run a shell
 	command in order to fetch the value or values required for a

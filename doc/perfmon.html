@@ -1,0 +1,112 @@
+<html>
+	<head>
+		<title>Perfmon Reference Guide</title>
+	</head>
+<body>
+
+<h1>The Perfmon Reference Guide</h1>
+
+<p>
+<h2>Introduction</h2>
+<p>
+Perfmon in Cricket is a bit tricky to master but ultimately worth it if you 
+wish to do long-term performance trending on the many useful perfmon counters 
+in NT.
+<p>
+One thing which makes it so tricky to use perfmon counters is that many of them
+are "raw" counters which require the use of derived, and computed historical
+data to extract any meaning from them. RRDtool makes it easy to perform the
+computations. With a bit of research you can easily discover what you need
+to feed into the Cricket configuration to get useful data.
+<p>
+<h2>Assumptions</h2>
+<p>
+This document assumes the following. You have a working Cricket installation,
+you have some knowledge of Perfmon and how it works (run perfmon.exe for a 
+crash course), you're attempting to extract data from a box running the
+Windows(tm) operating system, you have some knowledge of RPN (Reverse Polish
+Notation), and finally you feel comfortable to make very light modifications
+to the Cricket code during the "discovery process".
+<p>
+<h2>ds-source Parameters</h2>
+<p>
+Here is a breakdown of what the perfmon ds-source requires to operate:
+<p>
+<tt>perfmon:host-name:object name:counter name:instance name:special options</tt>
+<p>
+<li><tt>perfmon</tt> tells Cricket that it's to call on the perfmon libraries 
+to perform data collection. This is a required field.
+<li><tt>host-name</tt> tells Cricket what host name to connect to. In most
+cases you'll want to set this to <tt>%auto-target-name%</tt>. This is a
+required field.
+<li><tt>object name</tt> tells Cricket what object, or class to collect 
+sub-classes from. This is something like System, PhysicalDisk, Memory, 
+Network Interface, or Server. Using <tt>perfmon.exe</tt> can give you an idea
+of what is available on a particular system. While this field isn't required,
+you'll want to put something there 99% of the time.
+<li><tt>counter name</tt> tells Cricket what counter, or sub-class to collect
+counter data from. This is something like % Processor Time, Total Bytes/sec,
+or Threads. This is required only if something is in <tt>object name</tt>.
+<li><tt>instance name</tt> tells Cricket what instance to fetch from a 
+counter. Most counters don't have instances, a few do such as PhysicalDisk,
+and Swap. Most instance counters have a '_Total' counter which is a combined
+total of all the instances. This is not a required field unless a counter has
+instances.
+<li><tt>special options</tt> tells Cricket special processing options detailed
+later in this document. It takes the following arguments: perftime,
+perftime100ns, perffreq, and noscale. Most cases you won't need to use any of
+these but some counters require or necessitate them.
+<p>
+<h2>Collecting Data Part 1</h2>
+<p>
+There are many types of perfmon counters. They for the most part all require
+different calculations to give cooked data from the raw numbers. To help
+aid in figuring out what kind of counter is what, there is a program with
+cricket in utils called <tt>perfInfo.pl</tt>. For the purpose of this
+demonstration, we'll collect on the % Processor Time counter.
+<p>
+<tt>perfInfo.pl</tt> accepts arguments similar to what Cricket uses for data
+collection. You can run <tt>perfInfo.pl -h</tt> to get a list of all the
+switches it needs.
+<p>
+Since we don't know what kind of counter % Processor Time is, we ask 
+<tt>perfInfo.pl</tt> to tell us.
+<p>
+<pre>
+"C:/Cygwin/bin/bash.exe"-2.03$ perl perfInfo.pl -o processor -c '% processor ti
+m-i '_total'
+* Setting server to .
+* Getting counter type(s) for % processor time
+        * Traversing multiple counters for % processor time
+                * Found!
+                * % processor time->_total is counter: PERF_100NSEC_TIMER_INV
+
+Formulas are from MSDN - subject to change. Author of this program takes no
+responsibilities for inaccurate information!
+
+Symbols:
+TB   Time base. If TB is not used in the calculation, then it indicates the
+     units of the raw data.
+B    The base value used for calculating performance data types that require
+     base.
+
+
+Platform SDK
+
+PERF_100NSEC_TIMER_INV
+
+Timer for when the object is not in use.
+
+Element        Value
+X              CounterData
+Y              100NsTime
+Time base      100Ns
+Data size      8   bytes
+Display suffix %
+Calculation    100*(1-(X1-X0)/(Y1-Y0))
+
+=end
+        * Traversing multiple counters for % processor time
+</pre>		
+<p>
+

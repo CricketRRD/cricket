@@ -24,7 +24,6 @@ use Date::Parse;
 use FileHandle;
 use DB_File;
 use POSIX;
-
 my($gDebug) = 0;
 
 # tokens which need no name
@@ -168,7 +167,7 @@ sub compile {
 
     my($file) = "$base/config.db.new";
     my($finalFile) = "$base/config.db";
- 
+    my($errorLevel); 
     # we are being asked to do a complete rebuild, so start
     # from scratch
     unlink($file);
@@ -191,9 +190,15 @@ sub compile {
 	undef $dbh;
     untie %db;
 
-    rename($file, $finalFile);
+    rename($file, $finalFile) or $errorLevel = $!;
 
-	return ($ct, $#f+1);
+    if($errorLevel) {
+	Common::Log::Error("config.db.new could not be renamed to config.db!");
+	Common::Log::Error("Reason is: $errorLevel");
+	Common::Log::Error("This is usually due to collector locking config.db.");
+	Common::Log::Error("Your changes won't take effect until this is resolved!");
+    }
+    return ($ct, $#f+1);
 }
 
 sub compileTree {

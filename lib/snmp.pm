@@ -104,7 +104,7 @@ sub snmpFetch {
 			for $ctr ( 0..$#indices ) {
 				my($res) = $hostResults[$ctr];
 				$res = "U" if (! defined($res));
-				push(@results, "$indices[$ctr]:$res");
+				push(@results, "$indices[$ctr]:" . Common::Util::fixNum($res));
 			}
 		}
     }

@@ -37,6 +37,7 @@ BEGIN {
 	$Common::global::gInstallRoot ||= $programdir;
 }
 
+$| = 1; # Useful if you want to tail -f a logfile while the collector runs! :)
 use lib "$Common::global::gInstallRoot/lib";
 
 use Getopt::Long;
