@@ -54,7 +54,7 @@ sub monValue {
         return 1;
     }
 
-    if ($value eq 'NaN')  {
+    if ($value =~ /^NaN/)  {
         Info("Skipping: Last value from datafile was NaN.");
         return 1;
     }
@@ -169,7 +169,7 @@ sub monRelation {
     }
 
     my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return 1 if ($cmp_value eq 'NaN');
+    return 1 if ($cmp_value =~ /^NaN/);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -252,7 +252,7 @@ sub monFailures {
         return 1;
     }
     # FAILURES array stores a 1 for a failure (so should return 0)
-    return 1 if ($ret eq 'NaN');
+    return 1 if ($ret =~ /^NaN/);
     return !($ret);
 }
 
@@ -293,7 +293,7 @@ sub monQuotient {
     }
 
     my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return 1 if ($cmp_value eq 'NaN');
+    return 1 if ($cmp_value =~ /^NaN/);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
