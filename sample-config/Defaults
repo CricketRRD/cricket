@@ -7,6 +7,7 @@ Target	--default--
 	summary-loc			= top
 	rrd-datafile		= %dataDir%/%auto-target-name%.rrd
 	rrd-poll-interval	= 300
+	persistent-alarms   = false
 	snmp-host			= %auto-target-name%
 	snmp-community		= public
 	snmp-port			= 161
