@@ -1391,7 +1391,7 @@ sub doGraph {
         # verify a single data source
         if ($numDSs != 1) {
             Warn("Holt-Winters forecasting not supported for multiple data " .
-		"sources");
+                "sources");
             $hwParam = undef;
         }
     }
