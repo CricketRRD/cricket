@@ -24,80 +24,80 @@
 package RPN;
 
 sub new {
-	my($type) = @_;
-	my($self) = {};
-	bless($self, $type);
-	return $self;
+    my($type) = @_;
+    my($self) = {};
+    bless($self, $type);
+    return $self;
 }
 
 sub op {
-	my($self, $op) = @_;
+    my($self, $op) = @_;
 
-	if ($op eq '+') {
-		my($a) = $self->pop();
-		my($b) = $self->pop();
-		return unless (defined($a) && defined($b));
+    if ($op eq '+') {
+        my($a) = $self->pop();
+        my($b) = $self->pop();
+        return unless (defined($a) && defined($b));
 
-		$self->push($b + $a);
-	} elsif ($op eq '-') {
-		my($a) = $self->pop();
-		my($b) = $self->pop();
-		return unless (defined($a) && defined($b));
+        $self->push($b + $a);
+    } elsif ($op eq '-') {
+        my($a) = $self->pop();
+        my($b) = $self->pop();
+        return unless (defined($a) && defined($b));
 
-		$self->push($b - $a);
-	} elsif ($op eq '*') {
-		my($a) = $self->pop();
-		my($b) = $self->pop();
-		return unless (defined($a) && defined($b));
+        $self->push($b - $a);
+    } elsif ($op eq '*') {
+        my($a) = $self->pop();
+        my($b) = $self->pop();
+        return unless (defined($a) && defined($b));
 
-		$self->push($b * $a);
-	} elsif ($op eq '/') {
-		my($a) = $self->pop();
-		my($b) = $self->pop();
-		return unless (defined($a) && defined($b));
+        $self->push($b * $a);
+    } elsif ($op eq '/') {
+        my($a) = $self->pop();
+        my($b) = $self->pop();
+        return unless (defined($a) && defined($b));
 
-		if ($a != 0) {
-			$self->push($b / $a);
-		} else {
-			$self->push(undef);
-		}
-	} elsif ($op =~ /^LOG$/i) {
-		my($a) = $self->pop();
-		return unless (defined($a));
+        if ($a != 0) {
+            $self->push($b / $a);
+        } else {
+            $self->push(undef);
+        }
+    } elsif ($op =~ /^LOG$/i) {
+        my($a) = $self->pop();
+        return unless (defined($a));
 
-		if ($a != 0) {
-			$self->push(log($a));
-		} else {
-			$self->push(undef);
-		}
-	}
+        if ($a != 0) {
+            $self->push(log($a));
+        } else {
+            $self->push(undef);
+        }
+    }
 }
 
 sub pop {
-	my($self) = @_;
-	my($res) = pop(@{$self->{'stack'}});
-	warn("Stack underflow") if (! defined($res));
-	return $res;
+    my($self) = @_;
+    my($res) = pop(@{$self->{'stack'}});
+    warn("Stack underflow") if (! defined($res));
+    return $res;
 }
 
 sub push {
-	my($self, @items) = @_;
-	push @{$self->{'stack'}}, @items;
+    my($self, @items) = @_;
+    push @{$self->{'stack'}}, @items;
 }
 
 sub run {
-	my($self, $string) = @_;
+    my($self, $string) = @_;
 
-	my($item);
-	foreach $item (split(/,/, $string)) {
-		if ($item =~ /^[\+\*\/\-]/ || $item =~ /^log$/i) {
-			$self->op($item);
-		} else {
-			$self->push($item);
-		}
-	}
+    my($item);
+    foreach $item (split(/,/, $string)) {
+        if ($item =~ /^[\+\*\/\-]/ || $item =~ /^log$/i) {
+            $self->op($item);
+        } else {
+            $self->push($item);
+        }
+    }
 
-	return ($self->pop());
+    return ($self->pop());
 }
 
 1;
