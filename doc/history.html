@@ -1,160 +1,154 @@
 <html>
-  <head>
-    <title>The History of Cricket</title>
-  </head>
-<body>
+	<head>
+		<title>The History of Cricket</title>
+	</head>
+	<body>
+		<h1>The History of Cricket</h1>
+		<address>
+			By <a href="http://www.munitions.com/~jra">Jeff Allen</a>
+		</address>
+		<p>
+			Cricket did not spring, fully formed, from my fingers late one
+			night. Granted, most of it did come about late at night, but
+			that's just the way I work. Cricket is the result of using and in
+			some cases being limited by MRTG, all the while getting more and
+			more addicted to it. 
+		</p>
 
-<h1> The History of Cricket </h1>
+		<div>
+			<h2>RRD Tool is Born</h2>
+			<p>
+				In January 1998, Tobias Oetiker released some of the first
+				versions of the RRD tool. I took a look at this work and
+				immediately recognized that half of my problems with MRTG
+				would be solved by switching to using RRD as the backend,
+				instead of rateup, the old backend for MRTG. RRD was designed
+				to be much more flexible and much higher performance than
+				rateup. However, RRD did not promise to make any dent at all
+				in the complexity of our MRTG configuration, nor was it
+				immediately obvious how we could extend MRTG to take advantage
+				of RRD's new flexibility. 
+			</p>
+		</div>
 
-<address>By <a href="http://www.munitions.com/~jra">Jeff Allen</a></address>
+		<div>
+			<h2>The Config Tree is Born</h2>
+			<p>
+				During the Spring of 1998, Tobias continued to work on RRD,
+				but little work was being done to integrate it into a future
+				version of MRTG. There are only so many hours in a day,
+				after-all, and Tobias does need to earn a living too. I kept
+				thinking about the problems facing WebTV, and how we could
+				best put to use the really neat RRD tool while solving our
+				config file (and, to a lesser extent, parallelization)
+				problems. The answer was the config tree. After writing a
+				small proof of concept, I sold my bosses on paying a contractor
+				(Emmett Hogan) from Global Networking and Computing (<a
+				  href="http://www.gnac.com">http://www.gnac.com</a>) to
+				implement the design for an RRD frontend using the config tree
+				idea. This project was to be a six week job, starting around
+				July, 1998. This new frontend for RRD came to be called Super
+				MRTG, or SMRTG. 
+			</p>
+			<p>
+				As is often (almost always?) the case, it was very hard to
+				predict how much time would actually be required to do the
+				job. During Emmett's work, we learned a bunch more about how
+				we wanted the final system to work. Emmett's finished product
+				was still not ready to replace MRTG here at WebTV, and we were
+				not ready to release it to the world. I took over SMRTG and
+				added the features we needed to put it into production at
+				WebTV. I also released a few versions of SMRTG to the
+				MRTG-developers mailing list for review. 
+			</p>
+			<p>
+				About this point a number of things happened. First, I
+				realized that I was really unhappy with the name SMRTG for
+				several reasons. It was too cumbersome, the project is only
+				tangentially about routers at this point, and there was not
+				a line of MRTG code in SMRTG -- it only <i>looked</i> the
+				same. Thus, we needed a new name. I called it Cricket because
+				it popped into mind. It's short and catchy, and there seems to
+				be no other piece of network management software called
+				Cricket. A very long time ago, there once was a really cool
+				piece of graphing software for the Mac called Cricket Graph.
+				That might have tickled my subconscious, though I only
+				remembered it once people started referring to the output of
+				Cricket as "Cricket Graphs". 
+			</p>
+			<p>
+				Also, Tobias and I talked about Cricket's, RRD's, and MRTG's
+				futures. We agreed that Cricket and RRD made good partners,
+				but that RRD is useful on it's own too. (Thus, RRD and Cricket
+				will be distributed separately for the foreseeable future.) We
+				also agreed that it made no sense for him to duplicate my
+				effort on the frontend, so it's unlikely there will ever be a
+				version of MRTG that uses RRD as it's backend. Instead, we
+				will try to help people convert to using Cricket if they need
+				the performance of RRD. (And who doesn't!) As you can see from
+				this history, Cricket would not exist if it wasn't for MRTG
+				and RRD, two of Tobias' ultra-cool inventions. I am deeply
+				indebted to that giant for letting me stand on his shoulders. 
+			</p>
+			<p>
+				Cricket was unveiled to the public as part of 
+				<a href="http://www.usenix.org/events/neta99">Usenix's First
+					Conference on Network Administration</a>. I submitted
+				<a href="neta-paper/paper.html">a paper</a> on Cricket there,
+				and released a version that people started to rely on. During
+				the rest of 1999, the Cricket-users mailing list slowly grew
+				from 100 through 400. During 1999 Cricket changed little, even
+				though lots of users submitted patches. That was mostly due to
+				me getting a new job and Cricket losing some of it's novelty
+				value for me. 
+			</p>
+			<p>
+				I gave an invited talk at 
+				<a href="http://www.usenix.org/events/lisa99">Usenix's LISA 99</a>
+				which featured Cricket, along with <a
+					href="http://www.gnac.com/four-star">other tools</a>
+				I have worked on at WebTV. At LISA, I was invited to give a
+				talk on Cricket at <a href="http://www.nluug.nl/events/sane2000">SANE
+				2000</a>. Word of Cricket spread, and it was written up in both
+				<a href="http://www.sysadminmag.com">Sysadmin Magazine</a>
+				and <a href="http://www.webreview.com/pub/2000/02/25/feature/index2.html">WebReview.com</a>.
+			</p>
+			<p>
+				Around January 2000, I decided that the Cricket users deserved
+				to have better support, and what better way to do that than to
+				turn the project over to the community at large? I got a
+				project on Sourceforge and worked, slowly, through the spring
+				of 2000 to move things over. My goal was to release 1.0.0 in
+				time for the talk at SANE 2000. More importantly, my goal was
+				to setup a CVS tree that would allow us to actively develop
+				Cricket going forward. I seem to have succeeded. My co-worker
+				Adam Meltzer has already been working hard at adding features
+				to the 1.1.x branch, which will be ready for beta tests this
+				summer.
+			</p>
+			<p>
+				Today, in May 2000, Cricket is installed on three separate
+				servers at WebTV and is monitoring about 9000 targets, with
+				over 50 different target types represented. Cricket takes data
+				from SNMP, shell scripts, and files. Data gathered via scripts
+				comes in via syslog, application-specific event streams, HTTP,
+				rcp, and 2400 baud serial. WebTV operations folks know that if
+				they want to know the health of something they should ask
+				Cricket, and if it's not there, they should ask "Why Not!?!".
+				During peak times, Cricket has time and again given us
+				unprecedented visibility into the health of the WebTV Service.
+				It has paid for itself, and we genuinely hope it will be as
+				productive at your site. 
+			</p>
+		</div>
 
-<p>
-Cricket did not spring, fully formed, from my fingers late one
-night. Granted, most of it did come about late at night, but
-that's just the way I work. Cricket is the result of using and
-in some cases being limited by MRTG, all the while getting more
-and more addicted to it.
-</p>
-
-<div>
-<h2>RRD Tool is Born</h2>
-
-<p>
-In January 1998, Tobias Oetiker released some of the first versions of
-the RRD tool. I took a look at this work and immediately recognized
-that half of my problems with MRTG would be solved by switching to
-using RRD as the backend, instead of rateup, the old backend for MRTG.
-RRD was designed to be much more flexible and much higher performance
-than rateup.  However, RRD did not promise to make any dent at all in
-the complexity of our MRTG configuration, nor was it immediately
-obvious how we could extend MRTG to take advantage of RRD's new
-flexibility.
-</p>
-</div>
-
-<div>
-<h2>The Config Tree is Born</h2>
-
-<p>
-During the Spring of 1998, Tobias continued to work on RRD, but little
-work was being done to integrate it into a future version of
-MRTG. There are only so many hours in a day, after-all, and Tobias does
-need to earn a living too. I kept thinking about the problems facing
-WebTV, and how we could best put to use the really neat RRD tool while
-solving our config file (and, to a lesser extent, parallelization)
-problems. The answer was the config tree. After writing a small proof
-of concept, I sold my bosses on paying a contractor (Emmett Hogan)
-from Global Networking and Computing
-(<a href="http://www.gnac.com">http://www.gnac.com</a>) to
-implement the design for an RRD frontend using the config tree idea.
-This project was to be a six week job, starting around July, 1998.
-This new frontend for RRD came to be called Super MRTG, or SMRTG.
-</p>
-
-<p>
-As is often (almost always?) the case, it was very hard to predict how
-much time would actually be required to do the job. During Emmett's
-work, we learned a bunch more about how we wanted the final system to
-work. Emmett's finished product was still not ready to replace MRTG
-here at WebTV, and we were not ready to release it to the world. I
-took over SMRTG and added the features we needed to put it into
-production at WebTV. I also released a few versions of SMRTG to the
-MRTG-developers mailing list for review.
-</p>
-
-<p>
-About this point a number of things happened. First, I realized that I
-was really unhappy with the name SMRTG for several reasons. It was too
-cumbersome, the project is only tangentially about routers at this
-point, and there was not a line of MRTG code in SMRTG -- it only
-<i>looked</i> the same. Thus, we needed a new name. I called it
-Cricket because it popped into mind. It's short and catchy, and there
-seems to be no other piece of network management software called
-Cricket. A very long time ago, there once was a really cool piece of
-graphing software for the Mac called Cricket Graph. That might have
-tickled my subconscious, though I only remembered it once people
-started referring to the output of Cricket as "Cricket Graphs".
-</p>
-
-<p>
-Also, Tobias and I talked about Cricket's, RRD's, and MRTG's futures.
-We agreed that Cricket and RRD made good partners, but that RRD is
-useful on it's own too. (Thus, RRD and Cricket will be distributed
-separately for the foreseeable future.)  We also agreed that it made no
-sense for him to duplicate my effort on the frontend, so it's unlikely
-there will ever be a version of MRTG that uses RRD as it's
-backend. Instead, we will try to help people convert to using Cricket
-if they need the performance of RRD. (And who doesn't!) As you can see
-from this history, Cricket would not exist if it wasn't for MRTG and
-RRD, two of Tobias' ultra-cool inventions.  I am deeply indebted to
-that giant for letting me stand on his shoulders.
-</p>
-
-<p>
-Cricket was unveiled to the public as part of <a
-href="http://www.usenix.org/events/neta99">Usenix's First Conference
-on Network Administration</a>. I submitted <a href="neta-paper/paper.html">a
-paper</a> on Cricket there, and released a version that people started
-to rely on. During the rest of 1999, the Cricket-users mailing list
-slowly grew from 100 through 400. During 1999 Cricket changed little,
-even though lots of users submitted patches. That was mostly due to me
-getting a new job and Cricket losing some of it's novelty value for
-me.
-</p>
-
-<p>
-I gave an invited talk at <a
-href="http://www.usenix.org/events/lisa99">Usenix's LISA 99</a> which
-featured Cricket, along with <a
-href="http://www.gnac.com/four-star">other tools</a> I have worked on
-at WebTV. At LISA, I was invited to give a talk on Cricket at <a
-href="http://www.nluug.nl/events/sane2000">SANE 2000</a>.  Word of
-Cricket spread, and it was written up in both <a
-href="http://www.sysadminmag.com">Sysadmin Magazine</a> and <a
-href="http://www.webreview.com/pub/2000/02/25/feature/index2.html">WebReview.com</a>.
-</p>
-
-<p>
-Around January 2000, I decided that the Cricket users deserved to have
-better support, and what better way to do that than to turn the
-project over to the community at large? I got a project on Sourceforge
-and worked, slowly, through the spring of 2000 to move things over.
-My goal was to release 1.0.0 in time for the talk at SANE 2000. More
-importantly, my goal was to setup a CVS tree that would allow us to
-actively develop Cricket going forward. I seem to have succeeded. My
-co-worker Adam Meltzer has already been working hard at adding
-features to the 1.1.x branch, which will be ready for beta tests this
-summer.
-</p>
-
-<p>
-Today, in May 2000, Cricket is installed on three separate servers at
-WebTV and is monitoring about 9000 targets, with over 50 different
-target types represented. Cricket takes data from SNMP, shell scripts,
-and files. Data gathered via scripts comes in via syslog,
-application-specific event streams, HTTP, rcp, and 2400 baud
-serial. WebTV operations folks know that if they want to know the
-health of something they should ask Cricket, and if it's not there,
-they should ask "Why Not!?!". During peak times, Cricket has time and
-again given us unprecedented visibility into the health of the WebTV
-Service. It has paid for itself, and we genuinely hope it will be as
-productive at your site.
-</p>
-
-<p>
-<hr>
-</p>
-
-<p>
-<a href="http://cricket.sourceforge.net">Cricket</a>
-version !!VERSION!!, released !!RELDATE!!.
-</p>
-
-<p>
-Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
-the <a href="gpl.html">GNU General Public License</a>.
-</p>
-</div>
-
-</body>
+		<p>
+			<a href="http://cricket.sourceforge.net">Cricket</a>
+			version !!VERSION!!, released !!RELDATE!!.
+		</p>
+		<p>
+			Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+			the <a href="gpl.html">GNU General Public License</a>.
+		</p>
+	</body>
 </html>

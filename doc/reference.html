@@ -1,2037 +1,2216 @@
 <html>
-  <head>
-    <title>The Cricket Reference Guide</title>
-  </head>
-<body>
+	<head>
+		<title>The Cricket Reference Guide</title>
+	</head>
+	<body>
+		<h1>The Cricket Reference Guide</h1>
+		<p>
+			This section is the definitive reference for each and every tag
+			that Cricket knows about. Use this section as a reference when
+			you need to know the exact format for something, or the exact
+			behavior of a certain tag.
+		</p>
 
-<h1>The Cricket Reference Guide</h1>
+		<div>
+			<h2>File Format</h2>
+			<p>
+				Cricket config files are simple text files arranged into a
+				tree-shaped set of files called a <i>Config Tree</i>. They
+				are processed by a Perl module called ConfigTree.pm. This
+				setup would make it possible to use one config tree for
+				Cricket and other clients of ConfigTree.pm. At this time,
+				there are no other programs that use the config tree design,
+				but there may be in the future. It was set up this way
+				because the config tree will grow to contain an accurate
+				picture of your network; it makes sense to try to leverage
+				that information to other network administration tools. The
+				overriding philosophy here is duplicated information is bad:
+				it is hard to maintain, and it invites silly mistakes.
+			</p>
+			<p>
+				The Cricket config tree is 100% incompatible with MRTG
+				configuration files. There are not even any plans to write a
+				converter, though one could probably be written. When you
+				choose to use Cricket, it's a very good idea to approach
+				your config from a fresh perspective, to take maximum
+				advantage of Cricket's features.
+			</p>
+			<p>
+				The comment character for Cricket is &quot;#&quot;. If a
+				&quot;#&quot; is found at the beginning of the line (or is
+				preceded only by whitespace) then the &quot;#&quot; and
+				everything after it will be deleted. Completely blank lines
+				are discarded from the input too.
+			</p>
+			<p>
+				The fundamental unit of a config file is a chunk. A chunk is
+				made up of one line which begins in column one, and one or
+				more lines which have whitespace before them. In this way,
+				you can continue a long line to another line by simply
+				inserting a newline and some whitespace. When it is glued
+				back together internally, the newline and whitespace are
+				replaced by a space. A chunk should have at least one word
+				(a group of characters that are not whitespace) at the
+				beginning. This word (called the &quot;token&quot; by the
+				code) tells ConfigTree.pm what kind of chunk it is dealing
+				with, and what kind of parser to use.  If it is an unknown
+				token, ConfigTree.pm can be told to ignore it. By default,
+				unknown chunks cause a warning, but not a fatal error.
+				Clients of ConfigTree.pm can control this; Cricket chooses
+				to ignore unknown chunks.
+			</p>
 
-<p>
-This section is the definitive reference for each and every tag that
-Cricket knows about. Use this section as a reference when you need to
-know the exact format for something, or the exact behavior of a
-certain tag.
-</p>
+			<div>
+				<h3>Text Parser</h3>
+				<p>
+					This parser is used in cases where free-text is useful,
+					for instance in the HTML dictionary. The first two
+					tokens are parsed out, and they serve as the chunk type,
+					and the key. Everything after these first two tokens is
+					considered the value.
+				</p>
+			</div>
 
-<div>
-<h2>File Format</h2>
+			<div>
+				<h3>Simple Parser</h3>
+				<p>
+					This parser is used for simple mappings, like the OID
+					mapping. An example of a valid OID line is:
+				</p>
+				<p><pre>oid	ifInOctets	1.3.6.1.2.1.2.2.1.10</pre></p>
+				<p>
+					The format is a token, another token (called the key;
+					<tt>ifInOctets</tt> in this case), and finally the
+					value. The value can have whitespace in it, but only if
+					it is surrounded by double quotes (&quot;). Embedded
+					quotes are not yet supported.
+				</p>
+			</div>
 
-<p>
-Cricket config files are simple text files arranged into a tree-shaped
-set of files called a <i>Config Tree</i>. They are processed by a Perl
-module called ConfigTree.pm. This setup would make it possible to use
-one config tree for Cricket and other clients of ConfigTree.pm. At
-this time, there are no other programs that use the config tree
-design, but there may be in the future. It was set up this way because
-the config tree will grow to contain an accurate picture of your
-network; it makes sense to try to leverage that information to other
-network administration tools. The overriding philosophy here is
-duplicated information is bad: it is hard to maintain, and it invites
-silly mistakes.
-</p>
-
-<p>
-The Cricket config tree is 100% incompatible with MRTG configuration
-files. There are not even any plans to write a converter, though one
-could probably be written. When you choose to use Cricket, it's a very
-good idea to approach your config from a fresh perspective, to take
-maximum advantage of Cricket's features.
-</p>
-
-<p>
-The comment character for Cricket is &quot;#&quot;. If a &quot;#&quot;
-is found at the beginning of the line (or is preceded only by
-whitespace) then the &quot;#&quot; and everything after it will be
-deleted. Completely blank lines are discarded from the input too.
-</p>
-
-<p>
-The fundamental unit of a config file is a chunk. A chunk is made up
-of one line which begins in column one, and one or more lines which
-have whitespace before them. In this way, you can continue a long line
-to another line by simply inserting a newline and some
-whitespace. When it is glued back together internally, the newline and
-whitespace are replaced by a space. A chunk should have at least one
-word (a group of characters that are not whitespace) at the
-beginning. This word (called the &quot;token&quot; by the code) tells
-ConfigTree.pm what kind of chunk it is dealing with, and what kind of
-parser to use.  If it is an unknown token, ConfigTree.pm can be told
-to ignore it. By default, unknown chunks cause a warning, but not a
-fatal error. Clients of ConfigTree.pm can control this; Cricket
-chooses to ignore unknown chunks.
-</p>
-
-<div>
-<h3>Text Parser</h3>
-
-<p>
-This parser is used in cases where free-text is useful, for
-instance in the HTML dictionary. The first two tokens are parsed out,
-and they serve as the chunk type, and the key. Everything after these
-first two tokens is considered the value.
-</p>
-</div>
-
-<div>
-<h3>Simple Parser</h3>
-
-<p>
-This parser is used for simple mappings, like the OID mapping. An
-example of a valid OID line is:
-</p>
-
-<p>
-<blockquote><pre>oid	ifInOctets	1.3.6.1.2.1.2.2.1.10</pre></blockquote>
-</p>
-
-<p>The format is a token, another token (called the key;
-<tt>ifInOctets</tt> in this case), and finally the value. The value
-can have whitespace in it, but only if it is surrounded by double
-quotes (&quot;). Embedded quotes are not yet supported.
-</p>
-</div>
-
-<div>
-<h3>Tag/Value Parser</h3>
-
-<p>
-This is the most useful, and most commonly used parser. Here's an
-example of a Tag/Value chunk:
-</p>
-
-<p>
-<blockquote><pre>graph   ifInOctets
+			<div>
+				<h3>Tag/Value Parser</h3>
+				<p>
+					This is the most useful, and most commonly used parser.
+					Here's an example of a Tag/Value chunk:
+				</p>
+				<p>
+					<pre>
+graph   ifInOctets
     color       =   dark-green
     draw-as     =   AREA
     legend      =   "Average bits in"
     y-axis      =   "bits per second"
-    scale       =   8,*</pre></blockquote>
-</p>
+    scale       =   8,*
+					</pre>
+				</p>
+				<p>
+					Like the others, it parses out two tokens, the chunk
+					type and the key. After this, it parses a series of
+					tag/value pairs separated by whitespace and the equals
+					sign (&quot;=&quot;). The values must be surrounded by
+					quotes to embed whitespace, like the Simple Parser. If
+					you repeat a tag, only the second occurrence will be
+					used.
+				</p>
+			</div>
 
-<p>
-Like the others, it parses out two tokens, the chunk type and the
-key. After this, it parses a series of tag/value pairs separated by
-whitespace and the equals sign (&quot;=&quot;). The values must be
-surrounded by quotes to embed whitespace, like the Simple
-Parser. If you repeat a tag, only the second occurrence will be used.
-</p>
-</div>
-
-<div>
-<h3>Miscellaneous</h3>
-
-<p>
-All tokens and keys are case-insensitive. The tags in a tag/value
-chunk are also case insensitive. The values will have their case
-preserved when they are used by the system.
-</p>
-
-<p>
-Tag names can have numbers, letters, the period symbol, the dash, and
-the underscore. Avoid using other punctuation, since those symbols are
-used by Cricket internally.
-</p>
-
-<p>
-OID tags are more limited, to conform with the SNMP spec. A tag in an
-OID dictionary can be made up of numbers and letters. Dashes are not
-allowed.
-</p>
-
-<p>
-Target names should consist of letters, numbers, dashes and
-underscores. Do not put slashes in them, since they end up being used
-as parts of filenames.
-</p>
-
-<p>Inside of double quotes, on the right side of an equals sign, anything goes, with the exception of the double quote itself. There is currently no way to include the double quote in a string.</p>
-
-<p>
-Avoid choosing names that begin and end with two dashes (like
-<tt>--default--</tt>). Cricket uses some names like this internally,
-and future additions will make use of these names.
-</p>
-
-<p>
-The following table shows which tokens are parsed with which parsers:
-</p>
-
-<p>
-<center></center>
-</p>
-
-<table width=50% border="border">
-  <tr>
-    <th>Token</th><th>Parser</th>
-  <tr>
-    <td>target</td><td>Tag/Value</td>
-  <tr>
-    <td>datasource</td><td>Tag/Value</td>
-  <tr>
-    <td>targetType</td><td>Tag/Value</td>
-  <tr>
-    <td>graph</td><td>Tag/Value</td>
-  <tr>
-    <td>view</td><td>Tag/Value</td>
-  <tr>
-    <td>color</td><td>Simple</td>
-  <tr>
-    <td>oid</td><td>Simple</td>
-  <tr>
-    <td>html</td><td>Text</td>
-  <tr>
-    <td>event</td><td>Tag/Value</td>
-  <tr>
-    <td>rra</td><td>Simple</td>
-</table>
-
-<p> For some tags, you can put Perl expressions into the value.
-(<tt>inst-names</tt> is one such tag) However, double quotes are often
-useful in Perl expressions. That's problematic, since at present there
-is no way to put quotes into values.  Instead, you should use single
-quotes. Thus it might look something like this:
-</p>
-<p>
-<blockquote><pre>inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
+			<div>
+				<h3>Miscellaneous</h3>
+				<p>
+					All tokens and keys are case-insensitive. The tags in a
+					tag/value chunk are also case insensitive. The values
+					will have their case preserved when they are used by the
+					system.
+				</p>
+				<p>
+					Tag names can have numbers, letters, the period symbol,
+					the dash, and the underscore. Avoid using other
+					punctuation, since those symbols are used by Cricket
+					internally.
+				</p>
+				<p>
+					OID tags are more limited, to conform with the SNMP
+					spec. A tag in an OID dictionary can be made up of
+					numbers and letters. Dashes are not allowed.
+				</p>
+				<p>
+					Target names should consist of letters, numbers, dashes
+					and underscores. Do not put slashes in them, since they
+					end up being used as parts of filenames.
+				</p>
+				<p>
+					Inside of double quotes, on the right side of an equals
+					sign, anything goes, with the exception of the double
+					quote itself. There is currently no way to include the
+					double quote in a string.
+				</p>
+				<p>
+					Avoid choosing names that begin and end with two dashes
+					(like <tt>--default--</tt>). Cricket uses some names
+					like this internally, and future additions will make use
+					of these names.
+				</p>
+				<p>
+					The following table shows which tokens are parsed with
+					which parsers:
+				</p>
+				<table>
+					<tr> <th>Token</th>      <th>Parser</th>    </tr>
+					<tr> <td>target</td>     <td>Tag/Value</td> </tr>
+					<tr> <td>datasource</td> <td>Tag/Value</td> </tr>
+					<tr> <td>targetType</td> <td>Tag/Value</td> </tr>
+					<tr> <td>graph</td>      <td>Tag/Value</td> </tr>
+					<tr> <td>view</td>       <td>Tag/Value</td> </tr>
+					<tr> <td>color</td>      <td>Simple</td>    </tr>
+					<tr> <td>oid</td>        <td>Simple</td>    </tr>
+					<tr> <td>html</td>       <td>Text</td>      </tr>
+					<tr> <td>event</td>      <td>Tag/Value</td> </tr>
+					<tr> <td>rra</td>        <td>Simple</td>    </tr>
+				</table>
+				<p>
+					For some tags, you can put Perl expressions into the
+					value. (<tt>inst-names</tt> is one such tag) However,
+					double quotes are often useful in Perl expressions.
+					That's problematic, since at present there is no way to
+					put quotes into values.  Instead, you should use single
+					quotes. Thus it might look something like this:
+				</p>
+				<p>
+					<pre>
+inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
                  'Port 3 FDDI', 'Port 6 FDDI',
-                 'Port 7 Ethernet' , 'Port 9 Ethernet')"</pre></blockquote>
-</p>
-</div>
-</div>
-
-<div>
-<h2> Dictionary Reference </h2>
-
-<p>
-In this section are detailed lists of every tag you will find
-in every dictionary.
-</p>
-
-<p>
-Jump directly to:
-</p>
-
-<ul>
-  <li><a href="#target">target</a></li>
-  <li><a href="#datasource">datasource</a></li>
-  <li><a href="#targettype">targetType</a></li>
-  <li><a href="#graph">graph</a></li>
-  <li><a href="#view">view</a></li>
-  <li><a href="#color">color</a></li>
-  <li><a href="#oid">oid</a></li>
-  <li><a href="#html">html</a></li>
-  <li><a href="#event">event</a></li>
-  <li><a href="#rra">rra</a></li>
-</ul>
-
-<div>
-<a name="target">
-<h3> The Target Dictionary </h3>
-</a>
-
-<p>
-For each target known to Cricket, there is a target dictionary. The
-target dictionary holds all the information needed by Cricket to collect
-and store variables from a component. The target dictionary is
-expanded with respect to itself immediately before it is
-used to collect or display data.
-</p>
-
-<p></p>
-
-<dl>
-<dt><tt>collect</tt><p></p></dt>
-<dd>Default value: <i>not set</i><p>
-
-If this tag exists, and it is set to <tt>false</tt>, then
-this target will be skipped when the collector comes
-across it. This is useful if you no longer want to collect
-an obsolete target, but you still want it in the config tree
-so that you can look at it with the grapher.
-</p>
-<p></p>
-</dd>
-
-<dt><tt>copy-to</tt><p></p></dt>
-<dd>Default value: <i>not set</i><p>
-
-If this item is set, it tells Cricket to send the
-data it collects somewhere else after it is added to
-the RRD file. The value of this tag is interpreted
-as a colon separated list of two things. The first
-is where to send the data. The second item is used on
-a case-by-case basis.
-</p>
-<p>
-To send SNMP traps, set <tt>copy-to</tt> to a string like this:
-<tt>trap:public@traphost.company.com</tt>.
-</p>
-
-<p>
-The traps Cricket sends are marked with an enterprise number
-of "1.3.6.1.4.1.2595.1.1" (which is enterprises.webtv.wtvOps.wtvOpsTraps).
-Their generic type is 6, and their specific type is 3.
-The first varbind is the full path to the target, including
-the target name. The other varbinds are the actual data.
-The OID's for these varbinds can be ignored. They are not
-significant.
-</p>
-
-<p>
-To send SQL updates to a database (see <a href="copytosql.html">SQL HOWTO</a>),
-use a string like this:
-</p>
-
-<p>
-<tt>sql:driver,user,password</tt>
-</p>
-
-<p>
-<tt>driver</tt> is a string like: <tt>dbi:Sybase:NMSDB</tt>.
-</p>
-
-<p>
-This is a new extension to copy-to and while it is designed to work with as
-many platforms as possible, it may not work with all types of databases. It
-has only been tested against SQLServer.
-</p>
-
-<p>
-New copy-to types can only be added by editing the
-source to the collector. Please send any patches
-to the Cricket maintainer, so others can use your nifty
-copy-to method.
-</p>
-
-<p></p>
-</dd>
-
-<dt><tt>directory-desc</tt><p></p></dt>
-<dd>Default value: <i>unset</i><p>
-
-This string is displayed in the description column of the
-directory selection list, if it is set. If not, the column
-is simply left blank.
-</p>
-<p></p>
-</dd>
-
-<dt><tt>disable-short-desc</tt><p></p></dt>
-<dd>Default value: <i>unset</i><p>
-
-Hold on tight, this is a weird one. If this is set in the
-dictionary of the first target displayed in the "Targets
-that are available" table, then the table will have only one
-column. This is useful when you have lots of views and
-don't want to lose the space used by the description
-column.
-</p>
-<p></p>
-</dd>
-
-<dt><tt>display-name</tt><p></p></dt>
-<dd>Default value: <i>same as target name</i><p>
-
-You can use this tag to use a more user friendly name for a target
-for display purposes. If you do not set it, the target name itself
-will be displayed.
-</p>
-<p></p>
-</dd>
-
-<dt><tt>events</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-The pre-1.0.4 syntax of specifying events as a target tag is deprecated. The
-<tt>events</tt> tag is now a view dictionary tag.
-</p>
-</dd>
-
-<dt><tt>inst</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-This is the SNMP instance number. Cricket only really needs this value
-to be set correctly if <tt>%inst%</tt> shows up in the ds-source tag
-of the datasources you are collecting. If <tt>inst</tt>
-is set, Cricket will attempt to evaluate it as a Perl expression.
-</p>
-<p>
-<font color=red>Note</font>: there's no protection against
-side-effects from this expression, so to avoid a security problem from
-an inst like <tt>unlink('/etc/motd');</tt> you should make certain
-your config tree is only writable by you.
-</p>
-<p>
-The result of evaluating the instance is examined to see whether it is
-a mapped instance, a scalar, or a vector. If it starts with "map(", it
-is a mapped instance.  The instance mapping algorithm is used to
-derive an instance number from the rest of the data in the target (see
-<a href="inst-mapping.html">Instance Mapping</a> for more information on
-this), then the target is processed as though the instance number had
-been a scalar all along.</p>
-
-<p>
-If it is a scalar (i.e. <tt>inst=1</tt>) then it is processed
-normally. If the instance is a vector (i.e. <tt>inst="(0..12)"</tt>,
-or <tt>inst="(1, 3, 5)"</tt>) then the target is processed once for
-each value in the list. The target dictionary is expanded with respect
-to itself for each instance, so it's possible to embed <tt>%inst%</tt>
-into the rrd-datafile tag. In fact, it's critical to add
-<tt>%inst%</tt> to some part of the rrd-datafile tag, or else the data
-will all be stored on top of one another in the same datafile.</p>
-
-<p>
-<font color=red>Note</font>: To protect the instance against
-interpretation, use the perl quote operator:
-<br><tt>inst = qw(%InstanceName%)</tt>
-<br>This is required if instances look like floating point numbers to
-Perl, for example if you have an instance like 4.10.
-</p>
-</dd>
-
-<dt><tt>inst-names</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-When making the instance selector table, Cricket will use names
-from this tag instead of the instances themselves. If it will be
-needed, <tt>inst-names</tt> is eval'ed (just like <tt>inst</tt>).
-For each instance in the <tt>inst</tt> tag, Cricket looks for a
-corresponding entry in the <tt>inst-name</tt> vector. If it
-finds one, it uses that as the instance name, otherwise it defaults
-to the instance it fetched from the <tt>inst</tt> tag.
-</p>
-</dd>
-
-<dt><tt>long-desc</tt><p></p></dt>
-<dd>Default-value: <i>unset</i><p>
-
-This description shows up at the top of a page of graphs, in the
-"Summary" section. There is more room on this page for a longer
-description.  You can include your own HTML as long as you close all
-tags that you open. If you don't feel like setting this for every
-target, set it to <tt>%short-desc%</tt> in the "--default--" target,
-and the short description will show up on each graph page for every
-target which does not have an explicit long description. (Such is the
-power of the config tree.)</p>
-</dd>
-
-<dt><tt>monitor-thresholds</tt><p></p></dt>
-<dd>Default-value: <i>none</i><p>
-
-Monitor thresholds are discussed in detail in <a href="monitor-thresholds.html">
-this document</a>.</p>
-</dd>
-
-<dt><tt>mtargets</tt><p></p></dt>
-<dd>Default-value: <i>none</i><p>
-
-If this tag exists, then this target is considered by Cricket to be a
-multi-target.  To the collector, this means that it simply doesn't need to
-collect anything, and can skip the target.  To the grapher, it means this
-target will aggregate the data from several different targets all onto
-one set of graphs.  It will plot the data from each of the different targets
-all on the same graph.  It assumes that the target-type of each of the
-specified targets is the same.  It works best if the graph dictionary for
-each datasource does not specify a color (otherwise you'll end up with more
-than one line with the same color).  It enforces only one AREA graph--it
-will convert the others into LINE2 in order to ensure they can be seen.
-It does not currently support vector instances.  Other than that, the syntax
-matches that for "targets".  This tag can also be used in connection with
-the mtargets-ops flag to perform arithmetic operations.</p>
-
-<p>
-<i>Note:</i> This tag will not work with vector instances at this
-time. If you absolutely need it to work, you'll need to use multiple
-separate scalar targets to poll the device's ports, and then use
-the <tt>mtargets</tt> tag to graph each of the scalar targets.
-</p>
-</dd>
-
-<dt><tt>mtargets-ops</tt><p></p></dt>
-<dd>Default-value: <i>none</i><p>
-
-This tag is used in connection with the "mtargets" tag.  This tag lets
-you perform arithmetic operations on multiple targets.  For example,
-this lets you add multiple targets together and graph the results.
-This tag must either be set to an RPN notation, or to a short-hand
-form, like "sum()".
-</p>
-
-<p>
-If set to an RPN expression, it should be defined as a
-comma separated list of operations, such
-as "+","-","*","/".  This is used as a RPN calculator, operating on the
-targets listed in the <tt>mtargets</tt> definition.
-So, if you list three targets
-in your mtargets definition, you could define
-<tt>mtargets-ops="+,+"</tt>, and the
-result would be a graph of the three targets added together.
-</p>
-
-<p>
-If this tag is set to "sum()", the correct number of pluses
-will be substituted to make a valid RPN expression to sum each
-of the targets in the <tt>mtargets</tt> tag.
-</p>
-
-<p>
-If this tag is set to "avg()", it will be replaced by
-the correct RPN expression to
-calculate the average of the targets in the <tt>mtargets</tt> tag.
-</p>
-
-<p>
-The HTML
-summary section also has the same set of operations done to the values
-there.  The operations are done to each datasource defined for that
-target-type.  If you have defined a scale for the individual datasource,
-these operations are done on the scaled values.
-</p>
-</dd>
-
-<dt><tt>order</tt><p></p></dt>
-<dd>Default value: 0<p>
-
-The order tag is used to control the order that targets are
-<i>displayed</i>. It has nothing to do with the order that they are
-<i>polled</i>. (Though it might work like that someday.) When the
-display is laid out by the CGI application, it sorts the targets from
-the highest order to the lowest order.  Targets which have the same
-order are sorted alpha-numerically within their order.</p>
-</dd>
-
-<dt><tt>persistent-alarms</tt><p></p></dt>
-<dd>Default value: <i>false</i><P>
-This tag tells the Monitor agent that if it receives an alarm to send traps
-every time it detects an alarm condition. The default behavior is to only send
-an Alarm/Clear trap. This can be useful for sending many SNMP traps into an
-application which can tally the amount of failures, or to have it execute a
-program multiple times. Setting this tag to 'true' turns persistent alarming
-on.
-</p>
-</dd>
-
-<dt><tt>rrd-datafile</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag tells Cricket where to put the data it collects, and where to
-find the data it will graph. Since there are no guarantees about where
-Cricket will be running from, you should use a full path here. The
-sample-config ships with a one-size-fits all definition for
-rrd-datafile in the root Defaults file.  Except for special cases, you
-can probably use it and it will generate the filenames for you
-automatically.</p>
-</dd>
-
-<dt><tt>rrd-poll-interval</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag is used to set the step size (in seconds) for the RRD file
-when it is first created. This value cannot be changed once the RRD
-file is created, so if you need to change it in the config tree, then
-you must remove the RRD file, forcing Cricket to re-create it, to make
-the change stick. You will, of course, lose all the data you have
-collected so far.  It is critical that the collector runs on each
-target at least as often as the rrd-polling-interval, otherwise RRD
-may mark the intervening polling periods as unknown.<p>
-</p>
-<p>
-RRA's are defined in terms of the fundamental polling-interval of the
-RRD. Thus, if you chose to adjust the rrd-polling-interval (and then
-run the collector at a non-standard rate) then you should re-visit the
-RRA definitions and probably make adjustments to them. A particular
-example of adjusting rrd-polling-interval would be using Cricket to
-monitor a 155 Mbit OC3 link. Because an SNMP Counter32 can wrap in
-under 5 minutes at bandwidths above 100 Mbits, it's critical to fetch
-the data more often, or else RRD will not be able to correctly detect
-and process the counter wrap.
-</p>
-
-<p>
-<!-- XXX --> <i>Hopefully in the next few versions, we will have an
-example of a part of the config tree optimized for very fast
-interfaces.</i>
-</p>
-</dd>
-
-<dt><tt>rrd-max</tt><p></p>
-<dd>Default value: <i>unset</i><p>
-
-If this tag is present, it will override the same tag in the
-datasource dictionary. See the entry on <tt>rrd-max</tt> there for
-more information.
-</p>
-</dd>
-
-<dt><tt>rrd-min</tt><p></p></dt>
-<dd>Default value: <i>unset</i><p>
-
-If this tag is present, it will override the same tag in the
-datasource dictionary. See the entry on <tt>rrd-min</tt> there for
-more information.
-</p>
-
-<dt><tt>short-desc</tt><p></p></dt>
-<dd>Default value: <i>unset</i><p>
-
-This description shows up in the target selection table which the CGI
-program displays. It is a good idea to keep this description to one
-line. You can include your own HTML in it as long as you close all
-tags that you open.</p>
-</dd>
-
-<dt><tt>snmp</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag is not directly used by Cricket except when it is doing
-instance mapping. However, it is convention (as exemplified by the
-sample-config tree) that this tag should hold the SNMP community
-string, the hostname, and the port number in the exact form that is
-required by the snmp:// ds-source specification. Thus, ds-sources can
-simply start with <tt>snmp://%snmp%/</tt>, and they will incorporate
-the current host, port, and community string into the ds-source tag as
-soon as they are expanded with respect to the current target.<p>
-</p>
-<p>
-When using instance mapping, the <tt>snmp</tt> tag is used directly,
-so it must be present, even if you are using another convention to get
-the data into the ds-source tags.</p>
-</dd>
-
-<dt><tt>snmp-uptime</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-If an <tt>snmp-uptime</tt> tag is specified, <tt>collector</tt> will
-retrieve the specified SNMP object and interpret it as the remote
-device uptime. If the uptime is less than the <tt>rrd-poll-interval</tt>,
-Cricket will assume the device has been rebooted and will ignore the
-previous value of any <tt>COUNTER</tt>s on the device (effectively
-instructing RRD to just store the value as a baseline for the next sample).
-This tag should only be used if you <i>must</i> use <tt>COUNTER</tt>
-rather than <tt>DERIVE</tt> as the datatype for your data, because
-checking the uptime will not protect you against a host of other
-causes for spurious counter wraps. Use at your own risk, most users
-should just use the <tt>DERIVE</tt> datatype for counters.
-</p>
-
-<p>Example: <tt>snmp-uptime = 1.3.6.1.2.1.1.3.0
-</tt>
-</p>
-
-<p>This example shows how to use the system.sysUptime object to
-determine the device uptime. This tag only makes sense in the
-<tt>target --default--</tt> stanza, because specifying it will affect
-all collected counters.</p>
-<p>
-If not specified, Cricket will not monitor device uptime for reboots.</p>
-</dd>
-
-<dt><tt>summary-loc</tt><p></p></dt>
-<dd>Default value: <i>top</i><p>
-
-This tag controls where the "Summary" box appears on the page. There
-may be instances where you want it on the bottom instead of the top.
-This could be useful for aggregate pages where you only care about the graphs
-and not so much the content. To have it display on the bottom, change the tag
-to 'bottom'.
-</p>
-</dd>
-
-<dt><tt>targets</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-If this tag exists, then this target is considered by Cricket to be a
-multi-target. To the collector, this means that it simply doesn't need
-to collect anything, and can skip the target. To the grapher, it means
-this target will aggregate the data from several different targets all
-onto one report.  The syntax is a semi-colon delimited list of targets.
-The target definition can either by fully-qualified, which would look
-like "/router-interfaces/Datacenter1/ds3-1", or unqualified, in which case
-they are assumed to be in the current directory.</p>
-
-<p>
-For targets with vector instance definitions, it may also be useful to
-specify which instance you wish to display.  You can do that by putting
-a colon after the target definition.  So, it would look something like
-this:  targets="/switch-ports/switch-1:3;/switch-ports/switch-2:5..7".  This
-would put up instance #3 from switch-1, and instance #5, #6, and #7 from
-switch-2.  Variable expansion is handled in the instance definition
-section as well.</p>
-
-<p>
-This functionality assumes that the target-type of each of the specified
-targets is the same.  You also must set a target-type for the multi-target
-itself.  There are some variables which control the presentation of this
-data, which are also listed in this reference.
-</p>
-</dd>
-
-<dt><tt>targets-long-desc</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag sets the text which is displayed above each graph in a "targets"
-multi-target.  It should be an array of the same length as the "targets" array.
-This value overrides the default presentation, and also overrides the tag
-targets-short-desc.  Syntax would look like:
-targets-long-desc="('Target1','Target2')" </p>
-</dd>
-
-<dt><tt>targets-short-desc</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-By default above each graph in a targets multi-target page, the short-desc
-of each target being displayed is printed above that graph (as well as
-some other text).  This replaces that text with this.  It should be an
-array which matches the "targets" array.  The syntax would look the same as
-for targets-long-desc.</p>
-</dd>
-
-<dt><tt>target-type</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag sets the target type for this target. It must be one of the
-target type names from the targetType dictionary.  Cricket uses the
-targetType to decide which variables to fetch, and how much data to
-store in the RRD.
-</p>
-</dd>
-
-<dt><tt>trap-address</tt><p></p></dt>
-<dd>Default value: <i>unset</i><p>
-
-This tag is used to tell Monitor.pm where to send SNMP traps when
-it needs to send one. The format should be community@hostname:port.
-You can safely leave off community and port. The defaults are "public",
-and "162", respectively.
-</p>
-</dd>
-
-<dt><tt>unknown-is-zero</tt><p></p></dt>
-<dd>Default value: <i>unset</i><p>
-
-When this tag is set and the target is part of a multitarget
-which has mtargets-ops set, then data which is unknown
-will be treated as a 0, unless <b>all</b> targets of the multitarget are
-unknown (in which case the value is still unknown).
-This is very useful when trying to create
-aggregate graphs that sum a set of targets that span different time
-ranges. By default, places where one target is
-unknown and the others are known
-will show on the graph as unknown (blank). In some cases, this
-can result in no graph appearing at all (when the set of known
-datapoints are completely disjoint). Set this flag to "true" to
-avoid this problem.
-</p>
-</dd>
-</dl>
-
-<p>
-In addition, the following tags are set automatically by Cricket for
-your use in other tags in the target dictionary: </p>
-
-<dl>
-<dt><tt>auto-target-name</tt><p></p></dt>
-<dd>Default value: <i>automatically set</i><p>
-
-The short name of the current target. This does not include the entire
-path from the config tree root to the target.</p>
-</dd>
-<dt><tt>auto-target-path</tt><p>
-<dd>Default value: <i>automatically set</i><p>
-
-The path leading from the base of the config tree to the current
-target.
-</p>
-</dd>
-
-<dt><tt>auto-base</tt><p></p></dt>
-<dd>Default value: <i>automatically set</i><p>
-
-The config tree root directory. This is especially useful for creating
-paths which you want to be relative to the config tree root. For
-instance, setting rrd-datafile to
-<tt>%auto-base%/../cricket-data/foo.rrd</tt> would put the datafile in a
-directory named cricket-data, next to the base of the config tree.</p>
-</dd>
-
-<dt><tt>auto-view</tt><p></p></dt>
-<dd>Default value: <i>automatically set</i><p>
-
-The name of the current view, as selected using the user interface.
-This is sometimes useful to incorporate into strings used in the user
-interface via the HTML dictionary.</p>
-</dd>
-</dl>
-</div>
-
-<div>
-<a name="datasource">
-<h3> The Datasource Dictionary </h3>
-</a>
-
-<p>
-This dictionary tells Cricket everything it needs to know about
-individual datasources. A datasource is a single variable about a
-target which is polled and logged. For instance, a datasource for a
-router interface would be "inbound bandwidth". A separate datasource
-definition is needed for each of the other variables that you might
-want to measure ("outbound bandwidth", for instance).</p>
-
-
-<dl>
-<dt><tt>desc</tt><p></p></dt>
-<dd>Default value: <i>unset</i>
-<p>
-If this tag is set, the value is incorporated into a key at the bottom
-of the page of graphs. This is a very good place to put notes about
-how the value is measured, what uncertainty there is in the
-measurement, etc. You can put arbitrary HTML into it, as long as you
-close any tags that you open. If there are no datasources with a
-description, then no key will be printed.  Only datasources with
-descriptions will be present in the key.</p>
-</dd>
-
-<dt><tt>ds-source</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag is used to tell Cricket where to fetch the data from. There
-is a scheme identifier from the beginning until the first
-colon. Everything after the first colon is defined on a per-scheme
-basis. The scheme identifier is case-insensitive.</p>
-<p>
-The per-scheme part is expanded with respect to the target dictionary
-immediately before it is resolved into measurements, making it
-possible to plug values from the target dictionary into the ds-source
-at runtime. Likely candidates for this substitution include the SNMP
-hostname and community string, the instance number (which is appended
-to table-base OID's), and some or all of the command line for EXEC
-datasources.</p>
-
-<p>
-Here's a detailed description of each scheme.
-</p>
-
-<blockquote>
-<dl>
-  <dt> SNMP</dt>
-  <dd> These ds-sources look like this:
-	<tt>snmp://community@hostname:port/oid</tt>.  The hostname part
-	can be either an IP address or a domain name. It will be resolved
-	with <tt>gethostbyname()</tt> in the latter case. The oid part can
-	include a text label which will be expanded from the OID
-	dictionary.
-	</dd>
-
-  <dt> EXEC</dt>
-  <dd> <p>This ds-source is used to tell Cricket to run a shell
-	command in order to fetch the value or values required for a
-	target. After the <tt>exec:</tt> scheme identifier comes
-	an integer followed by a colon, followed by a command (including
-	whatever arguments are required for the command). The number
-	chooses a line of output from the command (starting from line
-	0). For example, say the "vmstat" program on your system prints
-	this when given the "-s" argument:</p>
-<p>
-	<pre>
+                 'Port 7 Ethernet' , 'Port 9 Ethernet')"
+                 	</pre>
+				</p>
+			</div>
+		</div>
+
+		<div>
+			<h2>Dictionary Reference</h2>
+			<p>
+				In this section are detailed lists of every tag you will
+				find in every dictionary.
+			</p>
+			<p>Jump directly to:</p>
+			<ul>
+				<li><a href="#target">target</a></li>
+				<li><a href="#datasource">datasource</a></li>
+				<li><a href="#targettype">targetType</a></li>
+				<li><a href="#graph">graph</a></li>
+				<li><a href="#view">view</a></li>
+				<li><a href="#color">color</a></li>
+				<li><a href="#oid">oid</a></li>
+				<li><a href="#html">html</a></li>
+				<li><a href="#event">event</a></li>
+				<li><a href="#rra">rra</a></li>
+			</ul>
+
+			<div>
+				<a name="target"><h3>The Target Dictionary</h3></a>
+				<p>
+					For each target known to Cricket, there is a target
+					dictionary. The target dictionary holds all the
+					information needed by Cricket to collect and store
+					variables from a component. The target dictionary is
+					expanded with respect to itself immediately before it is
+					used to collect or display data.
+				</p>
+				<dl>
+					<dt><tt>collect</tt></dt>
+					<dd>Default value: <i>not set</i>
+						<p>
+							If this tag exists, and it is set to
+							<tt>false</tt>, then this target will be skipped
+							when the collector comes across it. This is
+							useful if you no longer want to collect an
+							obsolete target, but you still want it in the
+							config tree so that you can look at it with the
+							grapher.
+						</p>
+					</dd>
+					<dt><tt>copy-to</tt></dt>
+					<dd>Default value: <i>not set</i>
+						<p>
+							If this item is set, it tells Cricket to send
+							the data it collects somewhere else after it is
+							added to the RRD file. The value of this tag is
+							interpreted as a colon separated list of two
+							things. The first is where to send the data. The
+							second item is used on a case-by-case basis.
+						</p>
+						<p>
+							To send SNMP traps, set <tt>copy-to</tt> to a
+							string like this:
+							<tt>trap:public@traphost.company.com</tt>.
+						</p>
+						<p>
+							The traps Cricket sends are marked with an
+							enterprise number of "1.3.6.1.4.1.2595.1.1"
+							(which is enterprises.webtv.wtvOps.wtvOpsTraps).
+							Their generic type is 6, and their specific type
+							is 3. The first varbind is the full path to the
+							target, including the target name. The other
+							varbinds are the actual data. The OID's for
+							these varbinds can be ignored. They are not
+							significant.
+						</p>
+						<p>
+							To send SQL updates to a database (see <a
+							href="copytosql.html">SQL HOWTO</a>), use a
+							string like this:
+						</p>
+						<p><tt>sql:driver,user,password</tt></p>
+						<p><tt>driver</tt> is a string like: <tt>dbi:Sybase:NMSDB</tt>.</p>
+						<p>
+							This is a new extension to copy-to and while it
+							is designed to work with as many platforms as
+							possible, it may not work with all types of
+							databases. It has only been tested against
+							SQLServer.
+						</p>
+						<p>
+							New copy-to types can only be added by editing
+							the source to the collector. Please send any
+							patches to the Cricket maintainer, so others can
+							use your nifty copy-to method.
+						</p>
+					</dd>
+					<dt><tt>directory-desc</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							This string is displayed in the description
+							column of the directory selection list, if it is
+							set. If not, the column is simply left blank.
+						</p>
+					</dd>
+					<dt><tt>disable-short-desc</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							Hold on tight, this is a weird one. If this is
+							set in the dictionary of the first target
+							displayed in the "Targets that are available"
+							table, then the table will have only one column.
+							This is useful when you have lots of views and
+							don't want to lose the space used by the
+							description column.
+						</p>
+					</dd>
+					<dt><tt>display-name</tt></dt>
+					<dd>Default value: <i>same as target name</i>
+						<p>
+							You can use this tag to use a more user friendly
+							name for a target for display purposes. If you
+							do not set it, the target name itself will be
+							displayed.
+						</p>
+					</dd>
+					<dt><tt>events</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							The pre-1.0.4 syntax of specifying events as a
+							target tag is deprecated. The <tt>events</tt>
+							tag is now a view dictionary tag.
+						</p>
+					</dd>
+					<dt><tt>inst</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This is the SNMP instance number. Cricket only
+							really needs this value to be set correctly if
+							<tt>%inst%</tt> shows up in the ds-source tag of
+							the datasources you are collecting. If
+							<tt>inst</tt> is set, Cricket will attempt to
+							evaluate it as a Perl expression.
+						</p>
+						<p>
+							<font color=red>Note</font>: there's no
+							protection against side-effects from this
+							expression, so to avoid a security problem from
+							an inst like <tt>unlink('/etc/motd');</tt> you
+							should make certain your config tree is only
+							writable by you.
+						</p>
+						<p>
+							The result of evaluating the instance is
+							examined to see whether it is a mapped instance,
+							a scalar, or a vector. If it starts with "map(",
+							it is a mapped instance.  The instance mapping
+							algorithm is used to derive an instance number
+							from the rest of the data in the target (see <a
+							href="inst-mapping.html">Instance Mapping</a>
+							for more information on this), then the target
+							is processed as though the instance number had
+							been a scalar all along.
+						</p>
+						<p>
+							If it is a scalar (i.e. <tt>inst=1</tt>) then it
+							is processed normally. If the instance is a
+							vector (i.e. <tt>inst="(0..12)"</tt>, or
+							<tt>inst="(1, 3, 5)"</tt>) then the target is
+							processed once for each value in the list. The
+							target dictionary is expanded with respect to
+							itself for each instance, so it's possible to
+							embed <tt>%inst%</tt> into the rrd-datafile tag.
+							In fact, it's critical to add <tt>%inst%</tt> to
+							some part of the rrd-datafile tag, or else the
+							data will all be stored on top of one another in
+							the same datafile.
+						</p>
+						<p>
+							<font color=red>Note</font>: To protect the
+							instance against interpretation, use the perl
+							quote operator: <tt>inst =
+							qw(%InstanceName%)</tt>. This is required if
+							instances look like floating point numbers to
+							Perl, for example if you have an instance like
+							4.10.
+						</p>
+					</dd>
+					<dt><tt>inst-names</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							When making the instance selector table, Cricket
+							will use names from this tag instead of the
+							instances themselves. If it will be needed,
+							<tt>inst-names</tt> is eval'ed (just like
+							<tt>inst</tt>). For each instance in the
+							<tt>inst</tt> tag, Cricket looks for a
+							corresponding entry in the <tt>inst-name</tt>
+							vector. If it finds one, it uses that as the
+							instance name, otherwise it defaults to the
+							instance it fetched from the <tt>inst</tt> tag.
+						</p>
+					</dd>
+					<dt><tt>long-desc</tt></dt>
+					<dd>Default-value: <i>unset</i>
+						<p>
+							This description shows up at the top of a page
+							of graphs, in the "Summary" section. There is
+							more room on this page for a longer description.
+							 You can include your own HTML as long as you
+							close all tags that you open. If you don't feel
+							like setting this for every target, set it to
+							<tt>%short-desc%</tt> in the "--default--"
+							target, and the short description will show up
+							on each graph page for every target which does
+							not have an explicit long description. (Such is
+							the power of the config tree.)
+						</p>
+					</dd>
+					<dt><tt>monitor-thresholds</tt></dt>
+					<dd>Default-value: <i>none</i>
+						<p>
+							Monitor thresholds are discussed in detail in <a
+							href="monitor-thresholds.html"> this
+							document</a>.
+						</p>
+					</dd>
+					<dt><tt>mtargets</tt></dt>
+					<dd>Default-value: <i>none</i>
+						<p>
+							If this tag exists, then this target is
+							considered by Cricket to be a multi-target.  To
+							the collector, this means that it simply doesn't
+							need to collect anything, and can skip the
+							target.  To the grapher, it means this target
+							will aggregate the data from several different
+							targets all onto one set of graphs.  It will
+							plot the data from each of the different targets
+							all on the same graph.  It assumes that the
+							target-type of each of the specified targets is
+							the same.  It works best if the graph dictionary
+							for each datasource does not specify a color
+							(otherwise you'll end up with more than one line
+							with the same color).  It enforces only one AREA
+							graph--it will convert the others into LINE2 in
+							order to ensure they can be seen. It does not
+							currently support vector instances.  Other than
+							that, the syntax matches that for "targets". 
+							This tag can also be used in connection with the
+							mtargets-ops flag to perform arithmetic
+							operations.
+						</p>
+						<p>
+							<i>Note:</i> This tag will not work with vector
+							instances at this time. If you absolutely need
+							it to work, you'll need to use multiple separate
+							scalar targets to poll the device's ports, and
+							then use the <tt>mtargets</tt> tag to graph each
+							of the scalar targets.
+						</p>
+					</dd>
+					<dt><tt>mtargets-ops</tt></dt>
+					<dd>Default-value: <i>none</i>
+						<p>
+							This tag is used in connection with the
+							"mtargets" tag. This tag lets you perform
+							arithmetic operations on multiple targets.  For
+							example, this lets you add multiple targets
+							together and graph the results. This tag must
+							either be set to an RPN notation, or to a
+							short-hand form, like "sum()".
+						</p>
+						<p>
+							If set to an RPN expression, it should be
+							defined as a comma separated list of operations,
+							such as "+","-","*","/".  This is used as a RPN
+							calculator, operating on the targets listed in
+							the <tt>mtargets</tt> definition. So, if you
+							list three targets in your mtargets definition,
+							you could define <tt>mtargets-ops="+,+"</tt>,
+							and the result would be a graph of the three
+							targets added together.
+						</p>
+						<p>
+							If this tag is set to "sum()", the correct
+							number of pluses will be substituted to make a
+							valid RPN expression to sum each of the targets
+							in the <tt>mtargets</tt> tag.
+						</p>
+						<p>
+							If this tag is set to "avg()", it will be
+							replaced by the correct RPN expression to
+							calculate the average of the targets in the
+							<tt>mtargets</tt> tag.
+						</p>
+						<p>
+							The HTML summary section also has the same set
+							of operations done to the values there.  The
+							operations are done to each datasource defined
+							for that target-type. If you have defined a
+							scale for the individual datasource, these
+							operations are done on the scaled values.
+						</p>
+					</dd>
+					<dt><tt>order</tt></dt>
+					<dd>Default value: 0
+						<p>
+							The order tag is used to control the order that
+							targets are <i>displayed</i>. It has nothing to
+							do with the order that they are <i>polled</i>.
+							(Though it might work like that someday.) When
+							the display is laid out by the CGI application,
+							it sorts the targets from the highest order to
+							the lowest order.  Targets which have the same
+							order are sorted alpha-numerically within their
+							order.
+						</p>
+					</dd>
+					<dt><tt>persistent-alarms</tt></dt>
+					<dd>Default value: <i>false</i>
+						<p>
+							This tag tells the Monitor agent that if it
+							receives an alarm to send traps every time it
+							detects an alarm condition. The default behavior
+							is to only send an Alarm/Clear trap. This can be
+							useful for sending many SNMP traps into an
+							application which can tally the amount of
+							failures, or to have it execute a program
+							multiple times. Setting this tag to 'true' turns
+							persistent alarming on.
+						</p>
+					</dd>
+					<dt><tt>rrd-datafile</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag tells Cricket where to put the data it
+							collects, and where to find the data it will
+							graph. Since there are no guarantees about where
+							Cricket will be running from, you should use a
+							full path here. The sample-config ships with a
+							one-size-fits all definition for rrd-datafile in
+							the root Defaults file.  Except for special
+							cases, you can probably use it and it will
+							generate the filenames for you automatically.
+						</p>
+					</dd>
+					<dt><tt>rrd-poll-interval</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag is used to set the step size (in
+							seconds) for the RRD file when it is first
+							created. This value cannot be changed once the
+							RRD file is created, so if you need to change it
+							in the config tree, then you must remove the RRD
+							file, forcing Cricket to re-create it, to make
+							the change stick. You will, of course, lose all
+							the data you have collected so far.  It is
+							critical that the collector runs on each target
+							at least as often as the rrd-polling-interval,
+							otherwise RRD may mark the intervening polling
+							periods as unknown.
+						</p>
+						<p>
+							RRA's are defined in terms of the fundamental
+							polling-interval of the RRD. Thus, if you chose
+							to adjust the rrd-polling-interval (and then run
+							the collector at a non-standard rate) then you
+							should re-visit the RRA definitions and probably
+							make adjustments to them. A particular example
+							of adjusting rrd-polling-interval would be using
+							Cricket to monitor a 155 Mbit OC3 link. Because
+							an SNMP Counter32 can wrap in under 5 minutes at
+							bandwidths above 100 Mbits, it's critical to
+							fetch the data more often, or else RRD will not
+							be able to correctly detect and process the
+							counter wrap.
+						</p>
+						<p>
+							<!-- XXX --> <i>Hopefully in the next few
+							versions, we will have an example of a part of
+							the config tree optimized for very fast
+							interfaces.</i>
+						</p>
+					</dd>
+					<dt><tt>rrd-max</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							If this tag is present, it will override the
+							same tag in the datasource dictionary. See the
+							entry on <tt>rrd-max</tt> there for more
+							information.
+						</p>
+					</dd>
+					<dt><tt>rrd-min</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							If this tag is present, it will override the
+							same tag in the datasource dictionary. See the
+							entry on <tt>rrd-min</tt> there for more
+							information.
+						</p>
+					</dd>
+					<dt><tt>short-desc</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							This description shows up in the target
+							selection table which the CGI program displays.
+							It is a good idea to keep this description to
+							one line. You can include your own HTML in it as
+							long as you close all tags that you open.
+						</p>
+					</dd>
+					<dt><tt>snmp</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag is not directly used by Cricket except
+							when it is doing instance mapping. However, it
+							is convention (as exemplified by the
+							sample-config tree) that this tag should hold
+							the SNMP community string, the hostname, and the
+							port number in the exact form that is required
+							by the snmp:// ds-source specification. Thus,
+							ds-sources can simply start with
+							<tt>snmp://%snmp%/</tt>, and they will
+							incorporate the current host, port, and
+							community string into the ds-source tag as soon
+							as they are expanded with respect to the current
+							target.
+						</p>
+						<p>
+							When using instance mapping, the <tt>snmp</tt>
+							tag is used directly, so it must be present,
+							even if you are using another convention to get
+							the data into the ds-source tags.
+						</p>
+					</dd>
+					<dt><tt>snmp-uptime</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							If an <tt>snmp-uptime</tt> tag is specified,
+							<tt>collector</tt> will retrieve the specified
+							SNMP object and interpret it as the remote
+							device uptime. If the uptime is less than the
+							<tt>rrd-poll-interval</tt>, Cricket will assume
+							the device has been rebooted and will ignore the
+							previous value of any <tt>COUNTER</tt>s on the
+							device (effectively instructing RRD to just
+							store the value as a baseline for the next
+							sample). This tag should only be used if you
+							<i>must</i> use <tt>COUNTER</tt> rather than
+							<tt>DERIVE</tt> as the datatype for your data,
+							because checking the uptime will not protect you
+							against a host of other causes for spurious
+							counter wraps. Use at your own risk, most users
+							should just use the <tt>DERIVE</tt> datatype for
+							counters.
+						</p>
+						<p>Example: <tt>snmp-uptime = 1.3.6.1.2.1.1.3.0</tt></p>
+						<p>
+							This example shows how to use the
+							system.sysUptime object to determine the device
+							uptime. This tag only makes sense in the
+							<tt>target --default--</tt> stanza, because
+							specifying it will affect all collected counters.
+						</p>
+						<p>
+							If not specified, Cricket will not monitor
+							device uptime for reboots.
+						</p>
+					</dd>
+					<dt><tt>summary-loc</tt></dt>
+					<dd>Default value: <i>top</i>
+						<p>
+							This tag controls where the "Summary" box
+							appears on the page. There may be instances
+							where you want it on the bottom instead of the
+							top. This could be useful for aggregate pages
+							where you only care about the graphs and not so
+							much the content. To have it display on the
+							bottom, change the tag to 'bottom'.
+						</p>
+					</dd>
+					<dt><tt>targets</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							If this tag exists, then this target is
+							considered by Cricket to be a multi-target. To
+							the collector, this means that it simply doesn't
+							need to collect anything, and can skip the
+							target. To the grapher, it means this target
+							will aggregate the data from several different
+							targets all onto one report.  The syntax is a
+							semi-colon delimited list of targets. The target
+							definition can either by fully-qualified, which
+							would look like
+							"/router-interfaces/Datacenter1/ds3-1", or
+							unqualified, in which case they are assumed to
+							be in the current directory.
+						</p>
+						<p>
+							For targets with vector instance definitions, it
+							may also be useful to specify which instance you
+							wish to display.  You can do that by putting a
+							colon after the target definition.  So, it would
+							look something like this:
+							targets="/switch-ports/switch-1:3;/switch-ports/
+							switch-2:5..7". This would put up instance #3
+							from switch-1, and instance #5, #6, and #7 from
+							switch-2.  Variable expansion is handled in the
+							instance definition section as well.
+						</p>
+						<p>
+							This functionality assumes that the target-type
+							of each of the specified targets is the same. 
+							You also must set a target-type for the
+							multi-target itself.  There are some variables
+							which control the presentation of this data,
+							which are also listed in this reference.
+						</p>
+					</dd>
+					<dt><tt>targets-long-desc</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag sets the text which is displayed above
+							each graph in a "targets" multi-target.  It
+							should be an array of the same length as the
+							"targets" array. This value overrides the
+							default presentation, and also overrides the tag
+							targets-short-desc.  Syntax would look like:
+							targets-long-desc="('Target1','Target2')".
+						</p>
+					</dd>
+					<dt><tt>targets-short-desc</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							By default above each graph in a targets
+							multi-target page, the short-desc of each target
+							being displayed is printed above that graph (as
+							well as some other text). This replaces that
+							text with this.  It should be an array which
+							matches the "targets" array.  The syntax would
+							look the same as for targets-long-desc.
+						</p>
+					</dd>
+					<dt><tt>target-type</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag sets the target type for this target.
+							It must be one of the target type names from the
+							targetType dictionary.  Cricket uses the
+							targetType to decide which variables to fetch,
+							and how much data to store in the RRD.
+						</p>
+					</dd>
+					<dt><tt>trap-address</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							This tag is used to tell Monitor.pm where to
+							send SNMP traps when it needs to send one. The
+							format should be community@hostname:port. You
+							can safely leave off community and port. The
+							defaults are "public", and "162", respectively.
+						</p>
+					</dd>
+					<dt><tt>unknown-is-zero</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							When this tag is set and the target is part of a
+							multitarget which has mtargets-ops set, then
+							data which is unknown will be treated as a 0,
+							unless <b>all</b> targets of the multitarget are
+							unknown (in which case the value is still
+							unknown). This is very useful when trying to
+							create aggregate graphs that sum a set of
+							targets that span different time ranges. By
+							default, places where one target is unknown and
+							the others are known will show on the graph as
+							unknown (blank). In some cases, this can result
+							in no graph appearing at all (when the set of
+							known datapoints are completely disjoint). Set
+							this flag to "true" to avoid this problem.
+						</p>
+					</dd>
+				</dl>
+				<p>
+					In addition, the following tags are set automatically by
+					Cricket for your use in other tags in the target
+					dictionary:
+				</p>
+				<dl>
+					<dt><tt>auto-target-name</tt></dt>
+					<dd>Default value: <i>automatically set</i>
+						<p>
+							The short name of the current target. This does
+							not include the entire path from the config tree
+							root to the target.
+						</p>
+					</dd>
+					<dt><tt>auto-target-path</tt><p>
+					<dd>Default value: <i>automatically set</i>
+						<p>
+							The path leading from the base of the config
+							tree to the current target.
+						</p>
+					</dd>
+					<dt><tt>auto-base</tt></dt>
+					<dd>Default value: <i>automatically set</i>
+						<p>
+							The config tree root directory. This is
+							especially useful for creating paths which you
+							want to be relative to the config tree root. For
+							instance, setting rrd-datafile to
+							<tt>%auto-base%/../cricket-data/foo.rrd</tt>
+							would put the datafile in a directory named
+							cricket-data, next to the base of the config
+							tree.
+						</p>
+					</dd>
+					<dt><tt>auto-view</tt></dt>
+					<dd>Default value: <i>automatically set</i>
+						<p>
+							The name of the current view, as selected using
+							the user interface. This is sometimes useful to
+							incorporate into strings used in the user
+							interface via the HTML dictionary.
+						</p>
+					</dd>
+				</dl>
+			</div>
+
+			<div>
+				<a name="datasource"><h3>The Datasource Dictionary</h3></a>
+				<p>
+					This dictionary tells Cricket everything it needs to
+					know about individual datasources. A datasource is a
+					single variable about a target which is polled and
+					logged. For instance, a datasource for a router
+					interface would be "inbound bandwidth". A separate
+					datasource definition is needed for each of the other
+					variables that you might want to measure ("outbound
+					bandwidth", for instance).
+				</p>
+				<dl>
+					<dt><tt>desc</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							If this tag is set, the value is incorporated
+							into a key at the bottom of the page of graphs.
+							This is a very good place to put notes about how
+							the value is measured, what uncertainty there is
+							in the measurement, etc. You can put arbitrary
+							HTML into it, as long as you close any tags that
+							you open. If there are no datasources with a
+							description, then no key will be printed.  Only
+							datasources with descriptions will be present in
+							the key.
+						</p>
+					</dd>
+					<dt><tt>ds-source</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag is used to tell Cricket where to fetch
+							the data from. There is a scheme identifier from
+							the beginning until the first colon. Everything
+							after the first colon is defined on a per-scheme
+							basis. The scheme identifier is
+							case-insensitive.
+						</p>
+						<p>
+							The per-scheme part is expanded with respect to
+							the target dictionary immediately before it is
+							resolved into measurements, making it possible
+							to plug values from the target dictionary into
+							the ds-source at runtime. Likely candidates for
+							this substitution include the SNMP hostname and
+							community string, the instance number (which is
+							appended to table-base OID's), and some or all
+							of the command line for EXEC datasources.
+						</p>
+						<p>Here's a detailed description of each scheme.</p>
+						<dl>
+							<dt>SNMP</dt>
+							<dd>
+								<p>
+									These ds-sources look like this:
+									<tt>snmp://community@hostname:port/oid</
+									tt>.  The hostname part can be either an
+									IP address or a domain name. It will be
+									resolved with <tt>gethostbyname()</tt>
+									in the latter case. The oid part can
+									include a text label which will be
+									expanded from the OID dictionary.
+								</p>
+							</dd>
+							<dt>EXEC</dt>
+							<dd>
+								<p>
+									This ds-source is used to tell Cricket
+									to run a shell command in order to fetch
+									the value or values required for a
+									target. After the <tt>exec:</tt> scheme
+									identifier comes an integer followed by
+									a colon, followed by a command
+									(including whatever arguments are
+									required for the command). The number
+									chooses a line of output from the
+									command (starting from line 0). For
+									example, say the "vmstat" program on
+									your system prints this when given the
+									"-s" argument:
+								</p>
+								<p>
+									<pre>
       350 swap ins
      2982 swap outs
       239 pages swapped in
      3298 pages swapped out
           (etc...)
-	</pre>
-</p>
-<p>
-	Then the following datasource would fetch the number of pages
-	swapped out: </p>
-<p>
-	<tt>exec:3:vmstat -s</tt></p>
-<p>
-	Note that we allow the text output from the command
-	(i.e. "pages swapped out")
-	to go in to Cricket. As of version 0.64, Cricket ignores everything
-	after the first space or tab. It will attempt to interpret the
-	first sequence of non-space characters on the line as a floating
-	point number. Since an integer is a degenerate form of a floating
-	point number, they are acceptable. This behavior holds for all
-	ds-sources, actually, but it is most useful for the EXEC type.
-	</p>
-<p>
-	If the initial integer is omitted (and there are no colons in the
-	command line to confuse Cricket) then the line number will be
-	assumed to be 0, and the first line of output will be used as
-	the measurement.
-	</p>
-</dd>
-  <dt> FILE</dt>
-  <dd> <p>This ds-source tells Cricket to read a file and find the
-	results on a certain line of that file. The line is specified
-	using the same syntax as EXEC. For example, say the file /tmp/data
-	has two lines in it, like this:</p>
-<p>
-	<tt> 100 <br>
-		 235 <br>
-	</tt></p>
-<p>
-	Then this datasource would always fetch "235" from the file:</p>
-<p>
-	<tt>file:1:/tmp/data</tt></p>
-<p>
-	Presumably, there would be some other process updating the data
-	file with interesting data from someplace, or else the graph
-	would be a flat line at 235.
-	</p>
-</dd>
-
-  <dt> FIELD</dt>
-  <dd> <p>This datasource is based on the FILE library. It is used to extract
-  specific fields from a file. It is analog to a cricket version of cut(1).</p>
-  <P>
-  FIELD ds-source look like:
-  <tt>field:filename:key:valuef:keyf:delim</tt></p>
-  <P>
-  <tt>key</tt> is the field to grab.<BR>
-  <tt>valuef</tt> is which key section from to grab (defaults to 2).<BR>
-  <tt>keyf</tt>is which key to grab based on the delimiter (defaults to 1).<BR>
-  <tt>delim</tt>is the delimiter (defaults to :).
-  </P>
-</dd>
-
-  <dt> FUNC</dt>
-  <dd> <p>This ds-source uses a Perl function to fetch the result. It
-		is not enabled by default, since it requires extra code
-		to be useful, and could be a security vulnerability, if the
-		config tree were not properly protected. To enable it,
-		uncomment the line <tt>use func;</tt> in <tt>collector</tt>.
-		</p>
-<p>
-		This ds-source uses Perl's <tt>eval</tt> keyword to evaluate
-		some Perl code at runtime. Usually, this will be a function
-		call to a function you have written yourself and added into
-		<tt>collector</tt>. A good way to add the code portably is to
-		keep it in its own file and incorporate it with the
-		<tt>require</tt> keyword. You will need to be careful to avoid
-		stomping on any data that collector uses, since it will be
-		running your code in its namespace. This should be fixed
-		someday, if many extensions to Cricket use this interface.
-		</p>
-</dd>
-
-  <dt> PERFMON <font color=red>(warning: still in development)</font></dt>
-  <dd> <p>This ds-source is used to extract perflib information from Win32 hosts
-  which don't use SNMP (or where counters aren't available through SNMP).</p>
-<P>
-  Setting up perflib counters in Cricket is not a trivial process, and requires
-  the following: RRDtool 1.1.x, comfort with RPN, and ActiveState perl. This
-  module will not under any circumstances work with any non-Windows OS.
-</p>
-  <P>
-  Perflib counter procedures are documented more in depth in the
-  <a href=perfmon.html>Perfmon reference</a> document.
-</p>
-  <P>
-  The syntax for a Perfmon datasource is:
-</p>
-  <P>
-  <tt>perfmon:hostname:counter group:counter name:instance:special</tt>
-</p>
-  <p>
-  Instance is optional, and only required for instance counters. Unlike
-  the perfmon.exe application in NT. Special is optional as well and is
-  documented in the <a href=perfmon.html>perfmon reference</a> document.
-</p>
-  <p>
-  If you're collecting an "instant" perfmon counter, collection is much like
-  getting something from SNMP. Here is an example.
-</p>
-  <p>
-  <tt>perfmon:%auto-host-name%:System:Processes</tt>
-</p>
-  <p>
-  Many perfmon counters return averages which need to be computed against a
-  timebase. This makes collection challenging because you need to first collect
-  several DERIVE-based datasources, and then tie them together with a COMPUTE
-  datasource. The sample-config directory has a large amount of examples with
-  common counters to help, and there is the <a href=perfmon.html>perfmon
-  reference</a> document.
-</p>
-  <p>
-  Please note that this piece of Cricket is still not complete and hasn't been
-  tested very well. Please let the developers know if you find any major bugs
-  or have any enhancement suggestions.
-  </P>
-</dd>
-
-  <dt> SQL <font color=red>(warning: still in development)</font></dt>
-  <dd> <p>This ds-source is used to for extracting counters from a database
-  server. It's still in development and not very robust.</p>
-  <P>
-  Here is the syntax:
-</p>
-  <P>
-  <tt>sql:login:password:query:col:DRIVER</tt>
-</p>
-  <P>
-  <tt>col</tt> is used to get a particular column of data returned from the
-  first returned row. Currently any other rows returned get discarded.
-  </P>
-<p>
-  <tt>DRIVER</tt> can have colons in it. Cricket's parser will not treat it
-  like separate arguments to the ds itself.
-</p>
-  <p>
-  Here is an example:
-  </P>
-<p>
-  <tt>sql:anonymous::select top 1 samplevalue from samplednumericdata where idsamplednumericdatasource = 'C04E3055-B282-4EE9-9F5D-CB46DC45C988' order by timesampled desc:1:dbi:Sybase:NMSDB</tt>
-  </P>
-</dd>
-
-  <dt> WBEM <font color=red>(warning: still in development)</font></dt>
-  <dd> <p>This ds-source is used to extract WBem information from Win32 hosts.
-  Currently this requires ActiveState Perl and will not run under any non-
-  Windows OS. It has not been tested for compatibility against a UNIX WBem
-  data provider.</p>
-  <p>
-  The syntax for a WBEM ds-source syntax:
-  </P>
-<p>
-  <tt>wbem:%auto-target-name%:wbem-namespace:wbem-object:counter:instance</tt>
-  </P>
-<p>
-  Here is an example to get the same counter as noted in the PERFMON provider
-  example.
-  </P>
-<p>
-  <tt>wbem:%auto-target-name%:root\\cimv2:Win32_PerfFormattedData_PerfOS_System:Processes</tt>
-  </p>
-<p>
-  The WBem provider does not support authentication, so security settings may
-  not allow this to work properly.
-  </P>
-<p>
-  More information can be found in the <a href="win2kwmi.html">Installing Cricket on Win2k to Monitor WMI Counters</a> document.
-  </P>
-</dd>
-</dl>
-</blockquote>
-
-<p>
-Datasources are batched together and executed with as few network
-transactions or shell executions are possible. For instance, if you
-are fetching six datasources from the same hostname, all six
-datasources will be rolled into one SNMP request.  Likewise, if you
-are fetching 3 different lines from the results of the same command,
-that command will be run only once.
-</p>
-
-<p>
-Schemes are expected to return their data as an array of numbers.
-If the values are of the form "XXX@YYY", then the measurement XXX
-will be recorded as being taken at time YYY. The time must be in the
-form of a Unix <tt>time_t</tt>, i.e. number of seconds since 1970.
-Currently, this feature is only supported by the EXEC and FILE schemes.
-RRD imposes the restriction that data can <b>only</b> be added in
-strictly ascending time order. Each datasource which has a time in it
-should have a matching
-time. If this is not the case, Cricket will log a warning, but use
-the first time it found in the array.
-</p>
-
-<p>
-You might use this
-feature if you are fetching the data from another data collection
-system which is operating on a different polling cycle than Cricket.
-You could use a shell script to fetch the data from the other
-system, along with the time the data was sampled. Then you
-could format the result into the "XXX@YYY" format, and print it to
-standard out for Cricket to read.
-</p>
-
-<p>
-New schemes can be added to Cricket with minimal effort. Use the file
-<tt>lib/exec.pm</tt> as your guide, then add a <tt>use</tt> statement
-for your new <tt>.pm</tt> file to <tt>collector</tt>.</p>
-</dd>
-
-<dt><tt>rrd-ds-type</tt><p></p></dt>
-<dd>Default value: GAUGE<p>
-The DS type is used by RRD to know how to interpret the numbers
-fetched from this datasource. There are three possibilities:
-</p>
-<blockquote>
-<dl>
-  <dt> GAUGE</dt>
-  <dd> <p>The measurement will be directly copied into the RRD
-	datafile without any extra processing. Examples of this
-	type of measurement include readings from thermometers,
-	percent disk space free, etc.
-  </p>
-</dd>
-
-  <dt> COUNTER</dt>
-  <dd> <p>The measurements from COUNTER datasources will be treated
-	like SNMP counters. An SNMP counter increases monotonically
-	until a fixed wrap-around point (usually either 2^31-2 or 2^63-2,
-	depending on the size of the data type). To convert a COUNTER
-	measurement into a rate (for instance, "count of octets" to
-	"octets per second") RRD subtracts the previous value from the
-	current one, and adjusts for any wraparound conditions. Any
-	SNMP variable which is marked with the SNMP "COUNTER" data type
-	would normally have its <tt>rrd-ds-type</tt> set to COUNTER,
-	but unless your datasource guarantees a monotonous increase,
-	it is better to use DERIVE with an rrd-min of zero.
-  </p>
-</dd>
-  <dt> DERIVE</dt>
-  <dd> <p>DERIVE is like COUNTER, but there is no overflow check, so
-	negative rates are possible. This datasource type would be
-	useful when you have a count of something (which may increase
-	and decrease), and you want to graph the rate of change.
-  </p><p>
-	With an rrd-min of zero, the DERIVE datasource type acts like
-	COUNTER, except that negative samples are treated as unknown.
-	Handling SNMP COUNTERs in this fashion helps reduce the occurrence
-	of spikes in the graphs. Negative values can result from
-	restarting the device or implementation errors in its SNMP agent,
-	and are common enough to really recommend using DERIVE rather than
-	COUNTER.
-  </p>
-</dd>
-
-  <dt> ABSOLUTE</dt>
-  <dd> <p>ABSOLUTE is for COUNTERs which get reset upon reading. Some
-	SNMP variables have this property. Using ABSOLUTE instead of COUNTER
-	tells RRD to compute the rate assuming the value is an absolute
-	count of octets (or whatever) during the last polling period.
-  </p>
-<dd>
-</dl>
-</blockquote>
-<p>
-The datasource type names are case-insensitive. They are passed
-directly through to RRD when the RRD file is created. If the
-datasource type is changed later, you must use <tt>rrd-tune</tt> to
-apply the change to the underlying RRD file. For more information
-about them, consult the RRD documentation for the <tt>create</tt>
-command.</p>
-</dd>
-
-<dt><tt>rrd-heartbeat</tt><p></p></dt>
-<dd>Default value: 1800 <i>(value is in seconds)</i><p>
-
-The heartbeat for a datasource is the number of seconds that can pass
-between updates before the datasource is marked unknown. If this tag
-is changed after the RRD file has been created, then the <a
-href="#rrd-tune">rrd-tune</a> tool must be used to apply the changes
-to the existing RRD's.</p>
-</dd>
-
-<dt><tt>rrd-max</tt><p></p></dt>
-<dd>Default value: U<p>
-
-This tag is used to set the RRD maximum value parameter. If RRD gets a
-value higher than this number, it will throw the data away, instead of
-adding it to the RRA. This can be used to filter bad data, though it
-could be argued it would be better to simply avoid fetching bad data
-in the first place. When it is set to "U" (for unknown), RRD does not
-attempt to check incoming data against an upper bound.
-</p>
-
-<p>
-If the tag <tt>rrd-max</tt> is present in the target dictionary,
-it will override the value found in the datasource dictionary.
-This makes is possible to assign different maxima to different
-targets.
-</p>
-
-<p>
-If this value is changed after the underlying RRD file has been
-created, the <tt>rrd-tune</tt> script must be used to apply the
-changes.
-</p>
-</dd>
-
-<dt><tt>rrd-min</tt><p></p></dt>
-<dd>Default value: U<p>
-Like <tt>rrd-max</tt>, this tag is passed through to RRD
-unchanged. It can be used to apply an upper bound to data
-submitted to RRD.
-</p>
-
-<p>
-Also like <tt>rrd-max</tt>, if <tt>rrd-min</tt> appears in the target
-dictionary, it will override the <tt>rrd-min</tt> in the datasource
-dictionary.
-</p>
-<dd>
-</dl>
-</div>
-
-<div>
-<a name="targettype">
-<h3> The TargetType Dictionary </h3>
-</a>
-<p>
-The TargetType dictionary tells Cricket which datasources
-to gather together for a certain kind of target. Unlike
-other dictionaries, keys in this one can occur multiple
-times.
-</p>
-
-<dl>
-<dt><tt>ds</tt><p></p><dt>
-<dd>Default value: <i>none</i><p>
-Each <tt>ds</tt> tag tells Cricket about a variable it will be
-fetching. The value of the tag must be comma-separated list
-of known datasource names.
-</p>
-</dd>
-
-<dt><tt>view</tt><p></p</dt>
-<dd>Default value: <i>none</i><p>
-Each <tt>view</tt> specifies a comma-delimited list of views associated
-with this target type. These views must be defined in separate view
-dictionary entries on the config tree inheritance path of targets 
-of this target type. This implies the view entries do not have
-to be defined in the same Defaults file in which the TargetType
-dictionary referencing them appears. However,
-for a cleaner, easier to read config tree, define view entries in
-the same Defaults file as the TargetType dictionary that references
-them.</p>
-<p>
-The pre-1.0.4 syntax of defining views with the TargetType <tt>view</tt>
-tag is deprecated.
-</p>
-<dd>
-</dl>
-</div>
-
-<div>
-<a name="graph">
-<h3>The Graph Dictionary</h3>
-</a>
-
-<p>
-The graph dictionary controls how individual datasources are displayed
-when it comes time to graph them. It also controls display attributes
-of statistical summary for this data source on the HTML page which embeds 
-the graph image(s). Each named graph dictionary entry (not 
-<tt>--default--</tt>) should share the name of a datasource dictionary entry.
-In this respect, the graph dictionary could be merged with the datasource
-dictionary. However, the separation permits separate administration of
-datasource definition/collection and display properties in graphs. </p>
-
-<p>
-Cricket variables in graph tags (i.e. %myvar%) are expanded with respect
-to a target. For example, in the graph dictionary entry for a datasource,
-you could specify <tt>y-max = %specific-y-max%</tt>, then set the tag
-<tt>specific-y-max</tt> on a per-target basis. The association between
-targets and graph dictionary entries is controlled by the TargetType 
-dictionary for the apporpriate target type (because the graph dictionary 
-names match datasource dictionary names). </p>
-
-<p>
-Graph <tt>--default--</tt> dictionary entries can be used to define
-default datasource graph attributes (such as default line thickness via the
-<tt>draw-as</tt> tag).</p> 
-
-<p>
-If your config tree does not utilize views, you should use graph
-<tt>--default--</tt> dictionary entries to define non-datasource
-specific graphing attributes. These tags include: 
-<tt>default-ranges</tt>,
-<tt>height</tt>,
-<tt>height-hint</tt>,
-<tt>interlaced</tt>,
-<tt>graph-format</tt>,
-<tt>vrule-color</tt>,
-<tt>width</tt>,
-and <tt>width-hint</tt>.
-</p>
-
-<p>
-If your config tree utilizes views, these attributes should instead
-be defined in view dictionary entries and these tags are defined
-in the <a href="#view">view dictionary section</a>. For a config
-tree that utilizes views, defining non-datasource specific graphing tags
-in graph <tt>--default--</tt> entries is deprecated.</p>
-
-<dl>
-
-<dt><tt>bytes</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-If this is set to true, then the conversion to SI units will
-use powers of 2 instead of powers of 10. For instance, if a router is
-reporting that it's moving 1048576 bits per second through a
-particular interface, and "bytes" is set to 1 (or "true") then
-the value will be reported in the HTML summary as 1 Mbit/sec.
-Without the <tt>bytes</tt> tag, the value would be reported at
-1.04 Mbit/sec, which is slightly misleading. When measuring
-very large numbers of bytes, the difference can be significant (4.9%
-in the case of Mega sized measurements, 7.3% in the case of Giga
-sized measurements). This is the major cause of discrepancies between
-Cricket and some commercial tools, so make sure it's set appropriately.
-</p>
-<p>
-The numbers on the vertical axis of a graph are scaled
-by powers of 2 if the bytes tag is set to true for any of the
-datasources on the graph.
-</p>
-<p></p>
-</dd>
-
-<dt><tt>color</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-Use the <tt>color</tt> tag to explicitly control the color of the datasource
-as it appears both on the graph, and in the HTML summary. If this is left
-unset, then Cricket will automatically choose colors according to the
-<tt>--order--</tt> key in the <a href="#color">color dictionary</a>.
-If you choose to set it, either set it to one of the color names in the color
-dictionary, or set it to an HTML-style color specification without the
-pound sign. For instance, to make a datasource's line red, set color to
-"ff0000".
-</p>
-<p></p>
-</dd>
-
-<dt><tt>draw-as</tt><p></p></dt>
-<dd>Default value: <i>?<!-- XXX --></i><p>
-
-This tag tells Cricket how to draw the datasource on the graph. The choices
-are as follows:
-</p>
-<p>
-
-	<blockquote>
-	<dl>
-		<dt><tt>AREA</tt></dt>
-		<dd>draws a filled-in shape representing the value of the datasource
-		over time.</dd>
-
-		<dt><tt>LINE1</tt></dt>
-		<dd>uses a thin line</dd>
-
-		<dt><tt>LINE2</tt></dt>
-		<dd>uses a medium line</dd>
-
-		<dt><tt>LINE3</tt></dt>
-		<dd>uses a heavy line</dd>
-	</dl>
-	</blockquote>
-</p>
-
-<dt><tt>draw-max-as</tt><p></p></dt>
-<dd>Default value: <i>LINE2</i><p>
-
-Same as <tt>draw-as</tt> but for maximums enabled with <tt>show-max</tt>.
-</p>
-<p></p>
-</dd>
-
-<dt><tt>legend</tt><p></p></dt>
-<dd>Default value: <i>datasource name</i><p>
-
-Using <tt>legend</tt> allows you to customize the datasource name which is
-displayed on the graph's legend, and in the HTML summary. If you don't
-use a <tt>legend</tt> tag, the name of the datasource (as specified
-by the <tt>ds</tt> tag in the targetType dictionary) will be used.
-</p>
-<p></p>
-</dd>
-
-<dt><tt>max-color</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-Same as <tt>color</tt> but for maximums enabled with <tt>show-max</tt>.
-</p>
-
-<dt><tt>precision</tt><p></p></p>
-<dd>Default value: <i>2</i><p>
-
-You can adjust the number of decimal points in the HTML summary values using
-the <tt>precision</tt> tag. The default is two. If you simply want the value
-displayed to be rounded to the nearest integer, set <tt>precision</tt> to
-zero. Alternatively, you can set it to the string "integer".
-</p>
-<p></p>
-</dd>
-
-<dt><tt>scale</tt><p></p></dt>
-<dd>Default value: <i>none</i><p>
-
-If <tt>scale</tt> is set, then the datasource is run through a computation
-(usually a simple scaling operation) before it it plotted or listed
-in the HTML summary. The tag is interpreted as a string of operations
-that will be executed by a Reverse Polish Notation (RPN)
-calculator, separated by commas. When the
-expression begins executing, the current value of the datasource is
-already on the stack. Thus setting <tt>scale</tt> to "8,*" will multiply
-the datasource by 8 before plotting it.
-</p>
-
-<p>
-The RPN operations available are "+" (plus), "-" (minus), "*" (multiply),
-"/" (divide), and "LOG" (take the natural logarithm of the top of the stack).
-Any other token is pushed onto the stack as a number. The top of the stack at the
-end of the string of operations is taken as the scaled value.
-</p>
-
-<p>
-This feature is very useful when plotting bits per second from a router
-interface. Routers tend to report bandwidth in bytes per second, but
-humans tend to think about link capacity in bits per second. Using a <tt>scale</tt>
-tag of "8,*" can bridge this gap by scaling the bytes per second from the router
-into bits per second for human use.
-</p>
-</dd>
-
-<dt><tt>show-avg-max</tt></dt>
-<dd>Default value: <i>true</i><p>
-
-This controls the amount of summary data shown for this datasource at the
-top of the graph page.
-If set to true, Cricket makes an extra call to RRD Tool to fetch the
-average and the maximum for the current day of data. If set to false, only
-the current reading is shown.
-</p>
-</dd>
-
-<dt><tt>show-max</tt><dt>
-<dd>Default value: <i>false</i><p>
-
-This controls whether or not the maximums stored for a data source are drawn
-on the graph.
-</p>
-
-<dt><tt>si-units</tt></dt>
-<dd>Default value: <i>true</i><p>
-
-Setting this tag to "false" will prevent Cricket from transforming
-the value printed in the HTML summary into SI units (i.e.
-2000 bytes/sec is transformed into 2 kbytes/sec). The scale
-on the graph, however, will still have the transformation done
-to it. Set this tag to "false" for items that are not typically
-counted with SI units, like system load average.
-</p>
-
-<p>
-Here are the SI units that are used by Cricket:
-</p>
-
-<blockquote>
-<table border cellpadding=3>
-<tr><th>Symbol</th><th>Magnitude</th><th>Name</th></tr>
-<tr><td>a	<td>10e-18	<td>Ato
-<tr><td>f	<td>10e-15	<td>Femto
-<tr><td>p	<td>10e-12	<td>Pico
-<tr><td>n	<td>10e-9	<td>Nano
-<tr><td>&#181;	<td>10e-6	<td>Micro
-<tr><td>milli	<td>10e-3	<td>Milli
-<tr><td>k	<td>10e3	<td>Kilo
-<tr><td>M	<td>10e6	<td>Mega
-<tr><td>G	<td>10e9	<td>Giga
-<tr><td>T	<td>10e12	<td>Terra
-<tr><td>P	<td>10e15	<td>Peta
-<tr><td>E	<td>10e18	<td>Exa
-</table>
-</blockquote>
-<p>
-
-Note that on graphs, 'milli' is denoted by 'm'. In the HTML summary,
-where there is more room, Cricket uses the less ambiguous 'milli'.
-</p>
-
-<dt><tt>space</tt></dt>
-<dd>Default value: <i>one space</i><p>
-
-This tag can be used by the extremely fastidious user to control the HTML
-summary. Usually, one space is exactly what you'd want between the value
-and the unit specifier of the value. However, for certain units, like the
-degree sign, no space is called for. In this case, set <tt>space</tt>
-to "", the empty string.
-</p>
-</dd>
-
-<dt><tt>units</tt></dt>
-<dd>Default value: <i>the value of the <tt>y-axis</tt> tag</i><p>
-
-In the HTML summary, the <tt>units</tt> tag is appended after the
-value of the datasource. If a datasource is collecting bandwidth information,
-for instance, it would make sense to set <tt>y-axis</tt> to "bits per second",
-since there is plenty of room for it. In the legend, where room is more limited,
-it would be better to set <tt>units</tt> to "bps", instead of letting it
-default to "bits per second".
-</p>
-
-<dt><tt>y-max</tt></dt>
-<dd>Default value: <i>unset</i><p>
-
-Use this tag (and its counterpart, <tt>y-min</tt>) to
-explicitly set the default vertical scale for this datasource when
-it is graphed. Often multiple datasources are graphed together,
-so this tag is better set in a view entry. Refer to the <a href="#view">
-the view dictionary section</a>.
-Presence of this tag disables auto-scaling, so you should set <tt>y-max</tt>
-and <tt>y-min</tt> together if you use this functionality. </p>
-</dd>
-
-<dt><tt>y-min</tt></dt>
-<dd>Default value: <i>unset</i><p>
-
-Refer to <tt>y-max</tt>.
-</p>
-</dd>
-
-</dl>
-</div>
-
-<div>
-<a name="view">
-<h3>The View Dictionary</h3>
-</a>
-
-<p>
-A view dictionary entry is a container for display elements. In
-particular, a view is a group of datasources to be displayed together
-with a particular set of display attributes/options. The same datasource
-can appear in multiple views. The datasource specific graph
-attributes are defined in graph dictionary entries, but other features
-of the graph and the HTML page in which the graph is embedded are
-configured in the view entry and thus can vary from view to view. As you
-navigate through the Cricket Grapher the choice of graph pages presented
-for a given target are the views defined for that target (via the
-view list in the TargetType dictionary).
-</p>
-
-<p>
-The most important view tag is <tt>elements</tt>, as this tag specifies
-the list of datasources (with their associated graph dictionary entries)
-to be included in the view. The <tt>elements</tt> tag is the replacement
-for the space-delimited datasource list in the TargetType dictionary
-view tag in older (pre-1.0.4) versions of Cricket.
-</p>
-
-<p>
-Views are not required. If a target type does not include any views, the
-Grapher will present the user with a list of datasources. But views
-unlock the full flexibility of the Cricket Grapher.
-</p>
-
-<p>
-Cricket variables in view tags (i.e. %myvar%) are expanded with respect
-to a target. The association between 
-targets and view dictionary entries is controlled by the <a href="#targettype">
-TargetType dictionary</a> for the apporpriate target type. <p>
-</p>
-
-<p>
-It is not uncommon for view names to contain space characters. Such names
-are permitted (and parseable) in the config tree. Simply enclose the name
-in double quotes:
-</p>
-
-<p>
-<blockquote><pre>
+									</pre>
+								</p>
+								<p>
+									Then the following datasource would
+									fetch the number of pages swapped out:
+								</p>
+								<p><tt>exec:3:vmstat -s</tt></p>
+								<p>
+									Note that we allow the text output from
+									the command (i.e. "pages swapped out")
+									to go in to Cricket. As of version 0.64,
+									Cricket ignores everything after the
+									first space or tab. It will attempt to
+									interpret the first sequence of
+									non-space characters on the line as a
+									floating point number. Since an integer
+									is a degenerate form of a floating point
+									number, they are acceptable. This
+									behavior holds for all ds-sources,
+									actually, but it is most useful for the
+									EXEC type.
+								</p>
+								<p>
+									If the initial integer is omitted (and
+									there are no colons in the command line
+									to confuse Cricket) then the line number
+									will be assumed to be 0, and the first
+									line of output will be used as the
+									measurement.
+								</p>
+							</dd>
+							<dt>FILE</dt>
+							<dd>
+								<p>
+									This ds-source tells Cricket to read a
+									file and find the results on a certain
+									line of that file. The line is specified
+									using the same syntax as EXEC. For
+									example, say the file /tmp/data has two
+									lines in it, like this:
+								</p>
+								<p><tt>100<br>235</tt></p>
+								<p>
+									Then this datasource would always fetch
+									"235" from the file:
+								</p>
+								<p><tt>file:1:/tmp/data</tt></p>
+								<p>
+									Presumably, there would be some other
+									process updating the data file with
+									interesting data from someplace, or else
+									the graph would be a flat line at 235.
+								</p>
+							</dd>
+							<dt>FIELD</dt>
+							<dd>
+								<p>
+									This datasource is based on the FILE
+									library. It is used to extract specific
+									fields from a file. It is analog to a
+									cricket version of cut(1).
+								</p>
+								<P>
+									FIELD ds-source look like:
+									<tt>field:filename:key:valuef:keyf:delim</tt>
+								</p>
+								<p>
+									<tt>key</tt> is the field to grab.<br>
+									<tt>valuef</tt> is which key section from
+									to grab (defaults to 2).<br>
+									<tt>keyf</tt>is which key to grab based on
+									the delimiter (defaults to 1).<br>
+									<tt>delim</tt>is the delimiter (defaults to :).
+								</p>
+							</dd>
+							<dt>FUNC</dt>
+							<dd>
+								<p>
+									This ds-source uses a Perl function to
+									fetch the result. It is not enabled by
+									default, since it requires extra code to
+									be useful, and could be a security
+									vulnerability, if the config tree were
+									not properly protected. To enable it,
+									uncomment the line <tt>use func;</tt> in
+									<tt>collector</tt>.
+								</p>
+								<p>
+									This ds-source uses Perl's <tt>eval</tt>
+									keyword to evaluate some Perl code at
+									runtime. Usually, this will be a
+									function call to a function you have
+									written yourself and added into
+									<tt>collector</tt>. A good way to add
+									the code portably is to keep it in its
+									own file and incorporate it with the
+									<tt>require</tt> keyword. You will need
+									to be careful to avoid stomping on any
+									data that collector uses, since it will
+									be running your code in its namespace.
+									This should be fixed someday, if many
+									extensions to Cricket use this
+									interface.
+								</p>
+							</dd>
+							<dt>PERFMON <font color=red>(warning: still in
+								development)</font></dt>
+							<dd>
+								<p>
+									This ds-source is used to extract
+									perflib information from Win32 hosts
+									which don't use SNMP (or where counters
+									aren't available through SNMP).
+								</p>
+								<p>
+									Setting up perflib counters in Cricket
+									is not a trivial process, and requires
+									the following: RRDtool 1.1.x, comfort
+									with RPN, and ActiveState perl. This
+									module will not under any circumstances
+									work with any non-Windows OS.
+								</p>
+								<p>
+									Perflib counter procedures are
+									documented more in depth in the <a
+									href="perfmon.html">Perfmon reference</a>
+									document.
+								</p>
+								<p>The syntax for a Perfmon datasource is:</p>
+								<p>
+									<tt>perfmon:hostname:counter group:counter
+										name:instance:special</tt>
+								</p>
+								<p>
+									Instance is optional, and only required
+									for instance counters. Unlike the
+									perfmon.exe application in NT. Special
+									is optional as well and is documented in
+									the <a href="perfmon.html">perfmon
+									reference</a> document.
+								</p>
+								<p>
+									If you're collecting an "instant"
+									perfmon counter, collection is much like
+									getting something from SNMP. Here is an
+									example.
+								</p>
+								<p><tt>perfmon:%auto-host-name%:System:Processes</tt></p>
+								<p>
+									Many perfmon counters return averages
+									which need to be computed against a
+									timebase. This makes collection
+									challenging because you need to first
+									collect several DERIVE-based
+									datasources, and then tie them together
+									with a COMPUTE datasource. The
+									sample-config directory has a large
+									amount of examples with common counters
+									to help, and there is the <a
+									href="perfmon.html">perfmon reference</a>
+									document.
+								</p>
+								<p>
+									Please note that this piece of Cricket
+									is still not complete and hasn't been
+									tested very well. Please let the
+									developers know if you find any major
+									bugs or have any enhancement suggestions.
+								</p>
+							</dd>
+							<dt>SQL <font color=red>(warning: still in
+								development)</font></dt>
+							<dd>
+								<p>
+									This ds-source is used to for extracting
+									counters from a database server. It's
+									still in development and not very
+									robust.
+								</p>
+								<p>Here is the syntax:</p>
+								<p><tt>sql:login:password:query:col:DRIVER</tt></p>
+								<p>
+									<tt>col</tt> is used to get a particular
+									column of data returned from the first
+									returned row. Currently any other rows
+									returned get discarded.
+								</p>
+								<p>
+									<tt>DRIVER</tt> can have colons in it.
+									Cricket's parser will not treat it like
+									separate arguments to the ds itself.
+								</p>
+								<p>Here is an example:</p>
+								<p>
+									<tt>sql:anonymous::select top 1
+										samplevalue from samplednumericdata
+										where idsamplednumericdatasource =
+										'C04E3055-B282-4EE9-9F5D-CB46DC45C988'
+										order by timesampled
+										desc:1:dbi:Sybase:NMSDB</tt>
+								</p>
+							</dd>
+							<dt>WBEM <font color=red>(warning: still in
+								development)</font></dt>
+							<dd>
+								<p>
+									This ds-source is used to extract WBem
+									information from Win32 hosts. Currently
+									this requires ActiveState Perl and will
+									not run under any non- Windows OS. It
+									has not been tested for compatibility
+									against a UNIX WBem data provider.
+								</p>
+								<p>The syntax for a WBEM ds-source syntax:</p>
+								<p><tt>wbem:%auto-target-name%:wbem-namespace:wbem-object:counter:instance</tt></p>
+								<p>
+									Here is an example to get the same
+									counter as noted in the PERFMON provider
+									example.
+								</p>
+								<p><tt>wbem:%auto-target-name%:root\\cimv2:Win32_PerfFormattedData_PerfOS_System:Processes</tt></p>
+								<p>
+									The WBem provider does not support
+									authentication, so security settings may
+									not allow this to work properly.
+								</p>
+								<p>
+									More information can be found in the <a
+									href="win2kwmi.html">Installing Cricket
+									on Win2k to Monitor WMI Counters</a>
+									document.
+								</p>
+							</dd>
+						</dl>
+						<p>
+							Datasources are batched together and executed
+							with as few network transactions or shell
+							executions are possible. For instance, if you
+							are fetching six datasources from the same
+							hostname, all six datasources will be rolled
+							into one SNMP request.  Likewise, if you are
+							fetching 3 different lines from the results of
+							the same command, that command will be run only
+							once.
+						</p>
+						<p>
+							Schemes are expected to return their data as an
+							array of numbers. If the values are of the form
+							"XXX@YYY", then the measurement XXX will be
+							recorded as being taken at time YYY. The time
+							must be in the form of a Unix <tt>time_t</tt>,
+							i.e. number of seconds since 1970. Currently,
+							this feature is only supported by the EXEC and
+							FILE schemes. RRD imposes the restriction that
+							data can <b>only</b> be added in strictly
+							ascending time order. Each datasource which has
+							a time in it should have a matching time. If
+							this is not the case, Cricket will log a
+							warning, but use the first time it found in the
+							array.
+						</p>
+						<p>
+							You might use this feature if you are fetching
+							the data from another data collection system
+							which is operating on a different polling cycle
+							than Cricket. You could use a shell script to
+							fetch the data from the other system, along with
+							the time the data was sampled. Then you could
+							format the result into the "XXX@YYY" format, and
+							print it to standard out for Cricket to read.
+						</p>
+						<p>
+							New schemes can be added to Cricket with minimal
+							effort. Use the file <tt>lib/exec.pm</tt> as
+							your guide, then add a <tt>use</tt> statement
+							for your new <tt>.pm</tt> file to
+							<tt>collector</tt>.
+						</p>
+					</dd>
+					<dt><tt>rrd-ds-type</tt></dt>
+					<dd>Default value: GAUGE
+						<p>
+							The DS type is used by RRD to know how to
+							interpret the numbers fetched from this
+							datasource. There are three possibilities:
+						</p>
+						<dl>
+							<dt>GAUGE</dt>
+							<dd>
+								<p>
+									The measurement will be directly copied
+									into the RRD datafile without any extra
+									processing. Examples of this type of
+									measurement include readings from
+									thermometers, percent disk space free,
+									etc.
+								</p>
+							</dd>
+							<dt>COUNTER</dt>
+							<dd>
+								<p>
+									The measurements from COUNTER
+									datasources will be treated like SNMP
+									counters. An SNMP counter increases
+									monotonically until a fixed wrap-around
+									point (usually either 2^31-2 or 2^63-2,
+									depending on the size of the data type).
+									To convert a COUNTER measurement into a
+									rate (for instance, "count of octets" to
+									"octets per second") RRD subtracts the
+									previous value from the current one, and
+									adjusts for any wraparound conditions.
+									Any SNMP variable which is marked with
+									the SNMP "COUNTER" data type would
+									normally have its <tt>rrd-ds-type</tt>
+									set to COUNTER, but unless your
+									datasource guarantees a monotonous
+									increase, it is better to use DERIVE
+									with an rrd-min of zero.
+								</p>
+							</dd>
+							<dt>DERIVE</dt>
+							<dd>
+								<p>
+									DERIVE is like COUNTER, but there is no
+									overflow check, so negative rates are
+									possible. This datasource type would be
+									useful when you have a count of
+									something (which may increase and
+									decrease), and you want to graph the
+									rate of change.
+								</p>
+								<p>
+									With an rrd-min of zero, the DERIVE
+									datasource type acts like COUNTER,
+									except that negative samples are treated
+									as unknown. Handling SNMP COUNTERs in
+									this fashion helps reduce the occurrence
+									of spikes in the graphs. Negative values
+									can result from restarting the device or
+									implementation errors in its SNMP agent,
+									and are common enough to really
+									recommend using DERIVE rather than
+									COUNTER.
+								</p>
+							</dd>
+							<dt>ABSOLUTE</dt>
+							<dd>
+								<p>
+									ABSOLUTE is for COUNTERs which get reset
+									upon reading. Some SNMP variables have
+									this property. Using ABSOLUTE instead of
+									COUNTER tells RRD to compute the rate
+									assuming the value is an absolute count
+									of octets (or whatever) during the last
+									polling period.
+								</p>
+							</dd>
+						</dl>
+						<p>
+							The datasource type names are case-insensitive.
+							They are passed directly through to RRD when the
+							RRD file is created. If the datasource type is
+							changed later, you must use <tt>rrd-tune</tt> to
+							apply the change to the underlying RRD file. For
+							more information about them, consult the RRD
+							documentation for the <tt>create</tt>
+							command.
+						</p>
+					</dd>
+					<dt><tt>rrd-heartbeat</tt></dt>
+					<dd>Default value: 1800 <i>(value is in seconds)</i>
+						<p>
+							The heartbeat for a datasource is the number of
+							seconds that can pass between updates before the
+							datasource is marked unknown. If this tag is
+							changed after the RRD file has been created,
+							then the <a href="#rrd-tune">rrd-tune</a> tool
+							must be used to apply the changes to the
+							existing RRD's.
+						</p>
+					</dd>
+					<dt><tt>rrd-max</tt></dt>
+					<dd>Default value: U
+						<p>
+							This tag is used to set the RRD maximum value
+							parameter. If RRD gets a value higher than this
+							number, it will throw the data away, instead of
+							adding it to the RRA. This can be used to filter
+							bad data, though it could be argued it would be
+							better to simply avoid fetching bad data in the
+							first place. When it is set to "U" (for
+							unknown), RRD does not attempt to check incoming
+							data against an upper bound.
+						</p>
+						<p>
+							If the tag <tt>rrd-max</tt> is present in the
+							target dictionary, it will override the value
+							found in the datasource dictionary. This makes
+							is possible to assign different maxima to
+							different targets.
+						</p>
+						<p>
+							If this value is changed after the underlying
+							RRD file has been created, the <tt>rrd-tune</tt>
+							script must be used to apply the changes.
+						</p>
+					</dd>
+					<dt><tt>rrd-min</tt></dt>
+					<dd>Default value: U
+						<p>
+							Like <tt>rrd-max</tt>, this tag is passed
+							through to RRD unchanged. It can be used to
+							apply an upper bound to data submitted to RRD.
+						</p>
+						<p>
+							Also like <tt>rrd-max</tt>, if <tt>rrd-min</tt>
+							appears in the target dictionary, it will
+							override the <tt>rrd-min</tt> in the datasource
+							dictionary.
+						</p>
+					</dd>
+				</dl>
+			</div>
+
+			<div>
+				<a name="targettype"><h3>The TargetType Dictionary</h3></a>
+				<p>
+					The TargetType dictionary tells Cricket which
+					datasources to gather together for a certain kind of
+					target. Unlike other dictionaries, keys in this one can
+					occur multiple times.
+				</p>
+				<dl>
+					<dt><tt>ds</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							Each <tt>ds</tt> tag tells Cricket about a
+							variable it will be fetching. The value of the
+							tag must be comma-separated list of known
+							datasource names.
+						</p>
+					</dd>
+					<dt><tt>view</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							Each <tt>view</tt> specifies a comma-delimited
+							list of views associated with this target type.
+							These views must be defined in separate view
+							dictionary entries on the config tree
+							inheritance path of targets of this target type.
+							This implies the view entries do not have to be
+							defined in the same Defaults file in which the
+							TargetType dictionary referencing them appears.
+							However, for a cleaner, easier to read config
+							tree, define view entries in the same Defaults
+							file as the TargetType dictionary that
+							references them.
+						</p>
+						<p>
+							The pre-1.0.4 syntax of defining views with the
+							TargetType <tt>view</tt> tag is deprecated.
+						</p>
+					</dd>
+				</dl>
+			</div>
+
+			<div>
+				<a name="graph"><h3>The Graph Dictionary</h3></a>
+				<p>
+					The graph dictionary controls how individual datasources
+					are displayed when it comes time to graph them. It also
+					controls display attributes of statistical summary for
+					this data source on the HTML page which embeds the graph
+					image(s). Each named graph dictionary entry (not
+					<tt>--default--</tt>) should share the name of a
+					datasource dictionary entry. In this respect, the graph
+					dictionary could be merged with the datasource
+					dictionary. However, the separation permits separate
+					administration of datasource definition/collection and
+					display properties in graphs.
+				</p>
+				<p>
+					Cricket variables in graph tags (i.e. %myvar%) are
+					expanded with respect to a target. For example, in the
+					graph dictionary entry for a datasource, you could
+					specify <tt>y-max = %specific-y-max%</tt>, then set the
+					tag <tt>specific-y-max</tt> on a per-target basis. The
+					association between targets and graph dictionary entries
+					is controlled by the TargetType dictionary for the
+					apporpriate target type (because the graph dictionary
+					names match datasource dictionary names).
+				</p>
+				<p>
+					Graph <tt>--default--</tt> dictionary entries can be
+					used to define default datasource graph attributes (such
+					as default line thickness via the <tt>draw-as</tt>
+					tag).
+				</p>
+				<p>
+					If your config tree does not utilize views, you should
+					use graph <tt>--default--</tt> dictionary entries to
+					define non-datasource specific graphing attributes.
+					These tags include: <tt>default-ranges</tt>,
+					<tt>height</tt>, <tt>height-hint</tt>,
+					<tt>interlaced</tt>, <tt>graph-format</tt>,
+					<tt>vrule-color</tt>, <tt>width</tt>, and
+					<tt>width-hint</tt>.
+				</p>
+				<p>
+					If your config tree utilizes views, these attributes
+					should instead be defined in view dictionary entries and
+					these tags are defined in the <a href="#view">view
+					dictionary section</a>. For a config tree that utilizes
+					views, defining non-datasource specific graphing tags in
+					graph <tt>--default--</tt> entries is deprecated.
+				</p>
+				<dl>
+					<dt><tt>bytes</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							If this is set to true, then the conversion to
+							SI units will use powers of 2 instead of powers
+							of 10. For instance, if a router is reporting
+							that it's moving 1048576 bits per second through
+							a particular interface, and "bytes" is set to 1
+							(or "true") then the value will be reported in
+							the HTML summary as 1 Mbit/sec. Without the
+							<tt>bytes</tt> tag, the value would be reported
+							at 1.04 Mbit/sec, which is slightly misleading.
+							When measuring very large numbers of bytes, the
+							difference can be significant (4.9% in the case
+							of Mega sized measurements, 7.3% in the case of
+							Giga sized measurements). This is the major
+							cause of discrepancies between Cricket and some
+							commercial tools, so make sure it's set
+							appropriately.
+					</p>
+					<p>
+						The numbers on the vertical axis of a graph are
+						scaled by powers of 2 if the bytes tag is set to
+						true for any of the datasources on the graph.
+					</p>
+				</dd>
+				<dt><tt>color</tt></dt>
+				<dd>Default value: <i>none</i>
+					<p>
+						Use the <tt>color</tt> tag to explicitly control the
+						color of the datasource as it appears both on the
+						graph, and in the HTML summary. If this is left
+						unset, then Cricket will automatically choose colors
+						according to the <tt>--order--</tt> key in the <a
+						href="#color">color dictionary</a>. If you choose to
+						set it, either set it to one of the color names in
+						the color dictionary, or set it to an HTML-style
+						color specification without the pound sign. For
+						instance, to make a datasource's line red, set color
+						to "ff0000".
+					</p>
+				</dd>
+				<dt><tt>draw-as</tt></dt>
+				<dd>Default value: <i>?<!-- XXX --></i>
+					<p>
+						This tag tells Cricket how to draw the datasource on
+						the graph. The choices are as follows:
+					</p>
+					<dl>
+						<dt><tt>AREA</tt></dt>
+						<dd>
+							Draws a filled-in shape representing the
+							value of the datasource over time.
+						</dd>
+						<dt><tt>LINE1</tt></dt>
+						<dd>Uses a thin line.</dd>
+						<dt><tt>LINE2</tt></dt>
+						<dd>Uses a medium line.</dd>
+						<dt><tt>LINE3</tt></dt>
+						<dd>Uses a heavy line.</dd>
+					</dl>
+					<dt><tt>draw-max-as</tt></dt>
+					<dd>Default value: <i>LINE2</i>
+						<p>
+							Same as <tt>draw-as</tt> but for maximums
+							enabled with <tt>show-max</tt>.
+						</p>
+					</dd>
+					<dt><tt>legend</tt></dt>
+					<dd>Default value: <i>datasource name</i>
+						<p>
+							Using <tt>legend</tt> allows you to customize
+							the datasource name which is displayed on the
+							graph's legend, and in the HTML summary. If you
+							don't use a <tt>legend</tt> tag, the name of the
+							datasource (as specified by the <tt>ds</tt> tag
+							in the targetType dictionary) will be used.
+						</p>
+					</dd>
+					<dt><tt>max-color</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							Same as <tt>color</tt> but for maximums enabled
+							with <tt>show-max</tt>.
+						</p>
+					</dd>
+					<dt><tt>precision</tt></p>
+					<dd>Default value: <i>2</i>
+						<p>
+							You can adjust the number of decimal points
+							in the HTML summary values using the
+							<tt>precision</tt> tag. The default is two.
+							If you simply want the value displayed to be
+							rounded to the nearest integer, set
+							<tt>precision</tt> to zero. Alternatively,
+							you can set it to the string "integer".
+						</p>
+					</dd>
+					<dt><tt>scale</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							If <tt>scale</tt> is set, then the
+							datasource is run through a computation
+							(usually a simple scaling operation) before
+							it it plotted or listed in the HTML summary.
+							The tag is interpreted as a string of
+							operations that will be executed by a
+							Reverse Polish Notation (RPN) calculator,
+							separated by commas. When the expression
+							begins executing, the current value of the
+							datasource is already on the stack. Thus
+							setting <tt>scale</tt> to "8,*" will
+							multiply the datasource by 8 before plotting
+							it.
+						</p>
+						<p>
+							The RPN operations available are "+" (plus),
+							"-" (minus), "*" (multiply), "/" (divide),
+							and "LOG" (take the natural logarithm of the
+							top of the stack). Any other token is pushed
+							onto the stack as a number. The top of the
+							stack at the end of the string of operations
+							is taken as the scaled value.
+						</p>
+						<p>
+							This feature is very useful when plotting
+							bits per second from a router interface.
+							Routers tend to report bandwidth in bytes
+							per second, but humans tend to think about
+							link capacity in bits per second. Using a
+							<tt>scale</tt> tag of "8,*" can bridge this
+							gap by scaling the bytes per second from the
+							router into bits per second for human use.
+						</p>
+					</dd>
+					<dt><tt>show-avg-max</tt></dt>
+					<dd>Default value: <i>true</i>
+						<p>
+							This controls the amount of summary data
+							shown for this datasource at the top of the
+							graph page. If set to true, Cricket makes an
+							extra call to RRD Tool to fetch the average
+							and the maximum for the current day of data.
+							If set to false, only the current reading is
+							shown.
+						</p>
+					</dd>
+					<dt><tt>show-max</tt><dt>
+					<dd>Default value: <i>false</i>
+						<p>
+							This controls whether or not the maximums
+							stored for a data source are drawn on the
+							graph.
+						</p>
+					</dd>
+					<dt><tt>si-units</tt></dt>
+					<dd>Default value: <i>true</i>
+						<p>
+							Setting this tag to "false" will prevent
+							Cricket from transforming the value printed
+							in the HTML summary into SI units (i.e. 2000
+							bytes/sec is transformed into 2 kbytes/sec).
+							The scale on the graph, however, will still
+							have the transformation done to it. Set this
+							tag to "false" for items that are not
+							typically counted with SI units, like system
+							load average.
+						</p>
+						<p>Here are the SI units that are used by Cricket:</p>
+						<table>
+							<tr><th>Symbol</th> <th>Magnitude</th> <th>Name</th></tr>
+							<tr><td>a</td>      <td>10e-18</td>    <td>Ato</td></tr>
+							<tr><td>f</td>      <td>10e-15</td>    <td>Femto</td></tr>
+							<tr><td>p</td>      <td>10e-12</td>    <td>Pico</td></tr>
+							<tr><td>n</td>      <td>10e-9</td>     <td>Nano</td></tr>
+							<tr><td>&#181;</td> <td>10e-6</td>     <td>Micro</td></tr>
+							<tr><td>milli</td>  <td>10e-3</td>     <td>Milli</td></tr>
+							<tr><td>k</td>      <td>10e3</td>      <td>Kilo</td></tr>
+							<tr><td>M</td>      <td>10e6</td>      <td>Mega</td></tr>
+							<tr><td>G</td>      <td>10e9</td>      <td>Giga</td></tr>
+							<tr><td>T</td>      <td>10e12</td>     <td>Terra</td></tr>
+							<tr><td>P</td>      <td>10e15</td>     <td>Peta</td></tr>
+							<tr><td>E</td>      <td>10e18</td>     <td>Exa</td></tr>
+						</table>
+						<p>
+							Note that on graphs, 'milli' is denoted by
+							'm'. In the HTML summary, where there is
+							more room, Cricket uses the less ambiguous
+							'milli'.
+						</p>
+					</dd>
+					<dt><tt>space</tt></dt>
+					<dd>Default value: <i>one space</i>
+						<p>
+							This tag can be used by the extremely
+							fastidious user to control the HTML summary.
+							Usually, one space is exactly what you'd
+							want between the value and the unit
+							specifier of the value. However, for certain
+							units, like the degree sign, no space is
+							called for. In this case, set <tt>space</tt>
+							to "", the empty string.
+						</p>
+					</dd>
+					<dt><tt>units</tt></dt>
+					<dd>Default value: <i>the value of the <tt>y-axis</tt> tag</i>
+						<p>
+							In the HTML summary, the <tt>units</tt> tag
+							is appended after the value of the
+							datasource. If a datasource is collecting
+							bandwidth information, for instance, it
+							would make sense to set <tt>y-axis</tt> to
+							"bits per second", since there is plenty of
+							room for it. In the legend, where room is
+							more limited, it would be better to set
+							<tt>units</tt> to "bps", instead of letting
+							it default to "bits per second".
+						</p>
+					</dd>
+					<dt><tt>y-max</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>
+							Use this tag (and its counterpart,
+							<tt>y-min</tt>) to explicitly set the
+							default vertical scale for this datasource
+							when it is graphed. Often multiple
+							datasources are graphed together, so this
+							tag is better set in a view entry. Refer to
+							the <a href="#view"> the view dictionary
+							section</a>. Presence of this tag disables
+							auto-scaling, so you should set
+							<tt>y-max</tt> and <tt>y-min</tt> together
+							if you use this functionality.
+						</p>
+					</dd>
+					<dt><tt>y-min</tt></dt>
+					<dd>Default value: <i>unset</i>
+						<p>Refer to <tt>y-max</tt>.</p>
+					</dd>
+				</dl>
+			</div>
+
+			<div>
+				<a name="view"><h3>The View Dictionary</h3></a>
+				<p>
+					A view dictionary entry is a container for display
+					elements. In particular, a view is a group of
+					datasources to be displayed together with a particular
+					set of display attributes/options. The same datasource
+					can appear in multiple views. The datasource specific
+					graph attributes are defined in graph dictionary
+					entries, but other features of the graph and the HTML
+					page in which the graph is embedded are configured in
+					the view entry and thus can vary from view to view. As
+					you navigate through the Cricket Grapher the choice of
+					graph pages presented for a given target are the views
+					defined for that target (via the view list in the
+					TargetType dictionary).
+				</p>
+				<p>
+					The most important view tag is <tt>elements</tt>, as
+					this tag specifies the list of datasources (with their
+					associated graph dictionary entries) to be included in
+					the view. The <tt>elements</tt> tag is the replacement
+					for the space-delimited datasource list in the
+					TargetType dictionary view tag in older (pre-1.0.4)
+					versions of Cricket.
+				</p>
+				<p>
+					Views are not required. If a target type does not
+					include any views, the Grapher will present the user
+					with a list of datasources. But views unlock the full
+					flexibility of the Cricket Grapher.
+				</p>
+				<p>
+					Cricket variables in view tags (i.e. %myvar%) are
+					expanded with respect to a target. The association
+					between targets and view dictionary entries is
+					controlled by the <a href="#targettype"> TargetType
+					dictionary</a> for the apporpriate target type. <p>
+				</p>
+				<p>
+					It is not uncommon for view names to contain space
+					characters. Such names are permitted (and parseable) in
+					the config tree. Simply enclose the name in double
+					quotes:
+				</p>
+				<p>
+					<pre>
 view   "Traffic Flow"
     elements = "ifInOctects, ifOutOctets"
-</pre></blockquote>
-</p>
+					</pre>
+				</p>
+				<p>Here is the list of view dictionary tags:</p>
+				<dl>
+					<dt><tt>confidence-band-scale</tt></dt>
+					<dd>Default value: 2
+						<p>
+							This tag is ignored unless the
+							<tt>holtwinters</tt> is present and set to to
+							true. In that case, it controls the multiple of
+							the deviations (RRA CF DEVPREDICT) used to
+							display confidence bands on the graph.
+						</p>
+					</dd>
+					<dt><tt>default-ranges</tt></dt>
+					<dd>Default value: "d:w"
+						<p>
+							The default set of temporal scales,
+							colon-separated, for which graphs are initially
+							displayed. For example, specifying
+							<tt>default-ranges="d"</tt> for a view means
+							only the daily graph will be generated, instead
+							of both the daily and weekly graphs. Of course,
+							the Cricket grapher permits the user to select
+							another temporal scale once the default is
+							rendered.
+						</p>
+					</dd>
+					<dt><tt>elements</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							The <tt>elements</tt> tag specifies a list of
+							datasources (with their associated graph
+							dictionary entries) to be included in the view.
+							These datasources are presumed to be listed in
+							the <tt>ds</tt> tag of any TargetType dictionary
+							to which the view belongs. The <tt>elements</tt>
+							tag may either be comma-delimited (the
+							preference) or space-delimited (to match
+							pre-1.0.4 syntax).
+						</p>
+						<p>
+							Selecting a view in the Grapher without the
+							<tt>elements</tt> tag defined in the Config Tree
+							is one cause of the "No graph to make?" error in
+							your web server log.
+						</p>
+					</dd>
+					<dt><tt>events</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag is interpreted by the grapher as a
+							comma-separated list of events to fetch from the
+							<tt>events</tt> dictionary, and add to the graph
+							in the form of vertical lines.
+						</p>
+					</dd>
+					<dt><tt>graph-format</tt></dt>
+					<dd>Default value: <i>png</i> (for 4.0+ browsers), <i>gif</i> otherwise
+						<p>
+							Set this tag to 'gif' to get RRD Tool to create
+							GIFs. The GIFs created by RRD are big and slow,
+							because they do not use patented compression
+							techniques. Cricket will use GIFs if the browser
+							will not support PNG's. This tag is likely to
+							appear in view <tt>--default--</tt> entry.
+						</p>
+						<p>
+							Note that RRD Tool 1.1.x does not support GIFs.
+							It does support other image formats that may be
+							incorporated into a future Cricket release.
+						</p>
+					</dd>
+					<dt><tt>height</tt></dt>
+					<dd>Default value: 200
+						<p>
+							This tag defines the requested height of the
+							data area of the graph. This value is passed
+							into RRD, which then draws the actual image
+							somewhat bigger, in order to leave room for the
+							margin, the scales, and the legend. This tag is
+							likely to appear in a view <tt>--default--</tt>
+							entry.
+						</p>
+					</dd>
+					<dt><tt>height-hint</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							HTML defines image sizing tags that allow the
+							browser to layout the page more efficiently.
+							Using the Cricket's size hints, you can control
+							what image sizing tags Cricket generates in its
+							HTML output. Most browsers will attempt to scale
+							the image if the size hints passed in via HTML
+							do not match the actual size of the image. The
+							result is a hard-to-read graph that took too
+							long to draw. Thus it is <b>critical</b> that if
+							you choose to use sizing hints to help the
+							browser layout the page, you make them precisely
+							the same as the size of the generated image.
+						</p>
+						<p>
+							Because RRD pads the image with extra space,
+							it's not possible for Cricket to guess the
+							finished size of the image using the
+							<tt>width</tt> and <tt>height</tt> tags.
+							Instead, you need to find this number yourself
+							by measuring an actual image produced by RRD. In
+							Netscape Navigator, you can do this by right
+							clicking on the image, then choosing <i>Open
+							this Image</i>. Once the image is loaded, check
+							the title bar for the actual size of the image.
+						</p>
+						<p>
+							Like <tt>height</tt>, this tag is likely to
+							appear in a view <tt>--default--</tt> entry.
+						</p>
+					</dd>
+					<dt><tt>holtwinters</tt></dt>
+					<dd>Default value: <i>false</i>
+						<p>
+							If present and set to true, the
+							<tt>holtwinters</tt> tag tells the Grapher to
+							display aberrant behavior detection options on
+							the graph and HTML summary page. These options
+							include display of aberrant behavior recorded in
+							the FAILURES RRA and predicted confidence bands
+							for the observed time series (based on
+							Holt-Winters Forecasting, hence the tag name).
+							The underlying target must have RRD Tool
+							aberrant behavior detection enabled (requires
+							RRD Tool 1.1.x).
+						</p>
+						<p>
+							If this tag is enabled, the <tt>elements</tt>
+							tag must contain only a single datasource;
+							otherwise, an error will be generated.
+							Furthermore, the <tt>default-ranges</tt> tag is
+							ignored for a view with <tt>holtwinters=true</tt>.
+						</p>
+						<p>
+							Note that it is not required to define views
+							with holtwinters=true simply because RRD Tool
+							aberrant behavior detection is enabled.
+						</p>
+					</dd>
+					<dt><tt>interlaced</tt></dt>
+					<dd>Default value: false
+						<p>
+							Set this tag to true to enable interlaced images
+							for this view. An interlaced image will appear
+							to "fade in" in most web browsers.
+						</p>
+					</dd>
+					<dt><tt>paint-nan</tt></dt>
+					<dd>Default value: <i>false</i>
+						<p>
+							Setting <tt>paint-nan</tt> to true for a view
+							will shade the background of the graph with a
+							pinkish hue for any time period in which one of
+							the datasources included in the view has missing
+							(NaN) data.
+						</p>
+					</dd>
+					<dt><tt>rrd-graph-args</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag can be used to pass through arguments
+							to the RRD Tool graph command. For example, to
+							make the canvas that the graph is drawn on
+							appear black, set <tt>rrd-graph-args</tt> to "-c
+							CANVAS#000000". This tag is split on whitespace
+							before it is sent to RRD Tool, so it is not
+							possible at this time to send arguments with
+							embedded whitespace to RRD Tool.
+						</p>
+						<p>
+							As a second example (running RRD Tool 1.1.x), to
+							change the default font for in-graph text to 12
+							pt Times, set <tt>rrd-graph-args</tt> to "--font
+							DEFAULT:12:times.ttf". This example assume
+							times.ttf is available on the path in the
+							environment in which the Cricket grapher is
+							running.
+						</p>
+					</dd>
+					<dt><tt>vrule-color</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							Vertical rules are lines added to the graph by
+							Cricket to help you visually find patterns in
+							the data related to time of day. A vertical rule
+							is placed at each "zero time" which appears on a
+							graph. For an daily graph, a zero time is
+							midnight. For a weekly graph, a zero time is the
+							beginning of the most recent Monday. For a
+							monthly graph, a zero time is the first day of
+							the month. For a yearly graph, a zero time is
+							the first day of the year. At this time, the
+							definition of zero time for a given scale is
+							hardcoded into Cricket's grapher.cgi script.
+						</p>
+						<p>
+							To enable vertical rules, use the
+							<tt>vrule-color</tt> tag to choose a color for
+							them defined in the color dictionary. That's all
+							there is to it. If <tt>vrule-color</tt> is
+							defined, Cricket will automatically add the
+							vertical rules for you.
+						</p>
+					</dd>
+					<dt><tt>width</tt></dt>
+					<dd>Default value: 500
+						<p>
+							Similar to <tt>height</tt>, this is the width of
+							the data area of the graph. The actual width of
+							the resulting image will differ.
+						</p>
+					</dd>
+					<dt><tt>width-hint</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							Similar to <tt>height-hint</tt>, this controls
+							the value used by Cricket for the width tag in
+							its HTML output. See <tt>height-hint</tt> for
+							more information.
+						</p>
+					</dd>
+					<dt><tt>y-max</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							Using this tag (and its counterpart,
+							<tt>y-min</tt>) you can explicitly control the
+							vertical scale of the graph and override any
+							datasource-specific <tt>y-max</tt> or
+							<tt>y-min</tt> tag defined in a graph dictionary
+							entry. For example, these tags might be useful
+							when you are graphing some value which should
+							normally be very tightly bounded (for instance
+							between 0 and 1 second), but occasionally jumps
+							far above 1 second. In this case, all variation
+							under one second will be essentially invisible
+							on the graph, unless you set the <tt>y-min</tt>
+							to 0 and the <tt>y-max</tt> to 1.
+						</p>
+						<p>
+							Using <tt>y-max</tt> or <tt>y-min</tt>, disables
+							auto-scaling, and so you must explicitly set
+							both of them (although they need not both be set
+							in the same dictionary entry, <tt>y-min=0</tt>
+							could appear in a view <tt>--default--</tt>
+							entry). Note that for many situations, the
+							default auto-scaling is reasonable.
+						</p>
+						<p>
+							If the <tt>y-max</tt> tag is not defined in view
+							entries, but does appear in graph
+							datasource-specific entries, <tt>y-max</tt> for
+							the view will default to the maximum
+							per-datasource <tt>y-max</tt>. Similarly,
+							<tt>y-min</tt> for the view defaults to the
+							minimum per-datasource <tt>y-min</tt>.
+						</p>
+					</dd>
+					<dt><tt>y-min</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>Refer to <tt>y-max</tt>.</p>
+					</dd>
+				</dl>
+			</div>
 
-<p>
-Here is the list of view dictionary tags:
-</p>
+			<div>
+				<a name="color"><h3>The Color Dictionary</h3></a>
+				<p>
+					The color dictionary is used to configure Cricket's
+					auto-color selection system and to map color names to
+					HTML-style color specifications (without the pound
+					sign). Every key, except for the special key
+					<tt>--order--</tt> is considered a color name, and
+					should have a color specification. The special key
+					<tt>--order--</tt> is used to tell Cricket what order to
+					assign the colors when doing auto-selection.
+				</p>
+				<p>
+					An HTML-style color specification consists of three hex
+					numbers ranging from <tt>00</tt> to <tt>ff</tt>. The
+					numbers represent the intensity of the red, green, and
+					blue components of the final color. For an example of a
+					correctly configured color dictionary, see the Defaults
+					file in the root of the sample config tree.
+				</p>
+			</div>
 
-<dl>
-<dt><tt>confidence-band-scale</tt></dt>
-<dd>Default value: 2<p>
+			<div>
+				<a name="oid"><h3>The OID Dictionary</h3></a>
+				<p>
+					The OID dictionary is a convenient place to put OID's to
+					make the config files more readable. Before any SNMP
+					operation, the user-supplied OID is scanned. Any text
+					parts of the OID that match an entry in the OID
+					dictionary get replaced. Note that this is a separate
+					process from variable expansion, for historical reasons.
+					The keys and values in this table are separated by
+					whitespace. Each entry starts with the keyword "OID".
+				</p>
+				<p>
+					In keeping with the conventions of ASN.1 and SNMP, OID
+					names are case insensitive, must start with a letter,
+					and can otherwise consist of letters and numbers.
+				</p>
+			</div>
 
-This tag is ignored unless the <tt>holtwinters</tt> is present and set to
-to true. In that case, it controls the multiple of the deviations
-(RRA CF DEVPREDICT) used to display confidence bands on the graph.</p>
-</dd>
-
-<dt><tt>default-ranges</tt></dt>
-<dd>Default value: "d:w"<p>
-
-The default set of temporal scales, colon-separated, for which graphs 
-are initially displayed. For example, specifying
-<tt>default-ranges="d"</tt> for a view means only the daily graph
-will be generated, instead of both the daily and weekly graphs. Of course,
-the Cricket grapher permits the user to select another temporal scale once
-the default is rendered. </p>
-</dd>
-
-<dt><tt>elements</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-The <tt>elements</tt> tag specifies a list of datasources (with their
-associated graph dictionary entries) to be included in the view. These
-datasources are presumed to be listed in the <tt>ds</tt> tag of any
-TargetType dictionary to which the view belongs. The <tt>elements</tt>
-tag may either be comma-delimited (the preference) or space-delimited
-(to match pre-1.0.4 syntax).
-</p>
-<p>
-Selecting a view in the Grapher without the <tt>elements</tt> tag defined
-in the Config Tree is one cause of the "No graph to make?" error in your
-web server log.
-</p>
-</dd>
-
-<dt><tt>events</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag is interpreted by the grapher as a comma-separated list
-of events to fetch from the <tt>events</tt> dictionary, and add
-to the graph in the form of vertical lines.
-</p>
-</dd>
-
-<dt><tt>graph-format</tt></dt>
-<dd>Default value: <i>png</i> (for 4.0+ browsers), <i>gif</i> otherwise<p>
-
-Set this tag to 'gif' to get RRD Tool to create GIFs.
-The GIFs created by RRD are big and slow, because they do not use
-patented compression techniques. Cricket will use GIFs if the
-browser will not support PNG's. This tag is likely to appear in
-view <tt>--default--</tt> entry.
-</p>
-<p>
-Note that RRD Tool 1.1.x does not support GIFs. It does support other image
-formats that may be incorporated into a future Cricket release.</p>
-</dd>
-
-<dt><tt>height</tt></dt>
-<dd>Default value: 200<p>
-
-This tag defines the requested height of the data area of the
-graph. This value is passed into RRD, which then draws the actual image
-somewhat bigger, in order to leave room for the margin, the scales, and
-the legend. This tag is likely to appear in a view <tt>--default--</tt>
-entry. </p>
-</dd>
-
-<dt><tt>height-hint</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-HTML defines image sizing tags that allow the browser to layout the
-page more efficiently. Using the Cricket's size hints,
-you can control what image
-sizing tags Cricket generates in its HTML output. Most browsers will
-attempt to scale the image if the size hints passed in via HTML do not
-match the actual size of the image. The result is a hard-to-read graph
-that took too long to draw. Thus it is <b>critical</b> that if you
-choose to use sizing hints to help the browser layout the page, you
-make them precisely the same as the size of the generated image.</p>
-
-<p>
-Because RRD pads the image with extra space, it's not possible for
-Cricket to guess the finished size of the image using the <tt>width</tt>
-and <tt>height</tt> tags. Instead, you need to find this number
-yourself by measuring an actual image produced by RRD. In Netscape
-Navigator, you
-can do this by right clicking on the image, then choosing <i>Open this
-Image</i>. Once the image is loaded, check the title bar for the actual
-size of the image.
-</p>
-<p>
-Like <tt>height</tt>, this tag is likely to appear in a view 
-<tt>--default--</tt> entry. </p>
-</dd>
-
-<dt><tt>holtwinters</tt></dt>
-<dd>Default value: <i>false</i><p>
-
-If present and set to true, the <tt>holtwinters</tt> tag tells the
-Grapher to display aberrant behavior detection options
-on the graph and HTML summary page. These options include display
-of aberrant behavior recorded in the FAILURES RRA and predicted confidence
-bands for the observed time series (based on Holt-Winters Forecasting,
-hence the tag name). The underlying target must have RRD Tool aberrant
-behavior detection enabled (requires RRD Tool 1.1.x).
-</p>
-<p>
-If this tag is enabled, the <tt>elements</tt> tag must contain only a
-single datasource; otherwise, an error will be generated. Furthermore,
-the <tt>default-ranges</tt> tag is ignored for a view with <tt>holtwinters=true
-</tt>.
-</p>
-<p>
-Note that it is not required to define views with holtwinters=true simply
-because RRD Tool aberrant behavior detection is enabled.
-</p>
-</dd>
-
-<dt><tt>interlaced</tt></dt>
-<dd>Default value: false<p>
-
-Set this tag to true to enable interlaced images for this view. An interlaced
-image will appear to "fade in" in most web browsers.</p>
-</dd>
-
-<dt><tt>paint-nan</tt></dt>
-<dd>Default value: <i>false</i><p>
-
-Setting <tt>paint-nan</tt> to true for a view will shade the background
-of the graph with a pinkish hue for any time period in which one of the
-datasources included in the view has missing (NaN) data.
-</p>
-</dd>
-
-<dt><tt>rrd-graph-args</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag can be used to pass through arguments to the RRD Tool graph
-command. For example, to make the canvas that the graph
-is drawn on appear black, set <tt>rrd-graph-args</tt>
-to "-c CANVAS#000000". This tag is split on whitespace before
-it is sent to RRD Tool, so it is not possible at this time to
-send arguments with embedded whitespace to RRD Tool.
-</p>
-
-<p>
-As a second example (running RRD Tool 1.1.x), to change the default
-font for in-graph text to 12 pt Times, set <tt>rrd-graph-args</tt> to 
-"--font DEFAULT:12:times.ttf". This example assume times.ttf is available
-on the path in the environment in which the Cricket grapher is running. </p>
-</dd>
-
-<dt><tt>vrule-color</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-Vertical rules are lines added to the graph by Cricket to help you
-visually find patterns in the data related to time of day. A vertical
-rule is placed at each "zero time" which appears on a graph. For an
-daily graph, a zero time is midnight. For a weekly graph, a zero time
-is the beginning of the most recent Monday.
-For a monthly graph, a zero time is the first day of the month.
-For a yearly graph, a zero time is the first day of the year.
-At this time, the definition of zero time for a
-given scale is hardcoded into Cricket's grapher.cgi script.</p>
-
-<p>
-To enable vertical rules, use the <tt>vrule-color</tt> tag to choose a
-color for them defined in the color dictionary.
-That's all there is to it. If <tt>vrule-color</tt> is
-defined, Cricket will automatically add the vertical rules for
-you.</p>
-</dd>
-
-<dt><tt>width</tt></dt>
-<dd>Default value: 500<p>
-
-Similar to <tt>height</tt>, this is the width of the data area of the graph. The
-actual width of the resulting image will differ.</p>
-</dd>
-
-<dt><tt>width-hint</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-Similar to <tt>height-hint</tt>, this controls the value used
-by Cricket for the width tag in its HTML output. See
-<tt>height-hint</tt> for more information.</p>
-</dd>
-
-<dt><tt>y-max</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-Using this tag (and its counterpart, <tt>y-min</tt>) you can
-explicitly control the vertical scale of the graph and override any
-datasource-specific <tt>y-max</tt> or <tt>y-min</tt> tag defined in
-a graph dictionary entry. For example, these tags
-might be useful when you are graphing some value which should
-normally be very tightly bounded (for instance between 0 and 1 second), but
-occasionally jumps far above 1 second. In this case, all variation under
-one second will be essentially invisible on the graph, unless you set the
-<tt>y-min</tt> to 0 and the <tt>y-max</tt> to 1.
-</p>
-
-<p>
-Using <tt>y-max</tt> or <tt>y-min</tt>, disables
-auto-scaling, and so you must explicitly set both of them (although
-they need not both be set in the same dictionary entry, <tt>y-min=0</tt>
-could appear in a view <tt>--default--</tt> entry).
-Note that for many situations, the default auto-scaling is reasonable.
-</p>
-
-<p>
-If the <tt>y-max</tt> tag is not defined in view entries, but
-does appear in graph datasource-specific entries, <tt>y-max</tt>
-for the view will default to the maximum per-datasource <tt>y-max</tt>.
-Similarly, <tt>y-min</tt> for the view defaults to the minimum
-per-datasource <tt>y-min</tt>.
-</p>
-
-<dt><tt>y-min</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-Refer to <tt>y-max</tt>.
-</p>
-</dd>
-</dl>
-</div>
-
-<div>
-<a name="color">
-<h3>The Color Dictionary</h3>
-</a>
-
-<p>
-The color dictionary is used to configure Cricket's auto-color
-selection system and to map color names to HTML-style color
-specifications (without the pound sign).
-Every key, except for the special key <tt>--order--</tt>
-is considered a color name, and should have a color specification.
-The special key <tt>--order--</tt> is used to tell Cricket what order to
-assign the colors when doing auto-selection.
-</p>
-
-<p>
-An HTML-style color specification consists of three hex numbers ranging
-from <tt>00</tt> to <tt>ff</tt>. The numbers represent the intensity of
-the red, green, and blue components of the final color.
-For an example of a correctly configured color dictionary, see the
-Defaults file in the root of the sample config tree.
-</p>
-</div>
-
-<div>
-<a name="oid">
-<h3>The OID Dictionary</h3>
-</a>
-
-<p>
-The OID dictionary is a convenient place to put OID's to make the
-config files more readable. Before any SNMP operation, the user-supplied
-OID is scanned. Any text parts of the OID that match an entry in the
-OID dictionary get replaced. Note that this is a separate process from
-variable expansion, for historical reasons. The keys and values in
-this table are separated by whitespace. Each entry starts with the
-keyword "OID".
-</p>
-
-<p>
-In keeping with the conventions of ASN.1 and SNMP, OID names
-are case insensitive, must start with a letter, and can
-otherwise consist of letters and numbers.
-</p>
-</div>
-
-<div>
-<a name="html">
-<h3>The HTML Dictionary</h3>
-</a>
-
-<p>
-The HTML dictionary holds components of the UI that is
-created by the grapher using HTML. Before it is used,
-the HTML dictionary is expanded with respect to itself.
-</p>
-
-<dl>
-<dt><tt>auto-error</tt></dt>
-<dd>Default value: <i>any errors generated on this page</i><p>
-
-Any runtime errors that the grapher finds while attempting
-to create the page are added to this tag. It is usually
-referenced in the <tt>page-footer</tt>.
-</p>
-
-<p>
-Note that only
-errors that Cricket can find while it's running will show
-up here. Problems finding the Perl interpreter, or parsing
-<tt>grapher.cgi</tt> will still show up in the webserver's
-error log.
-</p>
-</dd>
-
-<dt><tt>auto-long-version</tt></dt>
-<dd>Default value: <i>the contents of the VERSION file</i><p>
-
-This is the complete version string, including the version
-number and the time it was packaged for release.
-</p>
-</dd>
-
-<dt><tt>auto-short-version</tt></dt>
-<dd>Default value: <i>the version number</i><p>
-
-This is simply the version number from the
-complete Cricket version string.
-</p>
-</dd>
-
-<dt><tt>auto-title</tt></dt>
-<dd>Default value: <i>the title</i><p>
-
-This tag is set by the grapher to the title it expects
-to use on this page. It is normally referenced in the
-<tt>head</tt> tag.
-</p>
-</dd>
-
-<dt><tt>body-options</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-This tag is incorporated into the HTML body tag. This is
-the perfect place to set a background color. It's not
-useful for much else, unless you want your graphs to play
-a MIDI file in the background.
-</p>
-</dd>
-
-<dt><tt>head</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-This is HTML that will be inserted between the &lt;head&gt;
-and &lt;/head&gt; tags. It can be used to incorporate a cascading
-style sheet into the Cricket user interface. This would allow
-you to easily control aspects of the UI design that are hardcoded
-in the source code.
-</p>
-
-<p>
-To incorporate a CSS called "cricket.css", use a <tt>head</tt>
-tag like this:
-</p>
-
-<p>
-<center>
-<table valign="center" border="1" cellpadding="3">
-  <tr>
-    <td width="100%"><pre>
+			<div>
+				<a name="html"><h3>The HTML Dictionary</h3></a>
+				<p>
+					The HTML dictionary holds components of the UI that is
+					created by the grapher using HTML. Before it is used,
+					the HTML dictionary is expanded with respect to itself.
+				</p>
+				<dl>
+					<dt><tt>auto-error</tt></dt>
+					<dd>Default value: <i>any errors generated on this page</i>
+						<p>
+							Any runtime errors that the grapher finds while
+							attempting to create the page are added to this
+							tag. It is usually referenced in the
+							<tt>page-footer</tt>.
+						</p>
+						<p>
+							Note that only errors that Cricket can find
+							while it's running will show up here. Problems
+							finding the Perl interpreter, or parsing
+							<tt>grapher.cgi</tt> will still show up in the
+							webserver's error log.
+						</p>
+					</dd>
+					<dt><tt>auto-long-version</tt></dt>
+					<dd>Default value: <i>the contents of the VERSION file</i>
+						<p>
+							This is the complete version string, including
+							the version number and the time it was packaged
+							for release.
+						</p>
+					</dd>
+					<dt><tt>auto-short-version</tt></dt>
+					<dd>Default value: <i>the version number</i>
+						<p>
+							This is simply the version number from the
+							complete Cricket version string.
+						</p>
+					</dd>
+					<dt><tt>auto-title</tt></dt>
+					<dd>Default value: <i>the title</i>
+						<p>
+							This tag is set by the grapher to the title it
+							expects to use on this page. It is normally
+							referenced in the <tt>head</tt> tag.
+						</p>
+					</dd>
+					<dt><tt>body-options</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This tag is incorporated into the HTML body tag.
+							This is the perfect place to set a background
+							color. It's not useful for much else, unless you
+							want your graphs to play a MIDI file in the
+							background.
+						</p>
+					</dd>
+					<dt><tt>head</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This is HTML that will be inserted between the
+							&lt;head&gt; and &lt;/head&gt; tags. It can be
+							used to incorporate a cascading style sheet into
+							the Cricket user interface. This would allow you
+							to easily control aspects of the UI design that
+							are hardcoded in the source code.
+						</p>
+						<p>
+							To incorporate a CSS called "cricket.css", use a
+							<tt>head</tt> tag like this:
+						</p>
+						<table>
+							<tr>
+								<td>
+									<pre>
 html	head
-	&lt;link rel="stylesheet" src="cricket.css" type="text/css"&gt;</td>
-  </tr>
-</table>
-</center>
-</p>
-</dd>
+	&lt;link rel="stylesheet" src="cricket.css" type="text/css"&gt;
+									</pre>
+								</td>
+							</tr>
+						</table>
+					</dd>
+					<dt><tt>page-footer</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This is the HTML that will go on the bottom of
+							the page. As Cricket is shipped, it includes a
+							link to the RRD Tool website. Tobias Oetiker,
+							the author of RRD Tool, has respectfully asked
+							frontend authors to feature a link to RRD Tool.
+							Please take into account his wishes as you edit
+							this tag.
+						</p>
+						<p>
+							The version of <tt>page-footer</tt> in the
+							sample-config directory refers to a tag called
+							<tt>contact</tt>, which can be used to put
+							sub-tree specific contact information into the
+							bottom of the page. This is only meant as an
+							example. You might choose to put completely
+							different information at the bottom of the page.
+						</p>
+					</dd>
+					<dt><tt>page-header</tt></dt>
+					<dd>Default value: <i>none</i>
+						<p>
+							This is the HTML that will go at the top of the
+							page, after the &lt;body&gt; tag, but before the
+							rest of the user interface. As shipped, it
+							illustrates how you might put a company logo on
+							each page.
+						</p>
+					</dd>
+				</dl>
+			</div>
 
-<dt><tt>page-footer</tt></dt>
-<dd>Default value: <i>none</i><p>
+			<div>
+				<a name="event"><h3>The Event Dictionary</h3></a>
+				<p>
+					This dictionary holds information related to
+					<i>events</i>. An event is some point in time which
+					you'd like to mark on graphs so that later, you'll
+					remember why it was that those graphs look the way they
+					do. An event is named, just like a target or a
+					datasource. The event names are used in the <a
+					href="#view">view dictionary</a> tag called
+					<tt>events</tt>. names are used in the target dictionary
+					tag called <tt>events</tt>.
+				</p>
+				<p>Each event should have the following tags set:</p>
+				<dl>
+					<dt><tt>color</tt></dt>
+					<dd>
+						<p>
+							The color of the event. This should be the name
+							of a color in the <a href="#color">color
+							dictionary</a>.
+						</p>
+					</dd>
+					<dt><tt>date</tt></dt>
+					<dd>
+						<p>
+							The time the event happened, which controls
+							where on a graph the vertical rule appears.
+						</p>
+					</dd>
+					<dt><tt>name</tt></dt>
+					<dd>
+						<p>This is the text that will show up in the legend on the graph.</p>
+					</dd>
+				</dl>
+			</div>
 
-This is the HTML that will go on the bottom of the page. As Cricket
-is shipped, it includes a link to the RRD Tool website. Tobias
-Oetiker, the author of RRD Tool, has respectfully
-asked frontend authors to
-feature a link to RRD Tool. Please take into account his wishes
-as you edit this tag.
-</p>
+			<div>
+				<a name="rra"><h3>The RRA Dictionary</h3></a>
+				<p>
+					The RRA dictionary holds parameters used by Cricket when
+					it is setting up a new RRD file. These parameters
+					control how much data RRD stores, and on what schedule
+					it consolidates high resolution data into lower
+					resolution data.
+				</p>
+				<p>
+					The RRA dictionary that ships with Cricket in the sample
+					config tree will rollup and retain data using the same
+					schedule that MRTG 2.x has used for years. This has
+					proven satisfactory for most users. If you change the
+					polling rate from 5 minutes, this dictionary needs to be
+					edited. Likewise, if you want to keep history farther
+					back in time, you'll need to edit these entries.
+				</p>
+				<p>
+					Because this table is only used when a new RRD is being
+					created, you would need to delete any existing datafile,
+					losing all of the data in it, before a change to the RRA
+					dictionary takes effect.
+				</p>
+				<p>
+					For more information on the format of these dictionary
+					entries, read the RRD Tool documentation on the "create"
+					command.
+				</p>
+			</div>
+		</div>
 
-<p>
-The version of <tt>page-footer</tt> in the sample-config directory
-refers to a tag called <tt>contact</tt>, which can be used to put
-sub-tree specific contact information into the bottom of the page.
-This is only meant as an example. You might choose to put completely
-different information at the bottom of the page.
-</p>
-</dd>
-
-<dt><tt>page-header</tt></dt>
-<dd>Default value: <i>none</i><p>
-
-This is the HTML that will go at the top of the page,
-after the &lt;body&gt; tag, but before the rest of the
-user interface. As shipped, it illustrates how you might
-put a company logo on each page.
-</p>
-</dd>
-</dl>
-</div>
-
-<div>
-<a name="event">
-<h3>The Event Dictionary</h3>
-</a>
-
-<p>
-This dictionary holds information related to <i>events</i>. An
-event is some point in time which you'd like to mark on graphs
-so that later, you'll remember why it was that those graphs
-look the way they do. An event is named, just like a target
-or a datasource. The event names are used in the
-<a href="#view">view dictionary</a> tag called <tt>events</tt>.
-names are used in the target dictionary tag called <tt>events</tt>.
-</p>
-
-<p>
-Each event should have the following tags set:
-
-<dl>
-<dt><tt>color</tt></dt>
-<dd>
-
-<p>
-The color of the event. This should be the name of a color in the
-<a href="#color">color dictionary</a>.
-</p>
-</dd>
-
-<dt><tt>date</tt></dt>
-<dd>
-<p>
-The time the event happened, which controls where on a graph the
-vertical rule appears.
-</p>
-</dd>
-
-<dt><tt>name</tt></dt>
-<dd>
-<p>
-This is the text that will show up in the legend on the graph.
-</p>
-</dd>
-</dl>
-</div>
-
-<div>
-<a name="rra">
-<h3>The RRA Dictionary</h3>
-</a>
-
-<p>
-The RRA dictionary holds parameters used by Cricket when it is setting
-up a new RRD file. These parameters control how much data RRD stores,
-and on what schedule it consolidates high resolution data into lower
-resolution data.
-</p>
-
-<p>
-The RRA dictionary that ships with Cricket in the
-sample config tree will rollup and retain data using the same schedule
-that MRTG 2.x has used for years. This has proven satisfactory for
-most users. If you change the polling rate from 5 minutes, this
-dictionary needs to be edited. Likewise, if you want to keep history
-farther back in time, you'll need to edit these entries.
-</p>
-
-<p>
-Because this table is only used when a new RRD is being created,
-you would need to delete any existing datafile, losing all of the data
-in it, before a change to the RRA dictionary takes effect.
-</p>
-
-<p>
-For more information on the format of these dictionary entries, read
-the RRD Tool documentation on the "create" command.
-</p>
-</div>
-</div>
-
-<div>
-<hr>
-<p>
-<a href="http://cricket.sourceforge.net">Cricket</a>
-version !!VERSION!!, released !!RELDATE!!.
-</p>
-<p>
-Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
-the <a href="gpl.html">GNU General Public License</a>.
-</p>
-</div>
-</body>
+		<div>
+			<p>
+				<a href="http://cricket.sourceforge.net">Cricket</a>
+				version !!VERSION!!, released !!RELDATE!!.
+			</p>
+			<p>
+				Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+				the <a href="gpl.html">GNU General Public License</a>.
+			</p>
+		</div>
+	</body>
 </html>

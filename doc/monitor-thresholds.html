@@ -1,329 +1,434 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
-<head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-</head>
-<body>
-<b>Understanding and Utilizing Cricket Monitor Thresholds</b>
-<p>Although designed as a real-time data collection and trending tool,
-real-time alerts (or alarms) are a natural extended functionality for Cricket.
-Unfortunately, because they are not a part of the core design, the alert
-mechanisms in Cricket are not as cleanly implemented or efficient as they
-could be. If your interest is purely in a tool to generate real-time alerts,
-then Cricket is probably not the best choice. But if you already utilize
-Cricket for data collection and real-time trend analysis and you have the
-additional need for some light real-time alerting mechanism, then Cricket
-can meet your needs.
-</p>
-<p>In Cricket, the alert mechanism is called a monitor threshold. Monitor
-thresholds are set (or enabled) for specific data sources through the monitor-thresholds
-target dictionary tag. After the data collection pass, Cricket processes
-each monitor threshold by retrieving the most recent value of a data source
-from the RRD file and applying some criteria specific to the monitor threshold
-type. This criteria generates either a pass or fail condition. Depending
-on the setting of the persistent-alarms tag for the target, Cricket executes
-a specified action.
-</p>
-<p>Note that the most recent value of a data source from the RRD file will
-not necessarily agree with the most recent value fetched from by the collector
-because RRDtool interpolates.&nbsp; For those familiar with RRD tool internals,
-the "most recent value" is retreived from the first RRA in the file with
-a consolidation function of AVERAGE. The order of RRAs in the file is specified
-by the rra tag in the targetType dictionary.
-</p>
-<p>Note that a monitor threshold configured for a multi-instance (aka vector
-instances) target will be checked and an action possibly executed for each
-instance. Monitor thresholds are not supported for multi-targets (as multi-targets
-are purely a construct of the Cricket grapher).
-</p>
-<p><b>Syntax:</b>
-<p>monitor-thresholds = "&lt;monitor-threshold> [ , &lt;monitor-threshold>
-... ]"
-</p>
-<p>&lt;monitor-threshold> := &lt;data source>:&lt;monitor type>:&lt;monitor
-type args>:&lt;action>:&lt;action args>
-</p>
-<p>&lt;data source> := a data source defined for the target
-<br>&lt;monitor type> := One of the six supported types: exact, value,
-relation, hunt, quotient, or failures.
-<br>&lt;monitor type args> := a colon-delimited list of arguments specific
-to each monitor type
-<br>&lt;action> := One of five supported actions: SNMP, MAIL, EXEC, FUNC,
-or FILE.
-<br>&lt;action args> := a colon-delimited list of arguments specific to
-each action.
-</p>
-<p><b>Examples:</b>
-<br>&nbsp;
-<pre>target --default--</pre>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	</head>
+	<body>
+		<h1>Understanding and Utilizing Cricket Monitor Thresholds</h1>
+		<p>
+			Although designed as a real-time data collection and trending
+			tool, real-time alerts (or alarms) are a natural extended
+			functionality for Cricket. Unfortunately, because they are not a
+			part of the core design, the alert mechanisms in Cricket are not
+			as cleanly implemented or efficient as they could be. If your
+			interest is purely in a tool to generate real-time alerts, then
+			Cricket is probably not the best choice. But if you already
+			utilize Cricket for data collection and real-time trend analysis
+			and you have the additional need for some light real-time
+			alerting mechanism, then Cricket can meet your needs.
+		</p>
+		<p>
+			In Cricket, the alert mechanism is called a monitor threshold.
+			Monitor thresholds are set (or enabled) for specific data
+			sources through the monitor-thresholds target dictionary tag.
+			After the data collection pass, Cricket processes each monitor
+			threshold by retrieving the most recent value of a data source
+			from the RRD file and applying some criteria specific to the
+			monitor threshold type. This criteria generates either a pass or
+			fail condition. Depending on the setting of the
+			persistent-alarms tag for the target, Cricket executes a
+			specified action.
+		</p>
+		<p>
+			Note that the most recent value of a data source from the RRD
+			file will not necessarily agree with the most recent value
+			fetched from by the collector because RRDtool
+			interpolates.&nbsp; For those familiar with RRD tool internals,
+			the "most recent value" is retreived from the first RRA in the
+			file with a consolidation function of AVERAGE. The order of RRAs
+			in the file is specified by the rra tag in the targetType
+			dictionary.
+		</p>
+		<p>
+			Note that a monitor threshold configured for a multi-instance
+			(aka vector instances) target will be checked and an action
+			possibly executed for each instance. Monitor thresholds are not
+			supported for multi-targets (as multi-targets are purely a
+			construct of the Cricket grapher).
+		</p>
 
-<pre>&nbsp;&nbsp;&nbsp; mail-pgm = /usr/bin/mailx</pre>
+		<div>
+			<h2>Syntax</h2>
+			<p>
+				monitor-thresholds = "&lt;monitor-threshold>
+				[, &lt;monitor-threshold> ...]"
+			</p>
+			<p>
+				&lt;monitor-threshold> := &lt;data source>:&lt;monitor
+				type>:&lt;monitor type args>:&lt;action>:&lt;action args>
+			</p>
+			<p>
+				&lt;data source> := a data source defined for the target<br>
+				&lt;monitor type> := One of the six supported types: exact,
+				value, relation, hunt, quotient, or failures.<br>
+				&lt;monitor type args> := a colon-delimited list of arguments
+				specific to each monitor type<br>
+				&lt;action> := One of five supported actions: SNMP, MAIL,
+				EXEC, FUNC, or FILE.<br>
+				&lt;action args> := a colon-delimited list of arguments
+				specific to each action.
+			</p>
+		</div>
 
-<pre>&nbsp;&nbsp;&nbsp; trap-address = 127.0.0.1</pre>
+		<div>
+			<h2>Examples</h2>
+			<p>
+				<pre>
+target --default--
+&nbsp;&nbsp;&nbsp; mail-pgm = /usr/bin/mailx
+&nbsp;&nbsp;&nbsp; trap-address = 127.0.0.1
+&nbsp;&nbsp;&nbsp; persistent-alarms = true
+&nbsp;&nbsp;&nbsp; monitor-thresholds =
+&nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 262144 : SNMP,
+&nbsp;&nbsp;&nbsp;&nbsp; ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,
+&nbsp;&nbsp;&nbsp;&nbsp; ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"
 
-<pre>&nbsp;&nbsp;&nbsp; persistent-alarms = true</pre>
+target pop-2
+&nbsp;&nbsp;&nbsp; persistent-alarms = false
+&nbsp;&nbsp;&nbsp; monitor-thresholds = "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
+				</pre>
+			</p>
+			<p>
+				The first target, presumably a network link, has three
+				monitor thresholds. The first generates a SNMP trap whenever
+				the bandwidth exceeds 2 Mbps. Assuming a polling interval of
+				300 seconds, the second monitor threshold checks to see if
+				the current ifInOctets value is within 10% of the value
+				recorded for the last interval (300 seconds ago). It
+				computes abs(ifInOctets_now -
+				ifInOctets_then)/ifInOctets_then and compares this with 10%
+				(0.1). If traffic levels have increased more than 10% over
+				the interval, it invokes mailx to send a mail message to
+				me@mydomain.com (note the escaped backslash and escaped
+				'@'). The third monitor threshold checks to see if input
+				errors exceed 0.1% of input packets. If errors exceed this
+				threshold, Cricket generates a SNMP trap.
+			</p>
+			<p>
+				The second target, pop-2, has a single monitor threshold.
+				Cricket will append an entry to the file
+				/var/log/cricket-alerts when a non-zero number of users are
+				on pop-2 yet pop-1 has not reached 40 users. Once pop-1
+				reaches 40 users, or&nbsp; pop-2 returns to a zero user
+				count, the entry will be cleared from the file.
+			</p>
+		</div>
 
-<pre>&nbsp;&nbsp;&nbsp; monitor-thresholds =</pre>
+		<div>
+			<h2>Persistent Alarms</h2>
+			<p>
+				By default, the target tag persistent-alarms is set to
+				false. With this setting, the first time a monitor threshold
+				criteria fails, the action is executed.&nbsp; Specifically,
+				the Alarm() subroutine in the Monitor.pm module is invoked;
+				the action and its arguments are passed as arguments. If the
+				criteria continues to fail (at subsequent data collection
+				passes), the action is not executed again. After one or more
+				failures, the first time the monitor threshold criteria
+				passes, the action is executed. In this case, the Clear()
+				subroutine in the Monitor.pm module is invoked, with
+				appropriate action and action arguments.&nbsp; Thus the
+				default behavior is like a switch that toggles states when
+				the result of the monitor threshold criteria changes.
+			</p>
+			<p>
+				If the target tag persistent-alarms is true, the action is
+				executed (the Alarm subroutine is invoked) every time the
+				monitor threshold criteria fails. An action (and Clear
+				subroutine) is still executed once the first time the
+				criteria passes after a string of failures. With
+				persistent-alarms set to true, monitor threshold behavior is
+				like a bell. It keeps ringing until the problem stops.
+			</p>
+		</div>
 
-<pre>&nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 262144 : SNMP,</pre>
+		<div>
+			<h2>Monitor Types</h2>
+			<p>
+				The monitor type determines the criteria used to check a
+				monitor threshold.
+			</p>
+			<p>
+				Exact monitors are the simplest to use and configure,
+				and allow you to monitor a datasource for an exact
+				match.  This is useful in cases where an enumerated (or
+				boolean) SNMP object instruments a condition where a
+				transition to a specific state requires attention.  For
+				example, a datasource might return either true(1) or
+				false(2), depending on whether or not a power supply has
+				failed.  The exact monitor expects one argument; the
+				value on which the monitor will trigger.  For example,
+				<tt>monitor-thresholds = "dsPowerFail:exact:1"</tt>
+				would cause Cricket to send a trap when the last value
+				of the "dsPowerFail" datasource in the RRD file for this
+				target is 1.
+			</p>
+			<p>
+				value : The next simplest monitor type, value monitor
+				thresholds take two arguments, a minimum and maximum
+				value. If the data source strays outside of this
+				interval, the monitor threshold criteria fails. To omit
+				the minimum or maximum value, use the character "n".
+			</p>
+			<p>
+				relation : Relation monitor thresholds are very
+				flexible. A relation monitor considers the difference
+				between two data sources (possibly from different
+				targets), or alternatively, the difference between two
+				temporally distinct values for the same data source. The
+				first data source is the data source for which the
+				relation monitor threshold is defined. The difference
+				can be expressed as absolute value, or as a percentage
+				of the second data source (comparison) value. This
+				difference is compared to a threshold argument with
+				either the greater than or less than operator. The
+				criteria fails when the expression (&lt;absolute or
+				relative difference> &lt;either greater-than or
+				less-than> &lt;threshold>) evaluates to false. The four
+				colon-delimited arguments for a relation monitor are:
+			</p>
+			<ol>
+				<li>
+					The threshold number, optionally preceded by the
+					greater than (>) or less than (&lt;) symbol, and
+					optionally followed by the string "pct". If omitted,
+					greater than is used by default and the expression,
+					difference > threshold, is evaluated.&nbsp; "&lt;10
+					pct", ">1000", "50 pct", and "500" are all examples
+					of valid thresholds.
+				</li>
+				<li>
+					The name of the comparison target. The comparison
+					target must either share the same path with the
+					first target or be fully-qualified. This argument is
+					optional and if omitted the first target is also
+					taken as the comparison target.
+				</li>
+				<li>
+					The name of the comparison data source. This data
+					source must belong to the comparison target. This
+					argument is optional and if omitted the monitor
+					threshold data source name is also taken as the
+					comparison data source name.
+				</li>
+				<li>
+					The temporal offset in seconds to go back in the RRD
+					file that is being fetched from for comparison. Note
+					that a data source value must exist in the RRD file
+					for that exact offset. Choose a multiple of the RRD
+					file step size. This argument is optional and if
+					omitted, it is set to 0.
+				</li>
+			</ol>
+			<p>
+				quotient : Quotient monitor thresholds are similar to
+				relation monitor thresholds, except that they consider
+				the quotient of two data sources, or alternatively, the
+				same data source at two different time points. For a
+				quotient monitor threshold, Cricket computes the value
+				of the first data source as a percentage of the value
+				second data source (such as 10 is 50% of 20). This
+				percentage is then compared to a threshold argument with
+				either the greater than or less than operator. The
+				criteria fails when the expression (&lt;percentage>
+				&lt;either greater-than or less-than> &lt;threshold>)
+				evaluates to true. The four colon-delimited arguments
+				for a quotient monitor are:
+			</p>
+			<ol>
+				<li>
+					The threshold number, optionally preceded by the
+					greater than (>) or less than (&lt;) symbol followed
+					by the string&nbsp; "pct". If omitted, greater than
+					is used by default and the expression, difference >
+					threshold, is evaluated.
+				</li>
+				<li>
+					The name of the comparison target. The comparison
+					target must either share the same path with the
+					first target or be fully-qualified. This argument is
+					optional and if omitted the first target is also
+					taken as the comparison target.
+				</li>
+				<li>
+					The name of the comparison data source. This data
+					source must belong to the comparison target. This
+					argument is optional and if omitted the monitor
+					threshold data source name is also taken as the
+					comparison data source name.
+				</li>
+				<li>
+					The temporal offset in seconds to go back in the RRD
+					file that is being fetched from for comparison. Note
+					that a data source value must exist in the RRD file
+					for that exact offset. Choose a multiple of the RRD
+					file step size. This argument is optional and if
+					omitted, it is set to 0.
+				</li>
+			</ol>
+			<p>
+				hunt: The hunt monitor threshold is designed for the
+				situation where the data source serves as an overflow
+				for another data source; that is, if one data source
+				(the parent) is at or near capacity, then traffic will
+				begin to appear on this (the monitored) data
+				source.&nbsp; One application of hunt monitor thresholds
+				is to identify premature rollover in a set of modem
+				banks configured to hunt from one to the next.&nbsp;
+				Specifically, the criteria of the hunt monitor threshold
+				fails if the value of the monitored data source is
+				non-zero and the current value of the parent data source
+				falls below a specified capacity threshold. The three
+				colon-delimited arguments for a hunt monitor are:
+			</p>
+			<ol>
+				<li>
+					The threshold of the parent data source. Generally
+					this should be slightly less than the maximum
+					capacity of the target.
+				</li>
+				<li>
+					The name of the parent target. The parent target
+					must either share the same path with the monitored
+					target or be fully-qualified. This argument is
+					optional and if omitted the monitored target is also
+					taken as the parent target.
+				</li>
+				<li>
+					The name of the parent data source. This data source
+					must belong to the parent target. This argument is
+					optional and if omitted the monitor threshold data
+					source name is also take as the comparison data
+					source name.
+				</li>
+			</ol>
+			<p>
+				failures: The failures monitor threshold is integrated
+				with aberrant behavior detection in RRDtool. This
+				requires a 1.1.x version of RRDtool and aberrant
+				behavior detection to be enabled/configured for the
+				target. Visit <a
+				href="http://cricket.sourceforge.net/aberrant">http://
+				cricket.sourceforge.net/aberrant</a> for more
+				information.
+			</p>
+		</div>
 
-<pre>&nbsp;&nbsp;&nbsp;&nbsp; ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,</pre>
+		<div>
+			<h2>Actions</h2>
+			<p>
+				After the monitor threshold is checked for the current
+				value, Cricket may execute one of several actions.&nbsp;
+				Each action requires one or more arguments, which appear
+				as a colon-delimited list following the action tag in
+				the monitor threshold specification.
+			</p>
+			<p>
+				SNMP: Generating a SNMP trap is the default action if
+				the action tag is omitted from a monitor threshold
+				specification. To support this default and for backwards
+				compatibility, the action SNMP does not use the action
+				arguments field in the monitor threshold specification.
+				The SNMP action instead requires the attribute
+				trap-address to be set for target. The traps Cricket
+				sends are marked with the enterprise OID
+				".1.3.6.1.4.1.2595.1.1".&nbsp; The generic type is 6 and
+				specific type is 4 for failure (violation) of the
+				monitor threshold criteria and 5 for success (recall the
+				trap is cleared on the first success after one or more
+				failures).&nbsp; There are currently six varbinds: the
+				monitor type,&nbsp; the monitor threshold string, the
+				target name, data source name, cricket user name (set to
+				"cricket" on Win32 platforms), and instance number (to
+				distinguish targets with multiple instances). These
+				varbinds are set (and could be customized) in the
+				sendMonitorTrap() subroutine in Monitor.pm.
+			</p>
+			<p>
+				MAIL: This action sends email to a specified address via
+				a Berkeley mailx compatible mail program. The first
+				action argument is the program to invoke to send email.
+				It is assumed that this program is compatible with
+				Berkeley mailx. That is, the program accepts piped input
+				as the message body, and supports a "-s" command flag to
+				specify the subject.&nbsp; If you don't have such a
+				program on your system, you may wish to customize the
+				code in the sendEmail() subroutine in Monitor.pm to
+				utilize your email program. The second action argument
+				is the recipient's email address. Note that as in the
+				example, you may need to escape special characters. Both
+				arguments are required. The mail message body includes
+				the following information: the monitor type, the monitor
+				threshold string, the target name, data source name, the
+				value of the data source retrieved from the RRD file,
+				and the instance number (to distinguish targets with
+				multiple instances). To change the contents of the
+				message, customize the sendEmail() subroutine in
+				Monitor.pm.
+			</p>
+			<p>
+				FILE: This action appends and deletes entries (lines)
+				from a file. When the monitor threshold criteria first
+				fails, a line containing details in a space-delimited
+				format is appended to the file specified as the action
+				argument (the FILE action has only one argument).
+				Subsequent failures do not add multiple lines to the
+				file. The FILE action essentially ignores
+				persistent-alarms = true (though some overhead is
+				incurred to detect duplicate lines, so persistent-alarms
+				should be set to false when possible for targets using
+				the FILE action). When the monitor threshold passes
+				again after one or more failures, the line is deleted
+				from the file.&nbsp; The line details include the target
+				name and the data source name. To include other details,
+				customize the LogToFile() subroutine in Monitor.pm.
+			</p>
+			<p>
+				EXEC: This action executes a shell command or script.
+				The first action argument is the shell command or script
+				to execute when the monitor threshold criteria fails.
+				The second action argument is the shell command or
+				script to execute when the monitor threshold passes
+				again after one or more failures. The EXEC action
+				provides a mechanism by which automated corrective
+				action can be taken.
+			</p>
+			<p>
+				FUNC: This action is similar to EXEC, except that a perl
+				subroutine defined in the Cricket scope is executed. The
+				first action argument is the function invoked when the
+				monitor threshold criteria fails. The second action
+				argument is the function invoked when the monitor
+				threshold passes again after one or more failures.&nbsp;
+				To use this action, you must first modify the entry in
+				the func.pm module to set the global variable
+				gMonFuncEnabled. Using this action requires
+				customization (you must write the subroutines). While
+				this mechanism provides complete flexibility in handling
+				special cases, the invoked subroutines cannot easily
+				accept arguments (this can be done, but the argument
+				list must be included by name in the action arguments
+				which can quickly become unwieldy). If your function
+				requires access to arguments available in the Alarm()
+				and Clear() functions, you might consider adding a new
+				action tag (and sharing your work with the Cricket
+				community).
+			</p>
+		</div>
 
-<pre>&nbsp;&nbsp;&nbsp;&nbsp; ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"</pre>
-
-<pre>target pop-2</pre>
-
-<pre>&nbsp;&nbsp;&nbsp; persistent-alarms = false</pre>
-
-<pre>&nbsp;&nbsp;&nbsp; monitor-thresholds = "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"</pre>
-The first target, presumably a network link, has three monitor thresholds.
-The first generates a SNMP trap whenever the bandwidth exceeds 2 Mbps.
-Assuming a polling interval of 300 seconds, the second monitor threshold
-checks to see if the current ifInOctets value is within 10% of the value
-recorded for the last interval (300 seconds ago). It computes abs(ifInOctets_now
-- ifInOctets_then)/ifInOctets_then and compares this with 10% (0.1). If
-traffic levels have increased more than 10% over the interval, it invokes
-mailx to send a mail message to me@mydomain.com (note the escaped
-backslash and escaped '@'). The third monitor threshold checks to see
-if input errors exceed 0.1% of input packets. If errors exceed this threshold,
-Cricket generates a SNMP trap.
-</p>
-<p>The second target, pop-2, has a single monitor threshold. Cricket will
-append an entry to the file /var/log/cricket-alerts when a non-zero number
-of users are on pop-2 yet pop-1 has not reached 40 users. Once pop-1 reaches
-40 users, or&nbsp; pop-2 returns to a zero user count, the entry will be
-cleared from the file.
-</p>
-<p><b>Persistent Alarms</b>
-</p>
-<p>By default, the target tag persistent-alarms is set to false. With this
-setting, the first time a monitor threshold criteria fails, the action
-is executed.&nbsp; Specifically, the Alarm() subroutine in the Monitor.pm
-module is invoked; the action and its arguments are passed as arguments.
-If the criteria continues to fail (at subsequent data collection passes),
-the action is not executed again. After one or more failures, the first
-time the monitor threshold criteria passes, the action is executed. In
-this case, the Clear() subroutine in the Monitor.pm module is invoked,
-with appropriate action and action arguments.&nbsp; Thus the default behavior
-is like a switch that toggles states when the result of the monitor threshold
-criteria changes.
-</p>
-<p>If the target tag persistent-alarms is true, the action is executed
-(the Alarm subroutine is invoked) every time the monitor threshold criteria
-fails. An action (and Clear subroutine) is still executed once the first
-time the criteria passes after a string of failures. With persistent-alarms
-set to true, monitor threshold behavior is like a bell. It keeps ringing
-until the problem stops.
-</p>
-<p><b>Monitor Types</b></p>
-<p>The monitor type determines the criteria used to check a monitor threshold.
-</p>
-<p>Exact monitors are the simplest to use and configure, and allow you to
-monitor a datasource for an exact match.  This is useful in cases
-where an enumerated (or boolean) SNMP object instruments a condition
-where a transition to a specific state requires attention.  For
-example, a datasource might return either true(1) or false(2),
-depending on whether or not a power supply has failed.  The exact
-monitor expects one argument; the value on which the monitor will
-trigger.  For example, <tt>monitor-thresholds =
-"dsPowerFail:exact:1"</tt> would cause Cricket to send a trap when the
-last value of the "dsPowerFail" datasource in the RRD file for this
-target is 1.
-</p>
-<p>value : The next simplest monitor type, value monitor thresholds take two
-arguments, a minimum and maximum value. If the data source strays outside
-of this interval, the monitor threshold criteria fails. To omit the minimum
-or maximum value, use the character "n".
-</p>
-<p>relation : Relation monitor thresholds are very flexible. A relation
-monitor considers the difference between two data sources (possibly from
-different targets), or alternatively, the difference between two temporally
-distinct values for the same data source. The first data source is the
-data source for which the relation monitor threshold is defined. The difference
-can be expressed as absolute value, or as a percentage of the second data
-source (comparison) value. This difference is compared to a threshold argument
-with either the greater than or less than operator. The criteria fails
-when the expression (&lt;absolute or relative difference> &lt;either greater-than
-or less-than> &lt;threshold>) evaluates to false. The four colon-delimited
-arguments for a relation monitor are:
-</p>
-<ol>
-<li>
-The threshold number, optionally preceded by the greater than (>) or less
-than (&lt;) symbol, and optionally followed by the string "pct". If omitted,
-greater than is used by default and the expression, difference > threshold,
-is evaluated.&nbsp; "&lt;10 pct", ">1000", "50 pct", and "500" are all
-examples of valid thresholds.</li>
-
-<li>
-The name of the comparison target. The comparison target must either share
-the same path with the first target or be fully-qualified. This argument
-is optional and if omitted the first target is also taken as the comparison
-target.</li>
-
-<li>
-The name of the comparison data source. This data source must belong to
-the comparison target. This argument is optional and if omitted the monitor
-threshold data source name is also taken as the comparison data source
-name.</li>
-
-<li>
-The temporal offset in seconds to go back in the RRD file that is being
-fetched from for comparison. Note that a data source value must exist in
-the RRD file for that exact offset. Choose a multiple of the RRD file step
-size. This argument is optional and if omitted, it is set to 0.</li>
-</ol>
-<p>
-quotient : Quotient monitor thresholds are similar to relation monitor
-thresholds, except that they consider the quotient of two data sources,
-or alternatively, the same data source at two different time points. For
-a quotient monitor threshold, Cricket computes the value of the first data
-source as a percentage of the value second data source (such as 10 is 50%
-of 20). This percentage is then compared to a threshold argument with either
-the greater than or less than operator. The criteria fails when the expression
-(&lt;percentage> &lt;either greater-than or less-than> &lt;threshold>)
-evaluates to true. The four colon-delimited arguments for a quotient monitor
-are:
-</p>
-
-<ol>
-<li>
-The threshold number, optionally preceded by the greater than (>) or less
-than (&lt;) symbol followed by the string&nbsp; "pct". If omitted, greater
-than is used by default and the expression, difference > threshold, is
-evaluated.</li>
-
-<li>
-The name of the comparison target. The comparison target must either share
-the same path with the first target or be fully-qualified. This argument
-is optional and if omitted the first target is also taken as the comparison
-target.</li>
-
-<li>
-The name of the comparison data source. This data source must belong to
-the comparison target. This argument is optional and if omitted the monitor
-threshold data source name is also taken as the comparison data source
-name.</li>
-
-<li>
-The temporal offset in seconds to go back in the RRD file that is being
-fetched from for comparison. Note that a data source value must exist in
-the RRD file for that exact offset. Choose a multiple of the RRD file step
-size. This argument is optional and if omitted, it is set to 0.</li>
-</ol>
-<p>
-hunt: The hunt monitor threshold is designed for the situation where the
-data source serves as an overflow for another data source; that is, if
-one data source (the parent) is at or near capacity, then traffic will
-begin to appear on this (the monitored) data source.&nbsp; One application
-of hunt monitor thresholds is to identify premature rollover in a set of
-modem banks configured to hunt from one to the next.&nbsp; Specifically,
-the criteria of the hunt monitor threshold fails if the value of the monitored
-data source is non-zero and the current value of the parent data source
-falls below a specified capacity threshold. The three colon-delimited arguments
-for a hunt monitor are:
-<br>&nbsp;
-</p>
-
-<ol>
-<li>
-The threshold of the parent data source. Generally this should be slightly
-less than the maximum capacity of the target.</li>
-
-<li>
-The name of the parent target. The parent target must either share the
-same path with the monitored target or be fully-qualified. This argument
-is optional and if omitted the monitored target is also taken as the parent
-target.</li>
-
-<li>
-The name of the parent data source. This data source must belong to the
-parent target. This argument is optional and if omitted the monitor threshold
-data source name is also take as the comparison data source name</li>
-</ol>
-
-<p>
-failures: The failures monitor threshold is integrated with aberrant behavior
-detection in RRDtool. This requires a 1.1.x version of RRDtool and aberrant
-behavior detection to be enabled/configured for the target. Visit <a href="http://cricket.sourceforge.net/aberrant">http://cricket.sourceforge.net/aberrant</a>
-for more information.
-</p>
-<p><b>Actions</b></p>
-<p>After the monitor threshold is checked for the current value, Cricket
-may execute one of several actions.&nbsp; Each action requires one or more
-arguments, which appear as a colon-delimited list following the action
-tag in the monitor threshold specification.
-</p>
-<p>SNMP: Generating a SNMP trap is the default action if the action tag
-is omitted from a monitor threshold specification. To support this default
-and for backwards compatibility, the action SNMP does not use the action
-arguments field in the monitor threshold specification. The SNMP action
-instead requires the attribute trap-address to be set for target. The traps
-Cricket sends are marked with the enterprise OID ".1.3.6.1.4.1.2595.1.1".&nbsp;
-The generic type is 6 and specific type is 4 for failure (violation) of
-the monitor threshold criteria and 5 for success (recall the trap is cleared
-on the first success after one or more failures).&nbsp; There are currently
-six varbinds: the monitor type,&nbsp; the monitor threshold string, the
-target name, data source name, cricket user name (set to "cricket" on Win32
-platforms), and instance number (to distinguish targets with multiple instances).
-These varbinds are set (and could be customized) in the sendMonitorTrap()
-subroutine in Monitor.pm.
-</p>
-<p>MAIL: This action sends email to a specified address via a Berkeley
-mailx compatible mail program. The first action argument is the program
-to invoke to send email. It is assumed that this program is compatible
-with Berkeley mailx. That is, the program accepts piped input as the message
-body, and supports a "-s" command flag to specify the subject.&nbsp; If
-you don't have such a program on your system, you may wish to customize
-the code in the sendEmail() subroutine in Monitor.pm to utilize your email
-program. The second action argument is the recipient's email address. Note
-that as in the example, you may need to escape special characters. Both
-arguments are required. The mail message body includes the following information:
-the monitor type, the monitor threshold string, the target name, data source
-name, the value of the data source retrieved from the RRD file, and the
-instance number (to distinguish targets with multiple instances). To change
-the contents of the message, customize the sendEmail() subroutine in Monitor.pm.
-</p>
-<p>FILE: This action appends and deletes entries (lines) from a file. When
-the monitor threshold criteria first fails, a line containing details in
-a space-delimited format is appended to the file specified as the action
-argument (the FILE action has only one argument). Subsequent failures do
-not add multiple lines to the file. The FILE action essentially ignores
-persistent-alarms = true (though some overhead is incurred to detect duplicate
-lines, so persistent-alarms should be set to false when possible for targets
-using the FILE action). When the monitor threshold passes again after one
-or more failures, the line is deleted from the file.&nbsp; The line details
-include the target name and the data source name. To include other details,
-customize the LogToFile() subroutine in Monitor.pm.
-</p>
-<p>EXEC: This action executes a shell command or script. The first action
-argument is the shell command or script to execute when the monitor threshold
-criteria fails. The second action argument is the shell command or script
-to execute when the monitor threshold passes again after one or more failures.
-The EXEC action provides a mechanism by which automated corrective action
-can be taken.
-</p>
-<p>FUNC: This action is similar to EXEC, except that a perl subroutine
-defined in the Cricket scope is executed. The first action argument is
-the function invoked when the monitor threshold criteria fails. The second
-action argument is the function invoked when the monitor threshold passes
-again after one or more failures.&nbsp; To use this action, you must first
-modify the entry in the func.pm module to set the global variable gMonFuncEnabled.
-Using this action requires customization (you must write the subroutines).
-While this mechanism provides complete flexibility in handling special
-cases, the invoked subroutines cannot easily accept arguments (this can
-be done, but the argument list must be included by name in the action arguments
-which can quickly become unwieldy). If your function requires access to
-arguments available in the Alarm() and Clear() functions, you might consider
-adding a new action tag (and sharing your work with the Cricket community).
-</p>
-<p><b>Acknowledgements</b></p>
-<p>Javier Muniz first implemented Monitor Thresholds in Cricket. Jeff Younker
-implemented the EXEC and FUNC actions.&nbsp; Adam Meltzer implemented the
-first cut of the MAIL action.&nbsp; Jeff Jensen and Jeff Allen made contributions
-too numerous to count.
-</p>
-<p>Questions or comments: contact <a href="mailto:%20jakeb@users.sourceforge.net">Jake
-Brutlag</a></p>
-</body>
+		<div>
+			<h2>Acknowledgements</h2>
+			<p>
+				Javier Muniz first implemented Monitor Thresholds in
+				Cricket. Jeff Younker implemented the EXEC and FUNC
+				actions.&nbsp; Adam Meltzer implemented the first cut of
+				the MAIL action.&nbsp; Jeff Jensen and Jeff Allen made
+				contributions too numerous to count.
+			</p>
+			<p>
+				Questions or comments: contact <a
+				href="mailto:%20jakeb@users.sourceforge.net">Jake
+				Brutlag</a>
+			</p>
+		</div>
+	</body>
 </html>
