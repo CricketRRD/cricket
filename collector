@@ -142,17 +142,19 @@ sub localHandleTargetInstance {
     my($tpath) = $target->{'auto-target-path'};
 
     # first, dump the dict, to help debug things
-    my($k, $v, $t);
-    $t =  "target $tname\n";
-    foreach $k (sort (keys(%{$target}))) {
-        next if ($k eq "auto-target-name");
-
-        $v = $target->{$k};
-        $v = "[undef]" if (! defined($v));
-
-        $t .= "\t$k = $v\n";
+    if (isDebug()) {
+        my($k, $v, $t);
+        $t =  "target $tname\n";
+        foreach $k (sort (keys(%{$target}))) {
+            next if ($k eq "auto-target-name");
+    
+            $v = $target->{$k};
+            $v = "[undef]" if (! defined($v));
+    
+            $t .= "\t$k = $v\n";
+        }
+        Debug($t);
     }
-    Debug($t);
 
     # skip this if it's a meta-target
     if ((defined($target->{'targets'})) || (defined($target->{'mtargets'}))) {
