@@ -22,7 +22,7 @@ package Common::Log;
 require Exporter;
 @ISA = qw(Exporter);
 
-@EXPORT = qw(Debug Warn Info Die Error LogMonitor);
+@EXPORT = qw(Debug Warn Info Die Error LogMonitor isDebug);
 
 $kLogDebug    = 9;
 $kLogMonitor  = 8;
@@ -76,6 +76,11 @@ sub Info {
 
 sub LogMonitor {
     Log($kLogMonitor, @_);
+}
+
+sub isDebug {
+    return 1 if $gCurLogLevel >= $kLogDebug;
+    return 0;
 }
 
 sub timeStr {
