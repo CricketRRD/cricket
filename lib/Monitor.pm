@@ -27,6 +27,8 @@ use Common::Log;
 $Common::global::gMonitorTable{'value'} = \&monValue;
 $Common::global::gMonitorTable{'hunt'} = \&monHunt;
 $Common::global::gMonitorTable{'relation'} = \&monRelation;
+# Support for aberrant behavior detection
+$Common::global::gMonitorTable{'failures'} = \&monFailures;
 
 sub new {
 	my($package) = @_;
@@ -206,7 +208,51 @@ sub monRelation {
 	return 1;
 }
 
-# fetches any data you might need from an rrd file
+# check the FAILURES array for failure recorded by the aberrant behavior
+# detection algorithm in RRD
+# Return values: 1 = success
+#                0 = failure
+# Returns 1 on default or unexpected error
+sub monFailures {
+	my($self, $target, $ds, $type, $args) = @_;
+
+    my $datafile = $target->{'rrd-datafile'};
+	my $dsNum = $self->getDSNum($target, $ds);
+	return 1 if(!defined($dsNum));
+	return 1 if(!defined($datafile));
+    # open the file if not already open
+	if(!defined($self->{currentfile}) || $datafile ne $self->{currentfile}) {
+		my($rrd) = new RRD::File( -file => $datafile );
+		return 1 if(!$rrd->open() || !$rrd->loadHeader()); 
+		$self->{currentfile} = $datafile;
+		$self->{openrrd} = $rrd;
+	}
+	# check for a valid $dsNum
+	return 1 unless ($dsNum < $self->{openrrd}->ds_cnt());
+	# find the FAILURES RRA
+	my $rra;
+	my $rraNum;
+	for($rraNum = 0; $rraNum <= $#{$self->{openrrd}->{rra_def}}; $rraNum++) {
+		$rra = $self->{openrrd}->rra_def($rraNum);
+		last if ($rra -> {rraName} eq 'FAILURES');
+	}
+	return 1 if ($rra -> {rraName} ne 'FAILURES');
+
+	# retrieve the most recent value
+	my $ret;
+	$ret = $self->{openrrd}->getDSRowValue($rraNum,0,$dsNum);
+    if (!defined($ret))
+	{
+		Warn("Skipping: Couldn't fetch last value from datafile FAILURES RRA.");
+		return 1;
+	}
+	# FAILURES array stores a 1 for a failure (so should return 0)
+	return 1 if ($ret eq 'NaN');
+	return !($ret);
+}
+
+# fetches any data you might need from a rrd file
+# in a RRA with consolidation function AVERAGE
 # caching the open RRD::File object for later use
 # if possible.
 sub rrdFetch {
@@ -226,6 +272,9 @@ sub rrdFetch {
 	my($rra,$lastrecord,$rraNum);
 	for($rraNum = 0; $rraNum <= $#{$self->{openrrd}->{rra_def}}; $rraNum++) {
 		$rra = $self->{openrrd}->rra_def($rraNum);
+		# if the consolidation function is not AVERAGE, we can
+		# skip this RRA
+		next if ($rra->{rraName} ne "AVERAGE");
 		$lastrecord = $rra->{row_cnt} * $rra->{pdp_cnt} *
 						$self->{openrrd}->pdp_step();
 		last if($lastrecord >= $sec);
@@ -261,7 +310,8 @@ sub getDSNum {
 			lc($target->{'target-type'}), 
 			$target);
 	my($Counter) = 0;
-	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,lc($ttRef->{'ds'}));
+	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,$ttRef->{'ds'});
+	
 	return $dsMap{$dsName};
 }
 
@@ -300,6 +350,8 @@ sub Alarm {
 					$threshold,
 					$name,
 					$ds );
+	} elsif($alarmType eq 'FILE') {
+        $self->LogToFile($alarmArgs->[0],'ADD',$name,$ds);
 	} else {
 		Warn("Alarm Type $alarmType is not known.");
 	}
@@ -338,6 +390,8 @@ sub Clear {
 					$threshold,
 					$name,
 					$ds );
+	} elsif($alarmType eq 'FILE') {
+        $self->LogToFile($alarmArgs->[0],'CLEAR',$name,$ds);
 	} else {
 		Warn("Alarm Type $alarmType is not known.");
 	}
@@ -363,6 +417,72 @@ sub sendMonitorTrap {
 
 	Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
 	snmpUtils::trap2($to,$spec,@VarBinds);
+}
+
+sub LogToFile {
+   my ($self, $filePath, $action, $targetName, $dataSourceName) = @_;
+   my @lines = ();
+   my $targetLine;
+
+   return unless ($action eq 'ADD' || $action eq 'CLEAR');
+
+   # open for read or create if missing (so we open for append)
+   unless (open(INFILE, "+>>$filePath"))
+   {
+	  Info("Failed to open file $filePath");
+	  return;
+   }
+   
+   my $bFound = 0;
+   $targetLine = $targetName . " " . $dataSourceName;
+   while (<INFILE>)
+   {
+	  chomp;
+	  if ($_ eq $targetLine)
+	  {
+		$bFound = 1;
+		# nothing to add
+		last if ($action eq 'ADD');
+	  } else {
+	    push (@lines, $_) if ($action eq 'CLEAR');
+	  }
+   }
+
+   # append the new line to the end of the file
+   if ($action eq 'ADD' && $bFound == 0)
+   {
+	  Info("Appending line $targetLine to $filePath");
+	  print INFILE $targetLine . "\n";
+	  close(INFILE);
+	  return;
+   }
+
+   # don't need INFILE anymore
+   close(INFILE);
+
+   if ($action eq 'ADD' && $bFound == 1)
+   {
+	  Info("$targetName $dataSourceName already in file $filePath");
+	  return;
+   }
+
+   if ($action eq 'CLEAR' && $bFound == 0)
+   {
+	  Info("$targetName $dataSourceName already deleted from file $filePath");
+	  return;
+   }
+
+   # need to print out @lines, which excludes the $targetLine
+   # overwrite old file
+   unless (open(OUTFILE, ">$filePath"))
+   {
+	  Info("Failed to open file $filePath");
+	  return;
+   }
+   Info("Deleting $targetLine from $filePath");
+   print OUTFILE join("\n", @lines);
+   print OUTFILE "\n" unless (scalar(@lines) == 0);
+   close(OUTFILE);
 }
 
 sub sendEmail {

@@ -139,7 +139,8 @@ sub loadHeader {
 	$v = fixName($v);
 
 	if ($c ne $fmt->format('cookie') ||
-		($v ne $fmt->format('version')) ||
+# remove the version check: this code now support version 1 and 2
+#		($v ne $fmt->format('version')) ||
 		($fc != $fmt->format('float_cookie'))) {
 		$RRD::File::gErr = "Something is wrong with the header of this file.";
 		return;
@@ -294,7 +295,15 @@ sub getDSRowValue {
     }
  
     my($elmSize) = sizeof($fmt->format('element'));
-    my($rraOffset) = ($rra * $ds_cnt * $numRows * $elmSize);
+    my $rraOffset = 0;
+	my $i;
+	# jump over intervening rras
+	for ($i = 0; $i < $rra; $i++)
+	{
+	   $numRows = $self->rra_def($i)->{row_cnt};
+	   $rraOffset += $ds_cnt * $numRows * $elmSize;
+	}
+
     my($dataOffset) = $rraOffset +
                     $wantedRow * ($ds_cnt * $elmSize) + $ds * $elmSize;
     my($offset) = $headerOffset + $dataOffset;

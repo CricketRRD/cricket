@@ -72,6 +72,13 @@ sub setArch {
 	$self->{'CF_AVERAGE'} = 0;
 	$self->{'CF_MINIMUM'} = 1;
 	$self->{'CF_MAXIMUM'} = 2;
+	# new cf functions
+	$self->{'CF_LAST'} = 3;
+	$self->{'CF_HWPREDICT'} = 4;
+	$self->{'CF_SEASONAL'} = 5;
+	$self->{'CF_DEVPREDICT'} = 6;
+	$self->{'CF_DEVSEASONAL'} = 7;
+	$self->{'CF_FAILURES'} = 8;
 
 	$self->{'LAST_DS_LEN'} = 30;    # Tobias says, "DO NOT CHANGE THIS" :)
 

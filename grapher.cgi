@@ -265,7 +265,8 @@ sub doHTMLPage {
 
 			# now, we gather up a dslist: either it comes from
 			# the view, or it's simply all the ds's in the target type.
-
+            
+			my ($enableHoltWinters) = 0;
 			my($dslist);
 			if (defined($view)) {
 				my($v);
@@ -273,6 +274,8 @@ sub doHTMLPage {
 					# views are like this: "cpu: cpu1load  cpu5load"
 					my($vname, $dss) = split(/\s*:\s*/, $v, 2);
 					if ($view eq $vname) {
+			            # parse view name for HoltWinters special tag
+						$enableHoltWinters = 1 if ($view =~ /HoltWinters/);
 						$dslist = $dss;
 						# make it comma-separated
 						$dslist =~ s/\s*$//;
@@ -328,6 +331,15 @@ sub doHTMLPage {
 			# save the ranges before we start messing around with them
 			my($reqRanges) = $gQ->param('ranges');
 			my(%dsDescr) = ();
+			# if this tag is present, 
+			# the user wants to display a Holt-Winters graph
+			my($hwParam) = $gQ->param('hw');
+			# delete this tag so those that inherit (i.e. makeNavLinks)
+			# are not affected
+			$gQ->delete('hw');
+			# Holt-Winters links
+			my(@hwlinks);
+			@hwlinks = makeHwNavLinks() if ($enableHoltWinters);
 			my(@links) = makeNavLinks();
 
 			htmlHeader($name, $targRef, $title);
@@ -348,6 +360,10 @@ sub doHTMLPage {
 				}
 				print "</td><td><center>\n";
 				print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
+				# add a tag for Holt-Winters
+				if ($enableHoltWinters) {
+				   print "<p><i>Aberrant Behavior Detection:</i><p>\n", join("<br>\n", @hwlinks);
+				}
 				print "</center></td>\n";
 				print "</tr></table>\n";
 			}
@@ -356,8 +372,20 @@ sub doHTMLPage {
 			my($range, @ranges);
 			@ranges = getRanges($reqRanges);
 
+			# add perimeter stuff for Holt-Winters as appropriate
 			foreach $range (@ranges) {
-				my($label) = rangeToLabel($range);
+				my ($label);
+				if (defined($hwParam)) {
+				   if ($hwParam eq "confidence") {
+					  $label = "Confidence Bounds: Hourly";
+				   } elsif ($hwParam eq "failures") {
+					  $label = "Failures (exceeds confidence bounds): Hourly";
+				   } else {
+					  $label = "Failures (exceeds confidence bounds): Hourly";
+				   }
+				} else {
+				   $label = rangeToLabel($range);
+				}
 				print "<h3>$label graph${plural}</h3>\n";
 
 				#
@@ -498,6 +526,8 @@ sub doHTMLPage {
 					$gQ->param('dslist', $dslist);
 					$gQ->param('range', $range);
 
+					$gQ->param('hw',$hwParam) if (defined($hwParam));
+
 					# this parameter is to trick Netscape into
 					# always asking the CGI for the image, instead
 					# of trying to cache it inappropriately
@@ -561,6 +591,9 @@ sub doHTMLPage {
 				}
 				print "</td><td><center>\n";
 				print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
+				if ($enableHoltWinters) {
+				   print "<i>Holt Winters:</i><p>\n", join("<br>\n", @hwlinks);
+				}
 				print "</center></td>\n";
 				print "</tr></table>\n";
 			}
@@ -1249,6 +1282,27 @@ sub doGraph {
 		$yminlck = 0;
 	}
 
+	# A hack for Holt-Winters graphs
+    my ($hwParam) = $gQ->param('hw');
+	if (defined($hwParam))
+	{
+	   Debug("Holt Winters tag: $hwParam");
+	   # verify single target
+	   if ($isMTarget)
+	   {
+		  Warn("Holt-Winters forecasting not supported for multiple targets");
+		  $hwParam = undef;
+	   }
+	   # verify a single data source
+	   if ($numDSs != 1)
+	   {
+		  Warn("Holt-Winters forecasting not supported for multiple data sources");
+		  $hwParam = undef;
+	   }
+	} else {
+	   Debug("Holt Winters tag not found");
+	}
+
 	# ok, lets attempt to handle mtargets.  We need to loop through
 	# each of the individual targets and construct the graph command
 	# on each of those.  The other initializations should be outside
@@ -1391,6 +1445,8 @@ sub doGraph {
 			# default to not doing max stuff, since it's still a bit
 			# messy -- due to bad deafault RRA setup, etc.
 			$mx = isTrue(graphParam($gRef, 'show-max', 0));
+			# if hwParam, disable max, no matter what the config says
+			$mx = 0 if (defined($hwParam));
 			if ($mx) {
 				$colormax = graphParam($gRef, 'max-color',
 					nextColor($colorRef));
@@ -1402,6 +1458,43 @@ sub doGraph {
 			if (defined($dsidx)) {
 				push @defs, "DEF:mx$ct=$rrd:ds$dsidx:MAX" if ($mx);
 				push @defs, "DEF:ds$ct=$rrd:ds$dsidx:AVERAGE";
+				if (defined($hwParam)) {
+				   if ($hwParam eq "failures" || $hwParam eq "all")
+				   {
+					  # push failures onto the line stack first now, so that
+					  # they will appear in the background of the graph
+					  push @defs, "DEF:fail$ct=$rrd:ds$dsidx:FAILURES";
+					  # hard code colors for now
+					  push @lines, "TICK:fail$ct#ffffa0:1.0:" . 
+						 "Failures $legend";
+				   }
+				   if ($hwParam eq "confidence" || $hwParam eq "all")
+				   {
+					  push @defs, "DEF:hw$ct=$rrd:ds$dsidx:HWPREDICT";
+					  push @defs, "DEF:dev$ct=$rrd:ds$dsidx:DEVPREDICT";
+					  my $cbscale = graphParam($gRef,'confidence-band-scale',2);
+					  push @cdefs, "CDEF:upper$ct=hw$ct,dev$ct,$cbscale,*,+";
+					  push @cdefs, "CDEF:lower$ct=hw$ct,dev$ct,$cbscale,*,-";
+					  # Confidence bands need to be scaled along with the
+					  # observed data
+					  if (defined($scale))
+					  {
+					     push @cdefs, "CDEF:supper$ct=upper$ct,$scale";
+					     push @cdefs, "CDEF:slower$ct=lower$ct,$scale";
+					     push @lines, "LINE1:supper$ct#ff0000:" .
+						    "Upper Bound $legend";
+					     push @lines, "LINE1:slower$ct#ff0000:" .
+						    "Lower Bound $legend";
+					  } else {
+					     push @lines, "LINE1:upper$ct#ff0000:" .
+						    "Upper Bound $legend";
+					     push @lines, "LINE1:lower$ct#ff0000:" .
+						    "Lower Bound $legend";
+					  }
+					  # convert $drawAs
+					  $drawAs = 'LINE2' if ($drawAs eq 'AREA');
+				   }
+				}
 
 				my($mod) = $ct % $numDSs;
 				if (defined($scale)) {
@@ -1823,6 +1916,27 @@ sub makeNavLinks {
 		$i++;
 	}
 	return @links;
+}
+
+# make the Holt-Winters navigation links
+sub makeHwNavLinks {
+   my (@links) = ();
+   my ($localurl);
+   $gQ->param('ranges','d');
+   $gQ->param('hw','confidence');
+   $localurl = $gQ->self_url();
+   push @links, "<a href=\"$localurl\">Confidence Bounds</a>" .
+      "&nbsp;&nbsp;&nbsp;";
+   $gQ->param('hw','failures');
+   $localurl = $gQ->self_url();
+   push @links, "<a href=\"$localurl\">Failures</a>" .
+      "&nbsp;&nbsp;&nbsp;";
+   $gQ->param('hw','all');
+   $localurl = $gQ->self_url();
+   push @links, "<a href=\"$localurl\">Confidence Bounds and Failures</a>" .
+      "&nbsp;&nbsp;&nbsp;";
+   $gQ->delete('hw');
+   return @links;
 }
 
 sub generateImageName {

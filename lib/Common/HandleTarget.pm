@@ -126,7 +126,7 @@ sub checkTargetInstance {
 		$args =~ s/\\:/\0/g ;
 		my($alarmType) = 'SNMP' ;
 		my($alarmArgs) ;
-		if( $args =~ /^(.*)\s*:\s*(FUNC|EXEC)\s*:\s*([^:]*)\s*:\s*([^:]*)$/ ) {
+		if( $args =~ /^(.*)\s*:\s*(FUNC|EXEC|FILE)\s*:\s*([^:]*)\s*:\s*([^:]*)$/ ) {
 			$args = $1 ;
 			$alarmType = $2 ;
 			my $alarmCommand = $3 ;
