@@ -525,7 +525,7 @@ sub doHTMLPage {
 					$gQ->delete_all();
 					$gQ->param('type', $format);
                     $gQ->param('target', $thisTarget2);
-                    $gQ->param('inst', $thisInst) if defined(($thisInst));
+                    $gQ->param('inst', $thisInst) if defined($thisInst);
 
 					$gQ->param('dslist', $dslist);
 					$gQ->param('range', $range);
