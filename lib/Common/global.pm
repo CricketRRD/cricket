@@ -24,54 +24,61 @@ package ConfigRoot;
 my $val;
 
 sub TIESCALAR {
-   my $class = shift;
-   my $me;
-   $val = shift;
-   bless \$me, $class;
+    my $class = shift;
+    my $me;
+    $val = shift;
+    bless \$me, $class;
 }
 
 sub FETCH {
-   my $self = shift;
-   if (!defined($val)) {
-      return $Common::global::gCricketHome . "/cricket-config" 
-   # check for relative path (both UNIX and DOS drive letter style)
-   } elsif ($val !~ m#^/# && $val !~ m#^[a-z,A-Z]:/#) {
-	  return "$Common::global::gCricketHome/$val" unless
-         ($^O eq 'MSWin32' && $Common::global::isGrapher);
-   }
-   return $val;
+    my $self = shift;
+    if (!defined($val)) {
+        return $Common::global::gCricketHome . "/cricket-config";
+        # check for relative path (both UNIX and DOS drive letter style)
+    } elsif ($val !~ m#^/# && $val !~ m#^[a-z,A-Z]:/#) {
+        return "$Common::global::gCricketHome/$val" unless
+             ($^O eq 'MSWin32' && $Common::global::isGrapher);
+    }
+    return $val;
 }
 
 # this method will only be invoked if someone sets $gConfigRoot
 # after Common::global is loaded
 sub STORE {
-   my $self = shift;
-   $val = shift;
-   return $self->FETCH();
+    my $self = shift;
+    $val = shift;
+    return $self->FETCH();
 }
 
 package Common::global;
 
 BEGIN {
-	# Set defaults for things not picked up from cricket-config.pl
-	$gCricketHome ||= $ENV{'HOME'};
-	tie $gConfigRoot, 'ConfigRoot', $gConfigRoot;
-	if ($^O eq 'MSWin32') {
-		$gCacheDir ||= "$ENV{'TEMP'}\\cricket-cache"
-			if (defined($ENV{'TEMP'}));
-		$gCacheDir ||= "c:\temp\cricket-cache";
-	} else {
-		$gCacheDir ||= "$ENV{'TMPDIR'}/cricket-cache"
-			if (defined($ENV{'TMPDIR'}));
-		$gCacheDir ||= "/tmp/cricket-cache";
-	}
+    # Set defaults for things not picked up from cricket-config.pl
+    $gCricketHome ||= $ENV{'HOME'};
+    tie $gConfigRoot, 'ConfigRoot', $gConfigRoot;
+    if ($^O eq 'MSWin32') {
+        $gCacheDir ||= "$ENV{'TEMP'}\\cricket-cache"
+            if (defined($ENV{'TEMP'}));
+        $gCacheDir ||= "c:\temp\cricket-cache";
+    } else {
+        $gCacheDir ||= "$ENV{'TMPDIR'}/cricket-cache"
+            if (defined($ENV{'TMPDIR'}));
+        $gCacheDir ||= "/tmp/cricket-cache";
+    }
 
-	if (!defined($isGrapher)) {
-		$isGrapher = 0;
-	}
-	if (!defined($isCollector)) {
-		$isCollector = 0;
-	}
+    if (!defined($isGrapher)) {
+        $isGrapher = 0;
+    }
+    if (!defined($isCollector)) {
+        $isCollector = 0;
+    }
 }
 
 1;
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
