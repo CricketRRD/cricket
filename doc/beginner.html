@@ -277,7 +277,10 @@ make certain it only lists interfaces you are interested in.
 
 <p>
 By adding this file, you've just changed the config tree. Remember,
-you must compile the tree every time you edit it.
+you must compile the tree every time you edit it. Or rather, if you
+forget to compile the tree, the Cricket collector will do it for you,
+but in that case you are not likely to see any errors you might have
+introduced, so it's always a good idea to compile explicitly.
 
 <p>
 Once again, run the collector by hand to make certain that it will
@@ -394,7 +397,17 @@ Now, try going to this URL:
 <p>
 If you are running under a different user, or your webserver
 is on a different machine from your web browser, alter the
-URL accordingly.
+URL accordingly. Additionally, if you want to get rid of the username
+reference in the URL (i.e., the <tt>~cricket</tt> bit), using another
+method to start grapher.cgi, you'll have to edit grapher.cgi and
+uncomment the lines
+<blockquote><pre>
+# $ENV{'HOME'} = '/path/to/cricket/home';
+# return;
+</pre></blockquote>
+and replace <tt>/path/to/cricket/home</tt> with the directory you
+actually installed Cricket in.
+
 
 <p>
 You should see the front page, including some graphics and a
