@@ -31,6 +31,9 @@ New features, fixes in version 1.0.5
 	you are well advised to look for "Monitor" instead, and review
 	your scripts while you're at it.
 
+	We now support s390x-linux, thanks to Shane Stixrud. [Patch
+	#877924]
+
 New features, fixes in version 1.0.4
 
 	Added span option for monitor-thresholds of all types [Patch #838250].
