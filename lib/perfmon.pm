@@ -107,6 +107,7 @@ sub perfmonFetch {
         $pmonFetches{$index} = "$server:$myobject:$mycounter:$myinstance:$myoptions";
     }
 
+    my($perflib);  my $count=0;  my $num_fetch=keys %pmonFetches;
     DSLOOP: while(my ($index, $ilRef) = each %pmonFetches) {
         my $pr1 = {};
         my $critical;
@@ -166,9 +167,9 @@ sub perfmonFetch {
 
         $myobject = lc($myobject);
 
-        my $perflib = new Win32::PerfLib($server);
+        $perflib= new Win32::PerfLib($server) if ($count++ == 0);
         $perflib->GetObjectList($rcounter->{$server}->{$myobject}, $pr1);
-        $perflib->Close();
+        $perflib->Close() if ($count >= $num_fetch);
 
         if($perfTimeOnly) {
             if($perfTimeOnly eq 'normal') {
