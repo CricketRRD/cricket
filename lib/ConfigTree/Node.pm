@@ -568,9 +568,9 @@ sub skipFile {
  
     $res = 1 if ($file =~ /\/#.*#$/);
     $res = 1 if ($file =~ /\/README$/);
-    $res = 1 if ($file =~ /.bak$/);
-    $res = 1 if ($file =~ /.lock$/);
-    $res = 1 if ($file =~ /.new$/);
+    $res = 1 if ($file =~ /\.bak$/);
+    $res = 1 if ($file =~ /\.lock$/);
+    $res = 1 if ($file =~ /\.new$/);
     $res = 1 if ($file =~ /\/RCS$/);
     $res = 1 if ($file =~ /,v$/);
     $res = 1 if ($file =~ /~$/);
