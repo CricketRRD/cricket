@@ -1,5 +1,7 @@
 New features, fixes in version 1.0.4
 
+	Added span option for monitor-thresholds of all types [Patch #838250].
+
 	Added new option to log entry format [Patch #565877].
 
 	Added new META monitor thresholds action [Patch #821255].
