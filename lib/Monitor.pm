@@ -27,6 +27,7 @@ use Common::Log;
 $Common::global::gMonitorTable{'value'} = \&monValue;
 $Common::global::gMonitorTable{'hunt'} = \&monHunt;
 $Common::global::gMonitorTable{'relation'} = \&monRelation;
+$Common::global::gMonitorTable{'exact'} = \&monExact;
 # Support for aberrant behavior detection
 $Common::global::gMonitorTable{'failures'} = \&monFailures;
 $Common::global::gMonitorTable{'quotient'} = \&monQuotient;
@@ -188,6 +189,29 @@ sub monRelation {
     Debug("Values $value, $cmp_value; Difference is $difference; gtlt is $gtlt; thresh is $thresh.");
 	return (0,$value) if(!(eval "$difference $gtlt $thresh"));
 	return (1,$value);
+}
+
+sub monExact {
+	my($self,$target,$ds,$type,$args) = @_;
+	my(@args) = split(/\s*:\s*/, $args);
+
+	if (@args != 1) {
+		Warn("Skipping: monitor type \"exact\" requires 1 argument.");
+		return 1;
+	}
+	my $exact = shift @args;
+
+	my($value) = $self->rrdFetch(
+					$target->{'rrd-datafile'},
+					$self->getDSNum($target, $ds), 0
+				 );
+
+	if(!defined($value)) {
+		Warn("Skipping: Couldn't fetch last value from datafile.");
+		return 1;
+	}
+
+	return $exact eq $value ? 0 : 1;
 }
 
 # check the FAILURES array for failure recorded by the aberrant behavior
