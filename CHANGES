@@ -1,5 +1,14 @@
 New features, fixes in version 1.0.3
 
+	A new way of configuring Cricket has been added. It is now
+	possible to create a file called cricket-conf.pl, which can
+	either reside in the same directory as the grapher.cgi
+	and collector scripts, or in /usr/local/etc. This should
+	eliminate the need to edit grapher.cgi, and make life easier
+	for people running Cricket on NT. The change should be
+	backwards compatible, please file a bug on Sourceforge if it
+	is not. A sample file is provided as cricket-conf.pl.sample.
+
 	The implementation of the MAIL action tag for monitor thresholds
 	is complete. New VarBinds added for SNMP trap monitor thresholds.
 	Added a new monitor threshold type, quotient. Revised and extended

@@ -30,10 +30,15 @@
 # to tell collect-subtrees where to find it.
 
 BEGIN {
-   $Common::global::gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+	eval "require '$programdir/cricket-conf.pl'";
+	eval "require '/usr/local/etc/cricket-conf.pl'"
+					unless $Common::global::gInstallRoot;
+	$Common::global::gInstallRoot ||= $programdir;
 }
 
 use Getopt::Long;
+use Common::global;
 use strict;
 
 my @mHist;

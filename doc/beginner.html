@@ -130,8 +130,18 @@ To do this:
 This makes it so that you can refer to things in $HOME/cricket, and
 still get the version 1.00 copies of those files. You'll then be able
 to swing that link over to newer versions as they become available.
-<p>
 
+<p>
+If you don't have a cricket-conf.pl file yet, copy the example file
+cricket-conf.pl.sample to cricket-conf.pl, and edit it. You will need
+to set $gCricketHome to the home directory of the user that Cricket
+runs as (this is used to locate the cricket-config directory, among
+other things). The $gInstallRoot variable should point to where the
+Cricket scripts are. It is recommended to point this to the symlink,
+so that you can just copy this file if you upgrade Cricket later.
+Usually, there is no need to touch anything else in this file.
+
+<p>
 <li>Copy the sample-config tree and modify it for your site.
 
 <p>
