@@ -14,6 +14,13 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	Chris Adams
+		made show-max and scaling like each other
+
+	Matt Zimmerman
+		handles Debian
+		lots of work on the mailing lists
+
 	James Grinter
 		many contributions, including championing the self_url
 		issues and lots of work on the mailing lists
@@ -62,7 +69,7 @@ contributed ideas, patches, and/or debugging info:
 		Changes to use shared-object RRD module
 		Taught me how to use return. :)
 
-	Patrick Myers <pjm@mcc.ac.uk> 
+	Patrick Myers <pjm@mcc.ac.uk>
 		Found correct settings for FreeBSD.
 
 	Philippe.Simonet@swisscom.com
@@ -80,11 +87,11 @@ contributed ideas, patches, and/or debugging info:
 	Ed Bugg <Bugge@ABCBS.com>
 		contributed the converter and getFormat
 
-	Matija Grabnar <Matija.Grabnar@arnes.si> 
+	Matija Grabnar <Matija.Grabnar@arnes.si>
 		Verified that Linux formats work on i86pc-solaris.
 
 	David Koski <dkoski@noc.ns.itd.umich.edu>
-		auto-configuration via listInterfaces 
+		auto-configuration via listInterfaces
 		SNMP v2 support
 
 	Javier Muniz <jmuniz@corp.webtv.net>
