@@ -1,0 +1,333 @@
+#####################################################################
+# Top-level defaults file for host performance monitoring with the
+# Net-SNMP daemon (http://www.net-snmp.org/)
+#
+# Integrated into Cricket 1.0.4 on 28-mar-2002 by Bert Driehuis,
+# with many changes.
+#
+# Based on this work:
+# Started 12-16-99 by James Moore <jam@afn.org>
+#
+# Change Log :
+#     28/01/2000 : UCD-SNMP OID's added
+#              : default datasource added
+#              : default graph added
+#              - Stuart Grimshaw <stuart.grimshaw@blackburn.gov.uk>
+#        02-01-2000 : Changed OIDs for UCD load averages
+#              : Added graphs for ucd disk usage
+#              - James Moore
+#
+# To Do :
+#
+#####################################################################
+
+target --default--
+    server        = ""
+    snmp-host     = %server%
+    display-name  = "%auto-target-name% on %server%"
+    min-size      = 0
+    max-size      = undef
+
+OID    hrSystemNumUsers     1.3.6.1.2.1.25.1.5.0
+OID    hrSystemProcesses    1.3.6.1.2.1.25.1.6
+OID    hrStorageName        1.3.6.1.2.1.25.2.3.1.3
+OID    hrStorageUsed        1.3.6.1.2.1.25.2.3.1.6
+
+# Load averages.
+OID    ucd_load1min         1.3.6.1.4.1.2021.10.1.3.1
+OID    ucd_load5min         1.3.6.1.4.1.2021.10.1.3.2
+OID    ucd_load15min        1.3.6.1.4.1.2021.10.1.3.3
+
+# Memory stats
+OID    ucd_memswapAvail     1.3.6.1.4.1.2021.4.4.0
+OID    ucd_memrealAvail     1.3.6.1.4.1.2021.4.6.0
+OID    ucd_memtotalAvail    1.3.6.1.4.1.2021.4.11.0
+
+# Disk stats (Don't forget the instance number...)
+OID    ucd_diskfree         1.3.6.1.4.1.2021.9.1.7
+OID    ucd_diskused         1.3.6.1.4.1.2021.9.1.8
+OID    ucd_diskpused        1.3.6.1.4.1.2021.9.1.9
+
+# CPU Stats
+OID    ucd_cpuUser          1.3.6.1.4.1.2021.11.9.0
+OID    ucd_cpuSystem        1.3.6.1.4.1.2021.11.10.0
+OID    ucd_cpuIdle          1.3.6.1.4.1.2021.11.11.0
+OID    ucd_rawCpuUser       1.3.6.1.4.1.2021.11.50.0
+OID    ucd_rawCpuNice       1.3.6.1.4.1.2021.11.51.0
+OID    ucd_rawCpuSystem     1.3.6.1.4.1.2021.11.52.0
+OID    ucd_rawCpuIdle       1.3.6.1.4.1.2021.11.53.0
+
+# Disk I/O
+OID    ucd_diskIODevice     1.3.6.1.4.1.2021.13.15.1.1.2
+#OID   ucd_diskIONRead      1.3.6.1.4.1.2021.13.15.1.1.3
+#OID   ucd_diskIONWrite     1.3.6.1.4.1.2021.13.15.1.1.4
+OID    ucd_diskIOReads      1.3.6.1.4.1.2021.13.15.1.1.5
+OID    ucd_diskIOWrites     1.3.6.1.4.1.2021.13.15.1.1.6
+
+
+##### Datasources #########
+
+datasource --default--
+    rrd-ds-type  = GAUGE
+
+datasource hrSystemNumUsers
+    ds-source    = snmp://%snmp%/hrSystemNumUsers
+
+datasource hrSystemProcesses
+    ds-source    = snmp://%snmp%/hrSystemProcesses.%inst%
+
+datasource hrStorageUsed
+    ds-source    = snmp://%snmp%/hrStorageUsed.%inst%
+
+map hr-storage-name
+    base-oid    =   hrStorageName
+    match       =   %hr-storage-name%
+
+datasource ucd_load1min
+    ds-source    = snmp://%snmp%/ucd_load1min
+
+datasource ucd_load5min
+    ds-source    = snmp://%snmp%/ucd_load5min
+
+datasource ucd_load15min
+    ds-source    = snmp://%snmp%/ucd_load15min
+
+datasource ucd_memswapAvail
+    ds-source    = snmp://%snmp%/ucd_memswapAvail
+
+datasource ucd_memrealAvail
+    ds-source    = snmp://%snmp%/ucd_memrealAvail
+
+datasource ucd_memtotalAvail
+    ds-source    = snmp://%snmp%/ucd_memtotalAvail
+
+datasource ucd_diskfree
+    ds-source    = snmp://%snmp%/ucd_diskfree.%inst%
+
+datasource ucd_diskused
+    ds-source    = snmp://%snmp%/ucd_diskused.%inst%
+
+datasource ucd_diskpused
+    ds-source    = snmp://%snmp%/ucd_diskpused.%inst%
+
+datasource ucd_cpuUser
+    ds-source    = snmp://%snmp%/ucd_cpuUser
+
+datasource ucd_cpuSystem
+    ds-source    = snmp://%snmp%/ucd_cpuSystem
+
+datasource ucd_cpuIdle
+    ds-source    = snmp://%snmp%/ucd_cpuIdle
+
+datasource ucd_rawCpuUser
+    ds-source    = snmp://%snmp%/ucd_rawCpuUser
+    rrd-ds-type  = DERIVE
+
+datasource ucd_rawCpuNice
+    ds-source    = snmp://%snmp%/ucd_rawCpuNice
+    rrd-ds-type  = DERIVE
+
+datasource ucd_rawCpuSystem
+    ds-source    = snmp://%snmp%/ucd_rawCpuSystem
+    rrd-ds-type  = DERIVE
+
+datasource ucd_rawCpuIdle
+    ds-source    = snmp://%snmp%/ucd_rawCpuIdle
+    rrd-ds-type  = DERIVE
+
+datasource ucd_diskIONRead
+    ds-source    = snmp://%snmp%/ucd_diskIONRead.%inst%
+    rrd-ds-type  = DERIVE
+
+datasource ucd_diskIONWrite
+    ds-source    = snmp://%snmp%/ucd_diskIONWrite.%inst%
+    rrd-ds-type  = DERIVE
+
+datasource ucd_diskIOReads
+    ds-source    = snmp://%snmp%/ucd_diskIOReads.%inst%
+    rrd-ds-type  = DERIVE
+
+datasource ucd_diskIOWrites
+    ds-source    = snmp://%snmp%/ucd_diskIOWrites.%inst%
+    rrd-ds-type  = DERIVE
+
+map ucd-diskio-device
+    base-oid    =   ucd_diskIODevice
+    match       =   %ucd-diskio-device%
+
+
+#### Target Types #########
+
+targetType    hr_System
+    ds    = "hrSystemProcesses, hrSystemNumUsers"
+    view  = "Processes: hrSystemProcesses, Users: hrSystemNumUsers"
+
+targetType    hr_Storage
+    ds    = "hrStorageUsed"
+    view  = "Storage: hrStorageUsed"
+
+targetType    hr_StoragePct
+    ds    = "hrStorageUsedPct"
+    view  = "StoragePct: hrStorageUsedPct"
+
+targetType    ucd_System
+    ds    = "ucd_rawCpuUser, ucd_rawCpuNice, ucd_rawCpuSystem,
+             ucd_rawCpuIdle, ucd_memrealAvail, ucd_memswapAvail,
+             ucd_memtotalAvail, ucd_load1min, ucd_load5min, ucd_load15min"
+
+    view  = "cpu: ucd_rawCpuUser ucd_rawCpuNice ucd_rawCpuSystem,
+             Memory: ucd_memrealAvail ucd_memswapAvail ucd_memtotalAvail,
+             Load: ucd_load1min ucd_load5min ucd_load15min"
+
+targetType    ucd_Storage
+    ds    = "ucd_diskfree, ucd_diskused, ucd_diskpused"
+    view  = "Storage: ucd_diskfree ucd_diskused,
+             Percent Used: ucd_diskpused"
+
+targetType    ucd_diskIO
+    ds    =    "ucd_diskIOReads, ucd_diskIOWrites"
+    view  =    "diskIO: ucd_diskIOReads ucd_diskIOWrites"
+
+targetType    ucd_diskIO_bsdi
+    ds    =    "ucd_diskIOReads"
+    view  =    "diskIO: ucd_diskIOReads"
+
+
+#### Graphs ###############
+
+graph --default--
+    y-max    = undef
+    width-hint    = undef
+    height-hint    = undef
+
+graph    ucd_memswapAvail
+    legend    = "Available swap space"
+    scale    = 1024,*
+    bytes    = true
+    units    = "kBytes"
+    rrd-graph-args = --logarithmic
+
+graph    ucd_memrealAvail
+    legend    = "Used RAM"
+    scale    = 1024,*
+    bytes    = true
+    units    = "kBytes"
+
+graph    ucd_memtotalAvail
+    legend    = "Available RAM"
+    scale    = 1024,*
+    bytes    = true
+    units    = "kBytes"
+
+graph    ucd_load1min
+    legend    = "1 Min Load Av"
+    si-units= false
+
+graph    ucd_load5min
+    legend    = "5 Min Load Av"
+    si-units= false
+
+graph    ucd_load15min
+    legend    = "15 Min Load Av"
+    si-units= false
+
+graph    hrSystemNumUsers
+
+    color     = dark-green
+    draw-as   = AREA
+    y-axis    = "Users"
+    units     = "Users"
+    legend    = "# of Users"
+    precision = integer
+
+graph    hrSystemProcesses
+    color     = dark-green
+    draw-as   = AREA
+    y-axis    = "Processes"
+    units     = "Processes"
+    legend    = "# of system Processes"
+    precision = integer
+
+graph    hrStorageUsed
+    draw-as   = LINE1
+    y-axis    = "Bytes used"
+    units     = "Bytes"
+    legend    = "Bytes of space used"
+    bytes     = true
+    scale     = %units%
+    #y-min     = %min-size%
+    y-min     = 1048576
+    y-max     = %max-size%
+    height-hint    = undef
+    width-hint     = undef
+    rrd-graph-args = --logarithmic
+
+graph    hrStorageUsedPct
+    draw-as   = LINE1
+    y-axis    = "%"
+    units     = "%"
+    legend    = "% of space used"
+    bytes     = false
+    scale     = %units%,%max-size%,/,100,*
+    y-min     = 0
+    y-max     = 100
+    height-hint    = undef
+    width-hint     = undef
+    precision      = 1
+
+graph    ucd_diskfree
+    color     = dark-green
+    draw-as   = AREA
+    y-axis    = "Bytes"
+    legend    = "Bytes of space free"
+    bytes     = true
+    y-max     = %max-size%
+    y-min     = 0
+    scale     = 1024,*
+
+graph    ucd_diskused
+    color     = red
+    draw-as   = AREA
+    y-axis    = "Bytes"
+    legend    = "Bytes of space used"
+    bytes     = true
+    y-max     = %max-size%
+    y-min     = 0
+    scale     = 1024,*
+
+graph    ucd_diskpused
+    color     = blue
+    draw-as   = AREA
+    y-axis    = "%"
+    units     = "%"
+    legend    = "Percent of space used"
+
+graph    ucd_cpuUser
+    draw-as   = AREA
+    y-min     = 0
+    y-max     = 100
+graph    ucd_cpuSystem
+    draw-as   = STACK
+    y-min     = 0
+    y-max     = 100
+graph    ucd_cpuIdle
+    draw-as   = STACK
+    y-min     = 0
+    y-max     = 100
+
+graph    ucd_rawCpuUser
+    draw-as   = AREA
+    y-min      = 0
+    y-max      = 100
+graph    ucd_rawCpuNice
+    draw-as    = STACK
+    y-min      = 0
+    y-max      = 100
+graph    ucd_rawCpuSystem
+    draw-as    = STACK
+    y-min      = 0
+    y-max      = 100
+graph    ucd_rawCpuIdle
+    draw-as    = STACK
+    y-min      = 0
+    y-max      = 100
