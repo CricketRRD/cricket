@@ -276,11 +276,11 @@ target disks_all
     short-desc    = \"Disk usage (all disks)\"
     order         = $saved_order
 
-target disks_pct
-    target-type   = hr_StoragePct
-    mtargets      = $alltargets
-    short-desc    = \"Disk usage percentage (all disks)\"
-    order         = $saved_order2
+#target disks_pct
+#    target-type   = hr_StoragePct
+#    mtargets      = $alltargets
+#    short-desc    = \"Disk usage percentage (all disks)\"
+#    order         = $saved_order2
 
 EOF
     return $mtargets_tmpl . $tmpl;

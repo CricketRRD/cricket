@@ -170,10 +170,6 @@ targetType    hr_Storage
     ds    = "hrStorageUsed, hrStorageSize"
     view  = "Storage: hrStorageUsed"
 
-targetType    hr_StoragePct
-    ds    = "hrStorageUsedPct"
-    view  = "StoragePct: hrStorageUsedPct"
-
 targetType    ucd_System
     ds    = "ucd_rawCpuUser, ucd_rawCpuNice, ucd_rawCpuSystem,
              ucd_rawCpuIdle, ucd_memrealAvail, ucd_memswapAvail,
@@ -265,19 +261,6 @@ graph    hrStorageUsed
     height-hint    = undef
     width-hint     = undef
     rrd-graph-args = --logarithmic
-
-graph    hrStorageUsedPct
-    draw-as   = LINE1
-    y-axis    = "%"
-    units     = "%"
-    legend    = "% of space used"
-    bytes     = false
-    scale     = %units%,%max-size%,/,100,*
-    y-min     = 0
-    y-max     = 100
-    height-hint    = undef
-    width-hint     = undef
-    precision      = 1
 
 graph    ucd_diskfree
     color     = dark-green
