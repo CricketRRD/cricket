@@ -1,0 +1,857 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# Cricket: a configuration, polling and data display wrapper for RRD files
+#
+#		Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+#
+#		This program is free software; you can redistribute it and/or modify
+#		it under the terms of the GNU General Public License as published by
+#		the Free Software Foundation; either version 2 of the License, or
+#		(at your option) any later version.
+#
+#		This program is distributed in the hope that it will be useful,
+#		but WITHOUT ANY WARRANTY; without even the implied warranty of
+#		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+#		GNU General Public License for more details.
+#
+#		You should have received a copy of the GNU General Public License
+#		along with this program; if not, write to the Free Software
+#		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+BEGIN {
+		my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+		eval "require '$programdir/cricket-conf.pl'";
+		eval "require '/usr/local/etc/cricket-conf.pl'"
+				unless $Common::global::gInstallRoot;
+		$Common::global::gInstallRoot ||= $programdir;
+}
+
+use lib "$Common::global::gInstallRoot/lib";
+
+use RRDs 1.000101;
+
+#use Common::Log;
+use Common::Version;
+use Common::global;
+use Common::Options;
+use Common::Util;
+use Common::Map;
+use Common::HandleTarget;
+use ConfigTree::Cache;
+use Monitor;
+
+use threads;
+use threads::shared;
+
+# threading shared variables
+my %threads : shared = ();
+my %targets_time : shared = ();
+my %finished_targets : shared;
+
+# Don't change these here! Set them in the Defaults file.  These
+#  should also not be removed because of backwards compatability
+my $wait_time = 1;
+my $wait_max = 240;
+my $max_threads = 10;
+
+
+# here's where the individual datasource routines live
+use snmp;
+use exec;
+use file;
+use field;
+
+# Remove the comment on the next line if you want to use sql logging
+# use sql;
+if (Common::Util::isWin32()) {
+#	eval "use wbem";
+	eval "use perfmon";
+}
+
+Info("starting");
+my $start_time = time;
+my $logDir = qq{C:\\crickethome\\cricket-logs\\};
+my $threadFile = $logDir."thread.log";
+my $logging = 1;
+
+# See the documentation on ds-source FUNC for why this defaults
+# to commented out.
+# use func;
+
+Common::Options::commonOptions();
+
+Info("Starting collector: $Common::global::gVersion");
+$gTargetCt = 0;
+
+$Common::global::isCollector = 1;
+
+$Common::global::gCT = new ConfigTree::Cache;
+$gCT = $Common::global::gCT;
+$gCT->Base($Common::global::gConfigRoot);
+$gCT->Warn(\&Warn);
+
+Info("calling init") if (defined($logging));
+if (!$gCT->init()) {
+	Die("Failed to open compiled config tree from " .
+		"$Common::global::gConfigRoot/config.db: $!");
+}
+
+my($recomp, $why) = $gCT->needsRecompile();
+if ($recomp) {
+	Warn("Config tree needs to be recompiled: $why");
+
+	system( (Common::Util::isWin32() ? 'perl ' : '') .
+		"$Common::global::gInstallRoot/compile " .
+		"-base $Common::global::gConfigRoot");
+
+	$gCT = new ConfigTree::Cache;
+	$gCT->Base($Common::global::gConfigRoot);
+
+	if (! $gCT->init()) {
+		Die("Failed to open compiled config tree from " .
+			"$Common::global::gConfigRoot/config.db: $!");
+	}
+}
+
+# if they gave us no subtrees to focus on, use the root of the config tree
+if ($#ARGV+1 == 0) {
+	push @ARGV, '/';
+}
+
+
+# foreach subtree to do
+# find the base node of that subtree
+# foreach leaf node of this subtree
+# process it
+my($subtree,%targets);
+LogIt($threadFile,"start") if (defined($logging));
+
+foreach $subtree (@ARGV) {
+	if ($gCT->nodeExists($subtree)) {
+		$gCT->visitLeafs($subtree, \&handleTarget,
+					\&handleTargetInstance, \&localHandleTargetInstance);
+	} else {
+		Warn("Unknown subtree $subtree.");
+	}
+}
+
+foreach $subtree (@ARGV) {
+	if ($gCT->nodeExists($subtree)) {
+		$gCT->visitLeafs($subtree, \&handleTarget, \&checkTargetInstance);
+	} else {
+		Warn("Unknown subtree $subtree.");
+	}
+}
+
+# Placeholder for threaded collection
+my $th = 1;
+foreach my $name (sort rand_sort keys %targets) {
+	my(@mixedResults);
+	my $type = $targets{$name}{'type'};
+	my $target = $targets{$name}{'target'};
+	my $dsList = $targets{$name}{'dsList'};
+
+	Debug("threaded: $target->{'threaded'}");
+
+	if(defined $target->{'threaded'} == 1) {
+		Debug("Threading defined; using threaded collection");
+		$wait_time = $target->{'threaded_waittime'} if(defined($target->{'threaded_waittime'}));
+		$wait_max = $target->{'threaded_waitmax'} if(defined($target->{'threaded_waitmax'}));
+		Debug("Thread wait_time: $wait_time; wait_max: $wait_max");
+
+		wait_for_thread($wait_time,$th);
+		Info("[$th] Kick off thread");
+		threads->create(sub{threader($name,$type,$target,$dsList,$th)});
+		$th++;
+	} else {
+		Debug("Threading not defined; using un-threaded collection");
+		localUpdateRRDDataFile($name,$type,$target,$dsList);
+	}
+}
+
+wait_for_complete($wait_time);
+
+my $diff = time-$start_time;
+LogIt($threadFile,"ending after $diff seconds");
+
+# print some summary stuff (number of targets, time taken)
+# before exiting.
+my($time) = runTime();
+Info("Processed $gTargetCt targets in $time.");
+
+# only use strict for the subroutines
+use strict;
+
+sub rand_sort {
+  rand() <=> rand ();
+}
+
+sub localUpdateRRDDataFile {
+	my($name,$type,$target,$dsList) = @_;
+
+	my($tname) = $target->{'auto-target-name'};
+	my($tpath) = $target->{'auto-target-path'};
+
+	my($datafile) = $target->{'rrd-datafile'};
+
+	my $agent_restart = 0;
+
+	my(@data) = retrieveData($name,$type,$target,$dsList,\$agent_restart);
+
+	if ($#data+1 == 0) {
+		Warn("No data retrieved. Skipping RRD update.");
+		return;
+	}
+
+	if (!defined($datafile)) {
+		Warn("Could not find a datafile for $tname.");
+		return;
+	}
+
+	if (! -f $datafile) {
+		return unless newRRD($name, $target);
+	}
+
+	# look for date strings, suck em out.
+	my($data, $when, @data2);
+	foreach $data (@data) {
+		if ($data =~ /@(\d+)/) {
+			my($when2) = $1;
+			if (defined($when) && ($when ne $when2)) {
+				Warn("Found inconsistent times in retrieved data. " .
+					"Using first one seen.");
+			} else {
+				$when = $when2;
+			}
+			$data =~ s/\@${when2}//;
+		}
+		push @data2, $data;
+	}
+
+	if (! defined($when)) {
+		# if they didn't tell us when, use RRD's "now" syntax.
+		$when = "N";
+	}
+
+	# If an SNMP agent restart occurred, insert a dummy record consisting
+	# of all "U" one second before the current sample. This causes RRD
+	# to set the previous value of counters to undefined, avoiding weird
+	# results when a counter goes negative because of a restart.
+
+	if ($agent_restart && $when eq "N") {
+		my @dummyresults = @data2;
+		grep { $_ = 'U'} @dummyresults;
+		Info("Inserting dummy record because of agent restart");
+		my $now = time();
+		RRDs::update($datafile, join(":", $now - 1, @dummyresults));
+	}
+
+	RRDs::update($datafile, join(":", $when, @data2));
+	if (my $error = RRDs::error()) {
+		Warn("Cannot update $datafile: $error\n");
+	}
+
+	# if we were asked to copy this to someplace, go for it.
+	if (defined($target->{'copy-to'})) {
+		my($copyto) = $target->{'copy-to'};
+
+		my($to, $args) = split(/:/, $copyto, 2);
+		$to = lc($to);
+
+		if ($to eq "trap") {
+			# In this case, args is expected to have SNMP info in
+			# it. Example:				trap:public@nms-101
+			# We just pass it straight thru to snmptrap.
+
+			# This number lets our NMS identify this as a Cricket
+			# data trap. The enterprise for the trap
+			# is hardcoded in snmpUtils::trap.
+			my($specific) = 3;
+
+			snmpUtils::trap($args, $specific, "/$tpath/$tname", @data2);
+		} elsif ($to eq "sql") {
+			sqlUtils::sendto($args, @data2);
+		} else {
+			Warn("Unknown copy-to type: $to. Ignoring.");
+		}
+	}
+}
+
+sub localHandleTargetInstance {
+	my($name, $target) = @_;
+	my($tname) = $target->{'auto-target-name'};
+	my($tpath) = $target->{'auto-target-path'};
+
+	# first, dump the dict, to help debug things
+	my($k, $v, $t);
+	$t =	"target $tname\n";
+	foreach $k (sort (keys(%{$target}))) {
+		next if ($k eq "auto-target-name");
+
+		$v = $target->{$k};
+		$v = "[undef]" if (! defined($v));
+
+		$t .= "\t$k = $v\n";
+	}
+	Debug($t);
+
+	# skip this if it's a meta-target
+	if ((defined($target->{'targets'})) || (defined($target->{'mtargets'}))) {
+		Debug("Skipping meta target $tname");
+		return;
+	}
+
+	if (defined($target->{'collect'}) && isFalse($target->{'collect'})) {
+		Debug("Skipping target $tname due to collect=false tag.");
+		return;
+	}
+
+	$main::gTargetCt++;
+
+	my $agent_restart = 0;
+	my(@data) = retrieveParams($name, $target, \$agent_restart);
+}
+
+sub handleMultiTarget {
+	# the collector completely ignores this -- it's only
+	# used by the grapher.
+}
+
+sub retrieveData {
+	my($name,$type,$target,$dsList,$restart_ref)=@_;
+	my(@mixedResults);
+
+	my $start=time;
+	my($dirName,$logname,$logFile)=getLogFile($name);
+
+	push(@mixedResults,
+		map { $_ = $type . ":" . $_ }
+		&{$main::gDSFetch{$type}}($dsList, $name, $target));
+
+	# Reassemble the data in the right order.
+
+	my($line, @results);	my $data="";
+
+	foreach $line (@mixedResults) {
+		my($type, $index, $value) = split(/:/, $line, 3);
+
+		# only take the first token from the line... that
+		# way, they can put in-line comments in the returned data.
+		# do this only for 'exec' and 'file' data sources
+		if (lc($type) ne 'snmp') {
+			$value =~ s/^\s*//;
+			($value) = split(/\s+/, $value, 2);
+		}
+
+		$results[$index] = $value;
+		$data.=qq{$index:$value,};
+	}
+	my $num_data=@results;
+	$data=~ s/\:U\,/\:*** U ***\,/g;
+	my $diff=time-$start;
+
+	LogIt($logFile,"$logname gdSFetch ($diff sec for $num_data points) [$data]") if (defined($logging));
+
+	# Make sure there are no gaps in the return data!
+	# If any data is missing, make it undefined ("U")
+
+	my($ctr, $missingData) = (0, 0);
+	for $ctr (0 .. $#results) {
+		if (! defined $results[$ctr]) {
+			$results[$ctr] = "U";
+			$missingData = 1;
+		} else {
+			if ($results[$ctr] eq 'U') {
+				$missingData = 1;
+			}
+		}
+	}
+
+	# Check the agent uptime with the poll interval. If the uptime is
+	# less then one poll interval, notify our caller of the restart.
+
+	if (defined($target->{'snmp-uptime'})) {
+		my($agent_uptime) = pop @results;
+		my($poll) = $target->{'rrd-poll-interval'};
+		$poll = 300 unless (defined($poll));
+		if ($agent_uptime ne "U" && $agent_uptime < $poll * 100) {
+			Info("Agent uptime is less than poll interval");
+			$$restart_ref = 1 if (defined($restart_ref));
+		}
+	}
+
+	# if we are verifying, check the
+	# fetched mapping key to make certain it's right
+
+	my($mapkey, $mapRef, $match, $snmp, $baseOID, $oid);
+	if (defined($target->{'--verify-mapkey--'})) {
+		$mapkey = $target->{'--verify-mapkey--'};
+		$mapRef = $main::gCT->configHash($name, 'map', $mapkey, $target);
+
+	if (defined($mapRef)) {
+		$match = $mapRef->{'match'};
+	if (defined($match)) {
+				$match = ConfigTree::Cache::expandString($match,
+																												$target, \&Warn);
+			}
+			$baseOID = $mapRef->{'base-oid'};
+
+			my($oidMap) = $main::gCT->configHash($name, 'oid', undef, $target);
+			$oid = mapOid($oidMap, $baseOID);
+		} else {
+			Warn("Unknown mapkey. This should not happen.");
+		}
+
+		$snmp = $target->{'snmp'};
+
+		if (!defined($match) || !defined($snmp) || !defined($oid)) {
+						Warn("Data needed to verify $mapkey is missing. " .
+								"Skipping verification.");
+						delete($target->{'--verify-mapkey--'});
+		} else {
+						my($inst) = $target->{'inst'};
+		}
+		my($fetchedKey) = pop @results;
+		my($wrongInst);
+
+		if ($match =~ /^\s*\/(.*)\/\s*$/) {
+			$match = $1;
+			$wrongInst = ($fetchedKey !~ /$match/i);
+		} else {
+			$wrongInst = ($fetchedKey ne $match);
+		}
+
+		if ($wrongInst) {
+			# damn, they didn't match. this means we need to
+			# fix the instance number using mapInstance, and
+			# retry.
+
+			Common::Map::mapInstance($name, $target);
+
+			if (defined($target->{'inst'})) {
+				# now that we have the correct inst, fetch again
+				# (this time there is no need to verify)
+				delete($target->{'--verify-mapkey--'});
+				@results = retrieveData($name, $target, undef);
+			} else {
+				# fill in all unknown, since the mapping key seems
+				# to no longer exist
+				@results = ();
+#				for ($ctr = 0; $ctr < $dsCount; $ctr++) {
+#					push @results, "U";
+#				}
+			}
+		}
+	}
+
+	return @results;
+
+}
+
+sub retrieveParams {
+	my($name, $target, $restart_ref) = @_;
+
+	my($dirName,$logname,$logFile) = getLogFile($name);
+
+	my($tname) = $target->{'auto-target-name'};
+	my($inst) = $target->{'inst'};
+	if (defined($inst)) {
+		$tname .= " ($inst)";
+	}
+
+	my($ttype) = lc($target->{'target-type'});
+	my($ttRef) = $main::gCT->configHash($name, 'targettype', $ttype, $target);
+	if (! $ttRef) {
+		Warn("Unknown target type: $ttype.");
+		return;
+	}
+
+	Debug("Retrieving data for target $tname ($ttype)");
+
+	# Determine the list of data sources for this target.
+	my(@targetDSs) = split(/\s*,\s*/, $ttRef->{'ds'});
+	if (!@targetDSs) {
+		Warn("Could not find any datasources for target type $ttype.");
+		return ();
+	}
+
+	# take the count before we start dicking with it
+	# below...
+	my($dsCount) = $#targetDSs + 1;
+
+	# if we need to fetch a key to verify a cached instance,
+	# we append it to targetDSs here.
+
+	my($mapkey, $mapRef, $match, $snmp, $baseOID, $oid);
+	if ($target->{'--verify-mapkey--'}) {
+		$mapkey = $target->{'--verify-mapkey--'};
+		$mapRef = $main::gCT->configHash($name, 'map', $mapkey, $target);
+
+		if (defined($mapRef)) {
+			$match = $mapRef->{'match'};
+			if (defined($match)) {
+				$match = ConfigTree::Cache::expandString($match,
+					$target, \&Warn);
+			}
+			$baseOID = $mapRef->{'base-oid'};
+
+			my($oidMap) = $main::gCT->configHash($name, 'oid', undef, $target);
+				$oid = mapOid($oidMap, $baseOID);
+		} else {
+			Warn("Unknown mapkey. This should not happen.");
+		}
+
+		$snmp = $target->{'snmp'};
+
+		if (!defined($match) || !defined($snmp) || !defined($oid)) {
+			Warn("Data needed to verify $mapkey is missing. " .
+				"Skipping verification.");
+				delete($target->{'--verify-mapkey--'});
+		} else {
+			my($inst) = $target->{'inst'};
+			my($newds) = "--snmp://${snmp}/${oid}.${inst}";
+			push @targetDSs, $newds;
+		}
+	}
+	if (defined($target->{'snmp-uptime'})) {
+		my $ds = "--snmp://$target->{'snmp'}/$target->{'snmp-uptime'}";
+		push @targetDSs, $ds;
+	}
+
+	# this will hold a hash of ds-method names. the values will
+	# be a ref to a list of the sources that get passed to
+	# the ds-method later.
+	my(%targetDataSources) = ();
+
+	my($dsIndex) = 0;
+
+	my($ds);
+	foreach $ds ( @targetDSs ) {
+		my($dataSource);
+		if ($ds =~ /^--/) {
+			# this is a hacked one, from the verify code, above.
+			$dataSource = $ds;
+			$dataSource =~ s/^--//;
+		} else {
+			# this is a normal ds, so go look it up.
+			my($dsRef) = $main::gCT->configHash($name, 'datasource',
+																							lc($ds), $target);
+			if ($dsRef) {
+				# computed data sources need to be excluded fetch
+				if ($dsRef->{'rrd-ds-type'} eq 'COMPUTE') {
+					$dsCount--; # don't penalize for missing these DS
+					next;
+				}
+				$dataSource = $dsRef->{'ds-source'};
+				$dataSource = ConfigTree::Cache::expandString($dataSource,
+					$target, \&Warn);
+			} else {
+					Warn("Datasource named $ds not found.");
+					next;
+			}
+		}
+
+		my($dsMethod,$dsLine) = split(':', $dataSource, 2);
+
+		# create a hash entry which is an array of datasources
+		# of the same TYPE (i.e. snmp, shell, etc).
+		# NOTE: The datasource type is REPLACED by the datasource
+		# index.	This is so that we can be sure to reassemble the
+		# data source return value array in the right order.
+
+		push(@{ $targetDataSources{lc($dsMethod)} }, "$dsIndex:$dsLine");
+		Debug("ds$dsIndex is: $dsLine");
+		$dsIndex++;
+	}
+
+	# For each different data source type (snmp, exec, etc.)
+	# call the fetcher to retrieve the data.
+	my($dsList, $type, @mixedResults,$diff,$error);
+
+	while (($type, $dsList) = each %targetDataSources) {
+		if (defined ($main::gDSFetch{$type})) {
+			my $starttime = time;
+			$targets{$name}{'type'} = $type;
+			$targets{$name}{'target'} = $target;
+			$targets{$name}{'logname'} = $logname;
+			$targets{$name}{'dsList'} = $dsList;
+
+			LogIt($logFile,"$name is having params collected");
+		} else {
+			Warn("Could not find a fetcher with type $type to " .
+			"fetch data for $tname.");
+		}
+	}
+}
+
+sub newRRD {
+	# Create a new RRD file base on the contents of the
+	# referenced dictionary.
+	my($name, $target) = @_;
+
+	my($datafile) = $target->{'rrd-datafile'};
+	my($tname) = $target->{'auto-target-name'};
+	my($ttype) = lc($target->{'target-type'});
+
+	# Create the data directory if it does not exist:
+	$datafile =~ /(.*)\/.*$/;
+	my($dataDir) = $1;
+	if (! -d $dataDir) {
+		Common::Util::MkDir($dataDir);
+	}
+
+	# Start rrd one week ago.
+	my($week) = (60 * 60 * 24 * 7);
+	my($start) = time - $week - 1;
+
+	my($poll) = $target->{'rrd-poll-interval'};
+	$poll = 300 unless (defined($poll));
+
+	my(@arg) = ($datafile,
+		"--start",				$start,
+		"--step",					$poll);
+
+	my($type, $val);
+	my($valid) = 0;
+	my(@dsDesc) = ();
+	my(@rraDesc) = ();
+	my($dsCnt) = 0;
+
+	my($ttRef) = $main::gCT->configHash($name, 'targettype', $ttype, $target);
+	if (! $ttRef) {
+		Warn("Unknown target type: $ttype.");
+		return;
+	}
+
+	# first, process the ds tag
+
+	my($dses) = $ttRef->{'ds'};
+	if (! $dses) {
+		Warn("No ds tag found for target type $ttype.");
+		return;
+	}
+
+	my($ds);
+	foreach $ds (split(/\s*,\s*/, $dses)) {
+		my($dsname) = lc($ds);
+		my($d) = $main::gCT->configHash($name, 'datasource', $dsname, $target);
+
+		if (defined($d)) {
+			my($dst) = $d->{'rrd-ds-type'};
+			$dst = "GAUGE" unless (defined($dst));
+			$dst = uc($dst);
+
+			my($hb) = $d->{'rrd-heartbeat'};
+			$hb = $target->{'rrd-heartbeat'}
+			if (defined($target->{'rrd-heartbeat'}));
+			$hb = 1800 unless (defined($hb));
+
+			my($min) = $d->{'rrd-min'};
+			$min = $target->{'rrd-min'}
+			if (defined($target->{'rrd-min'}));
+			$min = 'U' unless (defined($min));
+
+			my($max) = $d->{'rrd-max'};
+			$max = $target->{'rrd-max'}
+			if (defined($target->{'rrd-max'}));
+			$max = 'U' unless (defined($max));
+
+			my($cdef) = $d -> {'rrd-cdef'};
+			if ($dst eq 'COMPUTE' && !defined($cdef)) {
+					Warn("Datasource $ds is of type $dst but tag " .
+							"rrd-cdef is missing.");
+					return;
+			}
+			if ($dst ne 'COMPUTE') {
+				push @dsDesc, join(":", 'DS', "ds$dsCnt",
+					$dst, $hb, $min, $max);
+			} else {
+				push @dsDesc, join(":", 'DS', "ds$dsCnt",
+					$dst, $cdef);
+			}
+			$dsCnt++;
+
+		} else {
+			Warn("Datasource $ds referenced by target " .
+				"type $ttype does not exist.");
+			return;
+		}
+	}
+
+	# now do RRAs
+	my($rras) = $ttRef->{'rra'};
+	if (! $rras) {
+		Warn("No rra tag found for target type $ttype.");
+		return;
+	}
+
+	my($rra);
+	foreach $rra (split(/\s*,\s*/, $rras)) {
+		my($rraname) = lc($rra);
+		my($r) = $main::gCT->configHash($name, 'rra', undef, $target);
+
+		if (defined($r)) {
+			if (defined $r->{$rraname}) {
+				push(@rraDesc, "RRA:$r->{$rraname}");
+			} else {
+				Warn("RRA $rra referenced by target " .
+					"type $ttype does not exist.");
+				return;
+			}
+		} else {
+			# this shouldn't happen... right?
+			Warn("Could not find RRA dictionary.");
+			return;
+		}
+	}
+
+	push(@arg, @dsDesc, @rraDesc);
+
+	Info("Creating datafile $datafile for target name $tname.");
+	Debug(join(' ', 'RRDs::create', @arg));
+	RRDs::create(@arg);
+	if (my $error = RRDs::error()) {
+		Warn("Cannot create $datafile: $error\n");
+	}
+
+	return 1;
+}
+
+sub threader {
+	my($target_name,$type,$target,$dsList,$th) = @_;
+	Info("[$th] Thread for target $target_name has started");
+
+	LogIt($threadFile,"($th) target=$target_name starting");
+	start_info($target_name,$th);
+
+      # take out, this is for testing
+#      sleep(250) if ($th == 6);
+	#Info("[$th] Thread for target $target_name doing work");
+
+	# do your work
+	localUpdateRRDDataFile($target_name,$type,$target,$dsList);
+
+	end_info($target_name,$th); 
+
+	Info("[$th] Thread for target $target_name has ended in $targets_time{$target_name} sec");
+	LogIt($threadFile,"($th) target=$target_name, max_threads=$max_threads in $targets_time{$target_name} sec");
+}
+
+# don't let the parent program complete until all threads are done
+# wait_time is the time we wait in between checks so that we do not overload the cpu.
+# wait_max is the time we are giving the script to finish.
+sub wait_for_complete {
+	my($wait_time) = @_;
+
+	my $complete = 0;
+	while (!$complete) {
+		my $num_threads = keys %threads;
+            my $total_time=time-$start_time;
+            Info("[$th] wait_for_thread called: $wait_time wait_time defined, num_thread=$num_threads, max=$max_threads");
+		if  (($num_threads > 0) && ($total_time <= $wait_max)) {
+			sleep($wait_time);
+			print "waiting $wait_time sec for $num_threads threads to end (total time=$total_time sec of $wait_max)\n";
+            }
+            elsif ($total_time > $wait_max) {
+              $complete=1;
+              Info("[$th] exiting because total time=$total_time is more then max wait time ($wait_max)");
+		} else {	
+			$complete = 1;
+		}
+	}
+}
+
+# wait until a thread has been released, and then initialized it
+sub wait_for_thread {
+	my($wait_time,$th) = @_;
+	# should be debug
+	my $thread_released = 0;
+
+	while (!$thread_released) {
+		my $num_threads = keys %threads;
+               Info("[$th] wait_for_thread called: $wait_time wait_time defined, num_thread=$num_threads, max=$max_threads");
+		if ($num_threads >= $max_threads) {
+			print "($th) num_th=$num_threads, max=$max_threads, waiting $wait_time sec\n";
+			sleep($wait_time);
+		} else {	
+			$thread_released = 1;
+		}
+	}
+	lock %threads;	
+	$threads{$th} = "";
+        Info("[$th] wait_for_thread called: exiting");
+}
+
+
+# initialize thread
+sub start_info {
+	my($target_name,$th)=@_;
+
+	# put in the starting time for the target in the threads hash 
+	lock %threads;
+	$threads{$th} = time;
+
+}
+
+# end the thread
+sub end_info {
+	my($target_name,$th)=@_;
+
+	# put in the starting time for the target
+	lock %targets_time;	
+	$targets_time{$target_name} = time-$threads{$th};
+
+	lock %threads;
+	delete $threads{$th};
+}
+
+
+
+
+sub LogIt {
+	my($logfile,$str) = @_;
+
+	my $nowtime=localtime(time);
+	if ((defined($str)) && ($str ne "")) {
+		if (-e $logfile) {
+			open(LOG,">>".$logfile) or die("unable to open $logfile");
+		} else {
+			open(LOG,">".$logfile) or die("unable to open $logfile");
+		}
+		print LOG "$nowtime: $str\n";
+		close(LOG);
+	}
+}
+
+sub getLogFile {
+	my($name)=@_;
+
+	my($dirName,$logname,$logFile);
+	if ($name =~ /^\/(.+?)\/(.+?)\/(.+?)$/) {
+		$dirName=$logDir.$1; 
+
+		system("mkdir $dirName") if ((!(-e $dirName)) && (defined($logging)));
+		$dirName .=" \\$2";
+		system("mkdir $dirName") if ((!(-e $dirName)) && (defined($logging)));
+		$logname = $3; 
+		$logFile = $dirName.'\\collector.log';
+	} elsif (($name =~ /^.+\/(.+?)\/(.+?)$/) || ($name =~ /^(.+)\/(.+?)$/)	) {
+		$dirName = qq{C:\\crickethome\\cricket-logs\\}.$1; 
+		$logname = $2; 
+			
+		system("mkdir $dirName") if ((!(-e $dirName)) && (defined($logging)));
+			
+		$logFile = $dirName.'\\collector.log';
+	} else {
+		die("$name parses incorrectly");
+	}
+	return ($dirName,$logname,$logFile);
+}
+
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
