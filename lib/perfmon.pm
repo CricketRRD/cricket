@@ -49,6 +49,8 @@
 #       * I know PERF_RAW_FRACTION and PERF_RAW_BASE are supremely messed up
 #         right now and I'm not sure why. I'm using the formulas Microsoft
 #         defined on their web site (100*x/b) and it returns screwy results.
+#       * On the same vein, this breaks the instance checker which Warn()s if
+#         there are more than one matches for a selected counter. 
 #       * That's all I can think of right now. After spending over a week
 #         working on this I think for the most part it works pretty well!
 #
@@ -75,9 +77,8 @@ use Win32::PerfLib;
 use strict;
 
 $main::gDSFetch{'perfmon'} = \&perfmonFetch;
-my %specialMath;
+my %specialMath; # This is crap which I hope to remove soon.
 
-# stop
 sub perfmonFetch {
 	my($dsList, $name, $target) = @_;
 	my %pmonFetches;
@@ -93,9 +94,9 @@ sub perfmonFetch {
 		}
 
 		$index      = shift(@components);
-		$server     = shift(@components);
-		$myobject   = shift(@components) || missing("object");
-		$mycounter  = shift(@components) || missing("counter");
+		$server     = shift(@components) || missing("host",$line);
+		$myobject   = shift(@components) || missing("object",$line);
+		$mycounter  = shift(@components) || missing("counter",$line);
 		$myinstance = shift(@components) || '';
 		$myduration = shift(@components) || 1;
 		
@@ -104,30 +105,33 @@ sub perfmonFetch {
 
 	while(my ($index, $ilRef) = each %pmonFetches) {
 		my $counter = {};
-		my $pr1      = {};
-		my $pr2      = {};
+		my $pr1 = {};
+		my $pr2 = {};
 		my $critical;
-
-		my($server, $myobject, $mycounter, $myinstance,$myduration) = split(/:/, $ilRef);
-		Win32::PerfLib::GetCounterNames($server, $counter) or $critical = $!;
 		my $matches = 0;
 		my $value;
 		my %rcounter;
 
-		
+		my($server, $myobject, $mycounter, $myinstance,$myduration) = split(/:/, $ilRef);
+		# Get a list of all the counters on the host. This is a required step.
+		# Otherwise it'd be up to the user to figure out the mappings on their
+		# own. 
+		Win32::PerfLib::GetCounterNames($server, $counter) or $critical = $!;
+
 		Error("Counters can't be retrieved from $server because of $critical") if $critical;
 		next if $critical;
 
+		# Get a list of mappings from CounterName -> id
 		foreach my $k (sort keys %{$counter}) {
 			$rcounter{lc($counter->{$k})} = $k;
 		}
 
 		$myobject = lc($myobject);
 		my $perflib = new Win32::PerfLib($server);
+
+		# Get the two seperate instances going for durational counters.
 		$perflib->GetObjectList($rcounter{$myobject}, $pr1);
-
-		sleep $myduration;
-
+		sleep $myduration; # defaults to 1 second
 		$perflib->GetObjectList($rcounter{$myobject}, $pr2);
 
 		$perflib->Close();
@@ -135,11 +139,9 @@ sub perfmonFetch {
 		foreach my $level2 (sort keys %{$pr1->{'Objects'}}) {
 			my $gDen1n = $pr1->{'PerfTime100nSec'};
 			my $gDen2n = $pr2->{'PerfTime100nSec'};
-			my $gDen1 = $pr1->{'PerfTime'};
-			my $gDen2 = $pr2->{'PerfTime'};
-			my $gTb  = $pr1->{'PerfFreq'};
-			my $base;
-			my $fract;
+			my $gDen1  = $pr1->{'PerfTime'};
+			my $gDen2  = $pr2->{'PerfTime'};
+			my $gTb    = $pr1->{'PerfFreq'};
 
 			if($pr1->{'Objects'}->{$level2}->{'NumInstances'} > 0) {
 				foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Instances'}}) {
@@ -172,6 +174,9 @@ sub perfmonFetch {
 			}
 		}
 
+		# This has a bug in it right now due to my broken PERF_RAW_*
+		# implementation so it's set to Debug instead of Warn until I 
+		# fix it.
 		if($matches > 1) {
 		Debug("More than one matches for datasource line: $ilRef. Only last instance will be used!");
 		}
@@ -182,11 +187,9 @@ sub perfmonFetch {
 		} else {
 			push @results, "$index:$value";
 		}
-	} # end perfmon fetch
-
+	} 
 	return @results;
-
-} # end sub perfmonFetch
+} 
 	
 sub getCounter {
 	my ($cr1,$cr2,$den1,$den2,$den1n,$den2n,$tb,$ilRef) = @_;
@@ -228,11 +231,11 @@ sub getCounter {
 		$value = ($n2 - $n1) / ($d2 - $d1);
 	} elsif ($ctype =~ /^(PERF_COUNTER_RAW|PERF_COUNTER_LARGE_RAW)/) {
 		$value = $n1;
+	# Yes, I know how crufty this is. I plan on fixing it soon.
 	} elsif ($ctype eq 'PERF_RAW_BASE' && $specialMath{$cn}{'PERF_RAW_FRACTION'}) {
-		# Yes, I know how crufty this is. I plan on fixing it soon.
 		$value = 100 * $n1 / $specialMath{$cn}{'PERF_RAW_FRACTION'}; 
+	# Yes, I know how crufty this is. I plan on fixing it soon.
 	} elsif ($ctype eq 'PERF_RAW_FRACTION' && $specialMath{$cn}{'PERF_RAW_BASE'}) {
-		# Yes, I know how crufty this is. I plan on fixing it soon.
 		$value = 100 * $n1 / $specialMath{$cn}{'PERF_RAW_FRACTION'}; 
 	} elsif ($ctype eq 'PERF_ELAPSED_TIME') {
 		$value = ($d1 - $n1) / $tb;
@@ -252,7 +255,9 @@ sub getCounter {
 }
 
 sub missing {
-	my ($missing) = @_;
-	Error("Missing perfmon $missing in datasource line.");
+	my ($missing,$line) = @_;
+	Error("Missing perfmon $missing in datasource: $line");
 	return();
 }
+
+1;
