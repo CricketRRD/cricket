@@ -79,7 +79,8 @@ sub snmpFetch {
         my(@oidsToQuery) = ();
 
         if ($#{ $snmpDSRef } >= 0) {
-            my(@oidsToQuery) = my(@indices) = ();
+            my(@oidsToQuery) = ();
+            my(@indices) = ();
             my($line);
             while ($line = shift @{ $snmpDSRef }) {
                 my($index, $oid) = split(/:/, $line);
