@@ -64,6 +64,11 @@ New features, fixes in version 1.0.3
 	use add_ds from the RRD distribution's contrib directory
 	to add a datasource to your existing RRD files.
 
+	Some internal changes were made that should not be user
+	visible (except perhaps by running faster in some cases).
+	Most notably, the internal database types "D:" and "n:" are
+	no longer generated.
+
 New features, fixes in version 1.0.2 (18-May-00):
 
 	Fixed bug #104757, $clmxCode/max-color bugs.
