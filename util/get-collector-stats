@@ -69,7 +69,9 @@ printf("%d\@%s\n", $dur, $when);
 printf("%d\@%s\n", $tnum, $when);
 printf("%.2f\@%s\n", $tnum/$dur, $when);
 } else {
-print "U\nU\nU\n";
+printf("%d\n", $dur);
+printf("%d\n", $tnum);
+printf("%.2f\n", $tnum/$dur);
 }
 
 exit(0);
