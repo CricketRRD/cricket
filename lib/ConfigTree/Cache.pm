@@ -45,14 +45,38 @@ sub init {
 	my($self) = @_;
 
 	my($file) = $self->Base() . "/config.db";
-	# By feeding the tied hash for the database into memory, a huge amount of costly
-	# disk I/O is eliminated. If you are using a machine with low memory, this should
-	# not be used. Comment out the two lines after this comment, and uncomment the line
-	# below to go back to the old way.
-	# my $dbh = tie %db, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
+	my ($dbh);
+
+	# !! VERY IMPORTANT !!
 	#
-	my($dbh) = tie %db2, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
-	%db = %db2;
+	# By feeding the timed hash into memory, I/O for collector is significantly
+	# reduced as it stops all the seeking to disk. This is especially useful
+	# for very large config.db files like we use at WebTV. This can also, 
+	# however cause the memory used for the collector process baloon and on
+	# a machine with many simultaneous collector runs you can quickly find
+	# yourself swapping. If this is a problem for you and you'd rather just
+	# deal with lots of disk I/O, comment out the lines like this:
+	#
+	# # if ($Common::...
+	# # 	($dbh) = tie...
+	# #		%db = %db2;
+	# # } else {
+	#		($dbh) = tie...
+	# # }
+	# Basically all lines in the if/then/else block except for the final
+	# tie to the BerkeleyDB file which doesn't read into memory. This block
+	# was put in so the GRAPHER wouldn't read the DB into memory which proved
+	# to be very costly.
+	#
+	# Let me know if you have any questions. - Adam <ameltzer@microsoft.com>
+	#
+	if($Common::global::isCollector == 1) {
+		($dbh) = tie %db2, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
+		%db = %db2;
+	} else {
+		($dbh) = tie %db, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
+	}
+
 	$self->DbRef(\%db);
 	$self->Dbh($dbh);
 
