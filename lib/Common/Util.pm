@@ -110,7 +110,7 @@ sub runTime {
 sub fixNum {
     my($n) = @_;
 
-    if (!$n) {
+    if (!defined($n)) {
         Error("Value not defined in Common::Util::fixNum()!");
     }
 
