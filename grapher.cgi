@@ -305,7 +305,7 @@ sub doHTMLPage {
                             # compatibility
                             $viewRef = undef;
                             # parse view name for HoltWinters special tag
-                            $enableHoltWinters = 1 if ($view =~ /HoltWinters/);
+                            $enableHoltWinters = 1 if ($view =~ /[hH]olt[wW]inters/);
                             $dslist = $dss;
                         }
                         $dslist =~ s/\s*$//; # remove trailing space
