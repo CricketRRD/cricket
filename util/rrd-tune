@@ -132,6 +132,14 @@ sub localHandleTargetInstance {
         my($dst) = $ds->{'rrd-ds-type'};
         $dst = "GAUGE" unless (defined($dst));
         $dst = uc($dst);
+        # Never tune COMPUTE data sources; it will corrupt the header.
+        # If the user really wants to replace the COMPUTE data source with
+		# another type, they can do it manually.
+        if ($dst eq 'COMPUTE') {
+            $dsnum++;
+		    Info("Skipping RRD tune for COMPUTE data source $dsname"); 
+            next;
+        }
 
         my($hb) = $ds->{'rrd-heartbeat'};
         $hb = $target->{'rrd-heartbeat'}
