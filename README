@@ -18,7 +18,7 @@ Installing
 ----------
 
 If you are a brand new Cricket user, you should read and
-closely follow the directions in doc/beginner.txt.
+closely follow the directions in doc/beginner.html.
 
 If you are a more advanced user, simply read the CHANGES
 to see what's new with this version and then install
@@ -80,8 +80,7 @@ License
 Cricket is covered by the GNU General Public Licensse. 
 See the file COPYING for copying permission.
 
-Cricket is Copyright (c) 1998-2000 by Jeff Allen and WebTV
-Networks, Inc.
+Cricket is Copyright (c) 1998-2000 by Jeff Allen
 
 Individual pieces are copyrighted by their contributors, though
 they are covered by same license as Cricket, namely the GPL.
