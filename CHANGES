@@ -42,6 +42,9 @@ New features, fixes in version 1.0.6 (TBD)
   1-minute polling, while still showing an entire 8-hour period (an entire work
   day, say). [Patch #921537]
 
+  Added support for new copy-to type "file" from [Patch #400598].
+
+
 New features, fixes in version 1.0.5
 
 	Cricket 1.0.5 is essentially a minor bugfix release.

@@ -246,6 +246,16 @@ sub localHandleTargetInstance {
             snmpUtils::trap($args, $specific, "/$tpath/$tname", @data2);
         } elsif ($to eq "sql") {
             sqlUtils::sendto($args, @data2);
+        } elsif ($to eq "file") {
+            open FILE, ">>$args"
+              or Debug("open($args) returned: $!\n");
+            if (defined FILE) {
+                my $time = ($when eq 'N' ? time() : $when);
+                print FILE "$time:", join ':', @data2, "\n";
+                close FILE;
+            } else {
+                Warn(qq|Failed to copy-to "$args": $!\n|);
+            }
         } else {
             Warn("Unknown copy-to type: $to. Ignoring.");
         }
