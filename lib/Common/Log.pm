@@ -123,15 +123,19 @@ sub timeStr {
 
 sub setLevel {
     my($level) = @_;
+    my($ilevel) = $gCurLogLevel;
 
     if (defined($kLogNameMap{lc($level)})) {
         $gCurLogLevel = $kLogNameMap{lc($level)};
+        Common::Log::Info("Log level changed from ",
+                           $kLogNameReverseMap{$ilevel}, " to $level.");
     } else {
         Common::Log::Warn("Log level name $level unknown. " .
                           "Defaulting to 'info'.");
         $gCurLogLevel = $kLogNameMap{lc('info')};
     }
 }
+
 sub setFormat {
     my($format) = @_;
 
