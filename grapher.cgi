@@ -175,6 +175,8 @@ sub doHTMLPage {
 			# make the instance selection widget...
 			htmlHeader($name, $targRef, "Instance selection for $tname");
 
+			print htmlCurrentPath($ct, $targRef, $name);
+
 			print "There are multiple instances for this target. Please";
 			print " choose one:<p>\n";
 
@@ -345,6 +347,7 @@ sub doHTMLPage {
 			htmlHeader($name, $targRef, $title);
 
 			if(!$targRef->{'summary-loc'} || $targRef->{'summary-loc'} eq "top") {
+				print htmlCurrentPath($ct, $targRef, $name);
 				print "<table width=100% cellpadding=5 padding=3 border>\n";
 				print "<tr><td width=70%>\n";
 
@@ -576,6 +579,7 @@ sub doHTMLPage {
 			}
 
 			if($targRef->{'summary-loc'} eq "bottom") {
+				print htmlCurrentPath($ct, $targRef, $name);
 				print "<table width=100% cellpadding=5 padding=3 border>\n";
 				print "<tr><td width=70%>\n";
 
@@ -638,6 +642,8 @@ sub doHTMLPage {
 			$orderb <=> $ordera || $a cmp $b;
 		} @targets;
 		
+		print htmlCurrentPath($ct, $targRef, $name);
+
 		if ($#targets+1 > 0) {
             my($doDesc) = 1;
             if ($targs->{$targets[0]}->{'disable-short-desc'}) {
@@ -1925,6 +1931,40 @@ sub makeNavLinks {
 		$i++;
 	}
 	return @links;
+}
+
+sub htmlCurrentPath {
+	my($ct, $targRef, $target) = @_;
+	my($html);
+
+	return "" if (!defined($targRef->{'show-path'}) ||
+		$targRef->{'show-path'} ne "yes");
+
+	if ($target !~ /^\s*\/\s*$/) {
+		$html = "Current path:\n";
+		$html .= htmlCurrentPathLinks($ct, $target);
+		$html .= "<br>\n";
+	}
+
+	return $html;
+}
+ 
+sub htmlCurrentPathLinks {
+	my($ct, $target) = @_;
+	my($html);
+ 
+	my($path) = "/";
+	foreach $p (split(/\//, $target)) {
+		my($lQ) = new CGI;
+		$path .= "$p";
+		$lQ->delete_all() unless ($ct->isLeaf($path));
+		$lQ->param('target', $path);
+		$p .= "/" unless ($p =~ /\/$/) || ($ct->isLeaf($path));
+		$path .= "/" unless $path =~ /\/$/;
+		$html .= " <a href=\"" . $lQ->self_url() . "\">" . $p . "</a>\n";
+	}
+ 
+	return $html;
 }
 
 # make the Holt-Winters navigation links

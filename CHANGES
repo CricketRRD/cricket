@@ -1,5 +1,9 @@
 New features, fixes in version 1.0.3
 
+	A new config option, show-path, was added that allows the
+	display of the current path in the config tree with clickable
+	links for easier backtracking. Defaults to "no".
+
 	Support for SNMP version 2, as well as for the additional
 	options that SNMP_Session now offers has been added to
 	the sample-config/Defaults file. For existing installations,
@@ -8,7 +12,7 @@ New features, fixes in version 1.0.3
 	If you do this, or if you install Cricket from scratch, you
 	should use SNMP_Session version 0.80 or higher (it is
 	recommended to upgrade SNMP_Session regardless, there were
-	some rare but hard to diagnose bugs in version prior to 0.78).
+	some rare but hard to diagnose bugs in versions prior to 0.78).
 	The defaults are
 		snmp-timeout = 2.0
 		snmp-retries = 5

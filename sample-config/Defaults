@@ -17,6 +17,7 @@ Target	--default--
 	snmp-version		= 1
 	snmp				= %snmp-community%@%snmp-host%:%snmp-port%:%snmp-timeout%:%snmp-retries%:%snmp-backoff%:%snmp-version%
 	summary-loc		= top
+	show-path		= no
 
 OID	sysUptime  			1.3.6.1.2.1.1.3.0
 OID	ifNumber   			1.3.6.1.2.1.2.1.0
