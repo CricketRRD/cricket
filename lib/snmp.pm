@@ -89,7 +89,7 @@ sub snmpFetch {
 
             Debug("Getting from $snmp ", join(" ", @oidsToQuery));
             my(@hostResults) = snmpUtils::get($snmp, @oidsToQuery);
-            Debug("Got: ", join(" ", @hostResults));
+            if (isDebug()) { Debug("Got: ", join(" ", @hostResults)); }
 
             # it tells us everything went to hell by returning
             # scalar -1. Unfortunately, we interpret that as the first
