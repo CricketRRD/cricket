@@ -30,11 +30,11 @@
 # to tell collect-subtrees where to find it.
 
 BEGIN {
-	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
-	eval "require '$programdir/cricket-conf.pl'";
-	eval "require '/usr/local/etc/cricket-conf.pl'"
-					unless $Common::global::gInstallRoot;
-	$Common::global::gInstallRoot ||= $programdir;
+    my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+    eval "require '$programdir/cricket-conf.pl'";
+    eval "require '/usr/local/etc/cricket-conf.pl'"
+        unless $Common::global::gInstallRoot;
+    $Common::global::gInstallRoot ||= $programdir;
 }
 
 $| = 1; # Useful if you want to tail -f a logfile while the collector runs! :)
@@ -50,14 +50,14 @@ my $gDebug = 0;
 my $gCF = "$Common::global::gInstallRoot/subtree-sets";
 
 GetOptions( "cf=s" => \$gCF,
-			"mail|m=s" => \$gMailTo,
-			"debug|d" => \$gDebug,
-		);
+            "mail|m=s" => \$gMailTo,
+            "debug|d" => \$gDebug,
+            );
 
 my $gLogDir = "$Common::global::gCricketHome/log";
 my $gBase = $Common::global::gConfigRoot;
 my $gKeepLogs = 20;
-my $gUser = getlogin || getpwuid($<);	# idiom from perlfunc manpage
+my $gUser = getlogin || getpwuid($<);    # idiom from perlfunc manpage
 my $gCurSet;
 my $mOut = 0; $mOut = 1 if(defined($gMailTo));
 my ($gSets, %gSets, @gSets);
@@ -69,172 +69,170 @@ my $subtreeTimes = 0;
 my $gMailer = '/bin/mailx';
 
 open(S, "<$gCF") ||
-	die("Could not read $gCF file.\n");
+    die("Could not read $gCF file.\n");
 
 while (<S>) {
-	chomp;
+    chomp;
 
-	# nuke comments and blank lines
-	s/^\s*#.*$//;
-	next if (/^\s*$/);
+    # nuke comments and blank lines
+    s/^\s*#.*$//;
+    next if (/^\s*$/);
 
-	if (/^\s*set\s+(.*):/i) {
-		$gCurSet = $1;
-		next;
-	} elsif (/^\s*base:\s+(.*)/i) {
-		$gBase = $1;
-		if ($gBase !~ m#^/#) {
-			$gBase = "$Common::global::gCricketHome/$gBase";
-		}
-	} elsif (/^\s*logdir:\s+(.*)/i) {
-		$gLogDir = $1;
-		if ($gLogDir !~ m#^/#) {
-			$gLogDir = "$Common::global::gCricketHome/$gLogDir";
-		}
-	} else {
-		my($subtree) = $_;
-		$subtree =~ s/^\s*//;
-		if (! defined($gCurSet)) {
-			warn("No set lines found. Ignoring subtree $subtree.\n");
-		} else {
-			push @{$gSets{$gCurSet}}, $subtree;
-		}
-	}
+    if (/^\s*set\s+(.*):/i) {
+        $gCurSet = $1;
+        next;
+    } elsif (/^\s*base:\s+(.*)/i) {
+        $gBase = $1;
+        if ($gBase !~ m#^/#) {
+            $gBase = "$Common::global::gCricketHome/$gBase";
+        }
+    } elsif (/^\s*logdir:\s+(.*)/i) {
+        $gLogDir = $1;
+        if ($gLogDir !~ m#^/#) {
+            $gLogDir = "$Common::global::gCricketHome/$gLogDir";
+        }
+    } else {
+        my($subtree) = $_;
+        $subtree =~ s/^\s*//;
+        if (! defined($gCurSet)) {
+            warn("No set lines found. Ignoring subtree $subtree.\n");
+        } else {
+            push @{$gSets{$gCurSet}}, $subtree;
+        }
+    }
 }
 close(S);
 
 # if none specified, do them all
 if ($#ARGV == -1) {
-	@ARGV = sort(keys(%gSets));
+    @ARGV = sort(keys(%gSets));
 }
 
 foreach my $s (@ARGV) {
-	my($subtreeRef) = $gSets{$s};
-	my(@output) = ();
-	my($debugFlag) = "";
-	if (! defined($subtreeRef)) {
-		if($mOut == 1) {
-			push @mHist, "$0: unknown subtree name: $s\n";
-		} else {
-			print STDERR "$0: unknown subtree name: $s\n";
-		}
-		next;
-	}
+    my($subtreeRef) = $gSets{$s};
+    my(@output) = ();
+    my($debugFlag) = "";
+    if (! defined($subtreeRef)) {
+        if($mOut == 1) {
+            push @mHist, "$0: unknown subtree name: $s\n";
+        } else {
+            print STDERR "$0: unknown subtree name: $s\n";
+        }
+        next;
+    }
 
-	my($lockfile) = "/tmp/$gUser-subtree-$s";
+    my($lockfile) = "/tmp/$gUser-subtree-$s";
 
-	# file locking relies on touch, which is not available on Win32
-	if (!isWin32()) {
-	if (-f $lockfile) {
-		if($mOut == 1) {
-			push @mHist, "Subtree $s is currently being processed." .
-							" If this is a mistake,\n";
-			push @mHist, "use \"rm $lockfile\" to unlock it.\n";
-		} else {
-			print STDERR "Subtree $s is currently being processed." .
-							" If this is a mistake,\n";
-			print STDERR "use \"rm $lockfile\" to unlock it.\n";
-		}
-		next;
-	}
+    # file locking relies on touch, which is not available on Win32
+    if (!isWin32()) {
+        if (-f $lockfile) {
+            if($mOut == 1) {
+                push @mHist, "Subtree $s is currently being processed." .
+                    " If this is a mistake,\n";
+                push @mHist, "use \"rm $lockfile\" to unlock it.\n";
+            } else {
+                print STDERR "Subtree $s is currently being processed." .
+                    " If this is a mistake,\n";
+                print STDERR "use \"rm $lockfile\" to unlock it.\n";
+            }
+            next;
+        }
 
-	# lock it
-	system("touch $lockfile");
-	}
+        # lock it
+        system("touch $lockfile");
+    }
 
-	rollLogs($s);
-	my $logfile = "$gLogDir/$s.0";
-	my $timelogfile = "$gLogDir/$s.times";
-	if(-f $timelogfile && -s $timelogfile >=  50000 && $subtreeTimes == 1) {
-		rename $timelogfile, "$timelogfile.old"
-	}
+    rollLogs($s);
+    my $logfile = "$gLogDir/$s.0";
+    my $timelogfile = "$gLogDir/$s.times";
+    if(-f $timelogfile && -s $timelogfile >=  50000 && $subtreeTimes == 1) {
+        rename $timelogfile, "$timelogfile.old";
+    }
 
-	$debugFlag = "-loglevel debug" if ($gDebug == 1);
-	my $args = "$debugFlag -base $gBase " . join(" ", @{$subtreeRef});
+    $debugFlag = "-loglevel debug" if ($gDebug == 1);
+    my $args = "$debugFlag -base $gBase " . join(" ", @{$subtreeRef});
 
-	# Win32 does not support #! notation
-	system((isWin32() ? "perl " : "") .
-	   "$Common::global::gInstallRoot/collector $args > $logfile 2>&1");
+    # Win32 does not support #! notation
+    system((isWin32() ? "perl " : "") .
+           "$Common::global::gInstallRoot/collector $args > $logfile 2>&1");
 
-	# unlock it
-	unlink($lockfile) if (!isWin32());
+    # unlock it
+    unlink($lockfile) if (!isWin32());
 
-	# scan the logfile for errors and send them to stderr
-	# so that cron sends them to the admin.
+    # scan the logfile for errors and send them to stderr
+    # so that cron sends them to the admin.
 
-	if (open(L, "<$logfile")) {
-		(open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!") unless (!$subtreeTimes == 1);
-		my $lastWasError;
-		my $skipLine;
+    if (open(L, "<$logfile")) {
+        (open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!") unless (!$subtreeTimes == 1);
+        my $lastWasError;
+        my $skipLine;
 
-		my (@hist, @mHist) = ();
+        my (@hist, @mHist) = ();
 
+        while (<L>) {
+            # keep 5 lines of history
+            push @hist, $_;
+            shift @hist if ($#hist+1 > 5);
 
-		while (<L>) {
-			# keep 5 lines of history
-			push @hist, $_;
-			shift @hist if ($#hist+1 > 5);
+            # errors are marked with a * after the date:
+            #     [21-Dec-1998 15:57:54*] RRD error ...
 
-			# errors are marked with a * after the date:
-			# 	[21-Dec-1998 15:57:54*] RRD error ...
+            if (/\*\] /) {
+                if ($lastWasError) {
+                    if($mOut == 1) {
+                        push @mHist, $_;
+                    } else {
+                        print STDERR $_;
+                    }
+                } else {
+                    if($mOut == 1) {
+                        push @mHist, "\nError and the lines leading up to it:\n";
+                        push @mHist, @hist;
+                    } else {
+                        print STDERR "\nError and the lines leading up to it:\n";
+                        print STDERR @hist;
+                    }
+                }
+                $lastWasError = 1;
+            } else {
+                if ($skipLine) {
+                    if($mOut == 1) {
+                        push @mHist, "\n";
+                    } else {
+                        print STDERR "\n";
+                    }
+                    $skipLine = 0;
+                }
+                $lastWasError = 0;
+            }
+        }
+        close(L);
 
-			if (/\*\] /) {
-				if ($lastWasError) {
-					if($mOut == 1) {
-						push @mHist, $_;
-					} else {
-						print STDERR $_;
-					}
-				} else {
-					if($mOut == 1) {
-						push @mHist, "\nError and the lines leading up to it:\n";
-						push @mHist, @hist;
-					} else {
-						print STDERR "\nError and the lines leading up to it:\n";
-						print STDERR @hist;
-					}
-				}
-				$lastWasError = 1;
-			} else {
-				if ($skipLine) {
-					if($mOut == 1) {
-						push @mHist, "\n";
-					} else {
-						print STDERR "\n";
-					}
-					$skipLine = 0;
-				}
-				$lastWasError = 0;
-			}
-		}
-		close(L);
+        if ($subtreeTimes == 1) {
+            print TL $hist[$#hist];
+            close(TL);
+        }
 
-		if ($subtreeTimes == 1) {
-			print TL $hist[$#hist];
-			close(TL);
-		}
-
-		if(defined($mOut)) {
-			mailHist($s, @mHist);
-		}
-	} else {
-		warn("Could not scan logfile $logfile for errors: $!\n");
-	}
+        if(defined($mOut)) {
+            mailHist($s, @mHist);
+        }
+    } else {
+        warn("Could not scan logfile $logfile for errors: $!\n");
+    }
 }
 
 sub rollLogs {
-	my($logName) = @_;
-	my($i) = $gKeepLogs;
+    my($logName) = @_;
+    my($i) = $gKeepLogs;
 
-	if (! -d $gLogDir ) {
-		MkDir($gLogDir);
-	}
+    if (! -d $gLogDir ) {
+        MkDir($gLogDir);
+    }
 
-	while ($i > 0) {
-		rename("$gLogDir/$logName." . ($i-1),
-				"$gLogDir/$logName." . $i);	
-		$i--;
-	}
+    while ($i > 0) {
+        rename("$gLogDir/$logName." . ($i-1), "$gLogDir/$logName." . $i);
+        $i--;
+    }
 }
 
 sub MkDir {
@@ -254,15 +252,22 @@ sub isWin32 {
 }
 
 sub mailHist {
-	my ($subtree, @output) = @_;
+    my ($subtree, @output) = @_;
 
-	if($#output > 0) {
-		my $subject = "output from subtree " . $subtree;
+    if($#output > 0) {
+        my $subject = "output from subtree " . $subtree;
 
-		open(MAIL, "|$gMailer -s \"$subject\" $gMailTo") ||
-			die "Couldn't run $gMailer to send subtree output: $!\n";
-		print MAIL @output;
-		close(MAIL);
-	}
+        open(MAIL, "|$gMailer -s \"$subject\" $gMailTo") ||
+            die "Couldn't run $gMailer to send subtree output: $!\n";
+        print MAIL @output;
+        close(MAIL);
+    }
 }
 exit 0;
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
