@@ -45,7 +45,7 @@ use strict;
 
 my @mHist;
 my $gMailTo;
-my $gDebug = 1;
+my $gDebug = 0;
 my $gCF = "$Common::global::gInstallRoot/subtree-sets";
 
 GetOptions( "cf=s" => \$gCF,
