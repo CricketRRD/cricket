@@ -2,8 +2,16 @@ New features, fixes in version 1.0.5
 
 	Cricket 1.0.5 is essentially a minor bugfix release.
 
+	An error with case dependance with new style views was eliminated.
+
+	systemPerfConf.pl was reverted back to using our own SNMP_Session
+	based SNMP interface, and interfaces detection was added [Mike Han]
+
 	The distributed sample-config/Defaults has width-hint and
 	height-hint commented out, to cut down on squashed graphics.
+
+	The handling of NaN was standardized throughout the code.
+	To check for NaN, use isNaN from Common::Util.
 
 	All text files now have LF line endings. In the 1.0.4 release,
 	a number of files were inadvertantly changed to have CRLF line
