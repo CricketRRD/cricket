@@ -94,13 +94,15 @@ sub setArch {
 
 		return 1;
 
-     } elsif ($archname =~ /^aix|i86pc-solaris|i386-freebsd/ ||
-				$archname =~ /i.86-linux|i386.bsdos$/) {
- 
+     } elsif ($archname =~ /^aix|i.86/i) {
         # Matija.Grabnar@arnes.si says that these formats           
         # work for Solaris x86 too. And Patrick Myers <pjm@mcc.ac.uk>
 		# says it works for i386-freebsd. Cool. And John Banner
-		# <jbanner@UVic.Ca> says it works on AIX.
+		# <jbanner@UVic.Ca> says it works on AIX. And Dave Mangot
+		# <dave@epylon.com> says it works on i386-openbsd.
+
+		# So, let's simplify and just say, 'if it has i.86 in the name,
+		# use this format.
  
         $self->{'newOld'} = "A4";                
         $self->{'statHead'} = "a4 a5 x3 d L L L x80";    

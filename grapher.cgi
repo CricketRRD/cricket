@@ -296,7 +296,7 @@ sub doHTMLPage {
 			if (defined($targRef->{'targets'})) {
 				my($path) = $targRef->{'auto-target-path'};
 				my($target);
-				foreach $target (split(/\s*;\s*/, $targRef->{'targets'})) {
+				foreach $target (split(/\s*;\s*/, lc($targRef->{'targets'}))) {
 
 					# this allows local targets to use shorter names
 					$target = "$path/$target" unless ($target =~ /^\//);
@@ -763,7 +763,7 @@ sub doHTMLSummary {
 		my($path) = $targRef->{'auto-target-path'};
 
 		my($m);
-		foreach $m (split(/\s*;\s*/, $targRef->{'mtargets'})) {
+		foreach $m (split(/\s*;\s*/, lc($targRef->{'mtargets'}))) {
 			$m = "$path/$m" unless ($m =~ /^\//);
 			push @mtargets, $m;
 		}
@@ -944,8 +944,8 @@ sub doHTMLSummary {
 				"\n";
 			}
 		} else {
-			print "<font color=red>Current values not available.</font>\n";
-			print "($RRD::File::gErr)\n" if (defined($RRD::File::gErr));
+			print "Current values not available: ";
+			print "$RRD::File::gErr<br>\n" if (defined($RRD::File::gErr));
 		}
 		if (!$isMTargetsOps)  {
 			print "<p>";
@@ -1090,7 +1090,7 @@ sub initConst {
 
 sub si_unit {
 	my($value, $bytes) = @_;
-    return ($value, '') if ($value eq "nan" || $value == 0);
+    return ($value, '') if ($value eq "?" || $value eq "nan" || $value == 0);
 
 	my(@symbol) = ('a', 'f', 'p', 'n', '&#181;', 'milli',
 				   '',
@@ -1195,7 +1195,7 @@ sub doGraph {
 
 	if (defined($targRef->{'mtargets'}))  {
 		$isMTarget = 1;
-		@mtargets = split(/\s*;\s*/, $targRef->{'mtargets'});
+		@mtargets = split(/\s*;\s*/, lc($targRef->{'mtargets'}));
 	}  else  {
 		@mtargets = ( $tname );
 	}
@@ -1261,6 +1261,7 @@ sub doGraph {
 	my(@lines) = ();
 	my($ct) = 0;
 	my($usedArea) = 0;
+	my($usedStack) = 1;
 	my(@linePushed);
 	my(%scaled);
 		
@@ -1317,6 +1318,14 @@ sub doGraph {
 
 			$drawAs = graphParam($gRef, 'draw-as', 'LINE2');
 			$drawAs = uc($drawAs);
+
+			# if stack first must be area 
+			if ($drawAs eq "STACK") { 
+				if (!$usedStack)  { 
+					$drawAs = 'AREA'; 
+					$usedStack = 1; 
+				} 
+			} 
 
 			# only allow 1 area graph per gif
 			if ($drawAs eq "AREA")  {
@@ -1933,7 +1942,7 @@ sub prepareValue {
 		($value, $prefix) = si_unit($value, $bytes);
 	}
 
-	if ($value ne "nan") {
+	if ($value ne "?" && $value ne "nan") {
 		$value = sprintf("%0.${precision}f", $value);
 	}
 	return "$value$space$prefix$unit";
