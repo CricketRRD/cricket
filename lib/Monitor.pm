@@ -187,7 +187,7 @@ sub monRelation {
     }
     Debug("Values $value, $cmp_value; Difference is $difference; gtlt is $gtlt; thresh is $thresh.");
 # see documentation: threshold fails if expression is false
-    return (0,$value) if (!(eval "$difference $gtlt $thresh"));
+    return (0,$value) if ((eval "$difference $gtlt $thresh") == 0);
     return (1,$value);
 }
 
