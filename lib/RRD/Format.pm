@@ -87,7 +87,7 @@ sub setArch {
 
     if ($archname eq "sun4-solaris" ||
          $archname eq "MSWin32-x86" || $archname eq "MSWin32-x86-object" ||
-         $archname eq "irix-o32") {
+         $archname eq "irix-o32" || $archname eq "sparc-linux") {
 
         $self->{'newOld'} = "A4";
         $self->{'statHead'} = "a4 a5 x7 d L L L x4 x80";
