@@ -1221,7 +1221,10 @@ particular interface, and "bytes" is set to 1 (or "true") then
 the value will be reported in the HTML summary as 1 Mbit/sec.
 Without the <tt>bytes</tt> tag, the value would be reported at
 1.04 Mbit/sec, which is slightly misleading. When measuring
-very large numbers of bytes, the difference can be significant.
+very large numbers of bytes, the difference can be significant (4.9%
+in the case of Mega sized measurements, 7.3% in the case of Giga
+sized measurements). This is the major cause of discrepancies between
+Cricket and some commercial tools, so make sure it's set appropriately.
 <p>
 The numbers on the vertical axis of a graph are scaled
 by powers of 2 if the bytes tag is set to true for any of the
