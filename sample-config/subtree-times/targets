@@ -1,11 +1,14 @@
-target atm-interfaces
-target http-performance
-target news-server
-target portmasters
-target router-interfaces
-target routers
-target routing
-target squid-proxy
-target switch-ports
-target switches
-target usr
+target normal
+# before uncommenting these targets, these sets need to defined in
+# cricket/subtree-sets
+#target atm-interfaces
+#target http-performance
+#target news-server
+#target portmasters
+#target router-interfaces
+#target routers
+#target routing
+#target squid-proxy
+#target switch-ports
+#target switches
+#target usr
