@@ -1,19 +1,19 @@
-datasource	AtmLPortInput
-        ds-source       =       "snmp://%snmp%/pportInCells.%inst%"
-        desc            =       "ATM Physical Port Data Rate - Input"
-        rrd-ds-type     =       DERIVE
-        rrd-heartbeat   =       1800
-        rrd-min         =       0
+datasource  AtmLPortInput
+    ds-source       =       "snmp://%snmp%/pportInCells.%inst%"
+    desc            =       "ATM Physical Port Data Rate - Input"
+    rrd-ds-type     =       DERIVE
+    rrd-heartbeat   =       1800
+    rrd-min         =       0
 
 datasource      AtmLPortOutput
-        ds-source       =       "snmp://%snmp%/pportOutCells.%inst%"
-        desc            =       "ATM Physical Port Data Rate - Output"
-        rrd-ds-type     =       DERIVE
-        rrd-heartbeat   =       1800
-        rrd-min         =       0
+    ds-source       =       "snmp://%snmp%/pportOutCells.%inst%"
+    desc            =       "ATM Physical Port Data Rate - Output"
+    rrd-ds-type     =       DERIVE
+    rrd-heartbeat   =       1800
+    rrd-min         =       0
 
-targetType	atm-lport
-	ds	=	"AtmLPortInput, AtmLPortOutput"
+targetType  atm-lport
+    ds  =   "AtmLPortInput, AtmLPortOutput"
 
 graph   AtmLPortInput
     draw-as     =  AREA

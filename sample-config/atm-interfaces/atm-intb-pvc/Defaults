@@ -1,25 +1,24 @@
-datasource	AtmPVCInput
-	ds-source	=	"snmp://%snmp%/cktAtmInCells.%inst%"
-	desc		=	"ATM PVC Data Rate - Input"
-	rrd-ds-type	=	DERIVE
-	rrd-min		=	0
+datasource  AtmPVCInput
+    ds-source   =   "snmp://%snmp%/cktAtmInCells.%inst%"
+    desc        =   "ATM PVC Data Rate - Input"
+    rrd-ds-type =   DERIVE
+    rrd-min     =   0
 
-datasource	AtmPVCOutput
-	ds-source	=	"snmp://%snmp%/cktAtmOutCells.%inst%"
-	desc		=	"ATM PVC Data Rate - Output"
-	rrd-ds-type	=	DERIVE
-	rrd-min		=	0
+datasource  AtmPVCOutput
+    ds-source   =   "snmp://%snmp%/cktAtmOutCells.%inst%"
+    desc        =   "ATM PVC Data Rate - Output"
+    rrd-ds-type =   DERIVE
+    rrd-min     =   0
 
-targetType	intb-pvcs
-	ds	=	"AtmPVCInput, AtmPVCOutput"
+targetType  intb-pvcs
+    ds          =   "AtmPVCInput, AtmPVCOutput"
 
-graph	AtmPVCInput
-    draw-as	=  AREA
+graph   AtmPVCInput
+    draw-as     =  AREA
     color       =  dark-green
-    legend	=  AtmPVCInput
+    legend      =  AtmPVCInput
 
 graph   AtmPVCOutput
-    draw-as	=  LINE1
+    draw-as     =  LINE1
     color       =  dark-blue
-    legend	=  AtmPVCOutput
-
+    legend      =  AtmPVCOutput

@@ -1,21 +1,21 @@
-target	ATMSwitch1--ATMSwitch1-ATMSwitch2-DS3-01.8.2
-	interface-desc = "ATMSwitch1-ATMSwitch2-DS3-01"
-	swname = "ATMSwitch1"
-	rrd-max = 96000
-	InterfaceID = "8.2"
-	target-type = atm-trunk
+target  ATMSwitch1--ATMSwitch1-ATMSwitch2-DS3-01.8.2
+    interface-desc = "ATMSwitch1-ATMSwitch2-DS3-01"
+    swname = "ATMSwitch1"
+    rrd-max = 96000
+    InterfaceID = "8.2"
+    target-type = atm-trunk
 
-target	ATMSwitch1--ATMSwitch1-ATMSwitch3-OC3-01.8.1
-	interface-desc = "ATMSwitch1-ATMSwitch3-DS3-01"
-	swname = "ATMSwitch1"
-	rrd-max = 353207
-	InterfaceID = "8.1"
-	target-type = atm-trunk
+target  ATMSwitch1--ATMSwitch1-ATMSwitch3-OC3-01.8.1
+    interface-desc = "ATMSwitch1-ATMSwitch3-DS3-01"
+    swname = "ATMSwitch1"
+    rrd-max = 353207
+    InterfaceID = "8.1"
+    target-type = atm-trunk
 
-target	ATMSwitch3--ATMSwitch1-ATMSwitch3-OC3-01.8.1
-	interface-desc = "ATMSwitch1-ATMSwitch3-DS3-01"
-	swname = "ATMSwitch3"
-	rrd-max = 353207
-	InterfaceID = "8.1"
-	target-type = atm-trunk
+target  ATMSwitch3--ATMSwitch1-ATMSwitch3-OC3-01.8.1
+    interface-desc = "ATMSwitch1-ATMSwitch3-DS3-01"
+    swname = "ATMSwitch3"
+    rrd-max = 353207
+    InterfaceID = "8.1"
+    target-type = atm-trunk
 
