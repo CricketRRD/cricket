@@ -1514,14 +1514,12 @@ sub doGraph {
         my(@dsnames, @mxnames);
         while ($i < ($ct-1))  {
             $i++;
-            my($nameme);
+            my $scalepre = "";
             if ($scaled{lc $dslist[$i % $numDSs]}) {
-                $nameme = "sds";
-            } else {
-                $nameme = "ds";
+                $scalepre = "s";
             }
-            push @{$dsnames[$i % $numDSs]}, "$nameme$i";
-            push @{$mxnames[$i % $numDSs]}, "mx$i";
+            push @{$dsnames[$i % $numDSs]}, "${scalepre}ds$i";
+            push @{$mxnames[$i % $numDSs]}, "${scalepre}mx$i";
         }
 
         my($j) = 0;
