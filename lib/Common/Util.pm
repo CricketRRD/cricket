@@ -178,7 +178,7 @@ sub mergeHash {
 # Munge an overly long datasource name to fit RRD's constraints
 sub mungeDsName {
     my $name = lc shift;
-    return $name if length($name) < 19;
+    return $name if length($name) <= 19;
     my $md5 = Digest::MD5::md5_base64($name);
     $md5 =~ tr/A-Z0-9//cd;
     return substr($name, 0, 15) . substr($md5, 0, 4);
