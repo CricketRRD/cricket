@@ -38,3 +38,8 @@ $gInstallRoot = "$gCricketHome/cricket";
 $gUrlStyle="classic";    # What Cricket before 1.0.4 did.
 #$gUrlStyle="relative";  # Required if Cricket sits behind a reverse proxy
 #$gUrlStyle="pathinfo";  # Encode the target in the URL path for authentication
+
+#	Set this to "1" to enable the new (and experimental!) feature to
+#	use long RRD datasource names. See the CHANGES file before enabling
+#	this.
+$gLongDSName=0;
