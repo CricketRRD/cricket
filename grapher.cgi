@@ -1345,6 +1345,11 @@ sub doGraph {
         foreach $ds (split(/,/, $dslist)) {
             $ds = lc($ds);
 
+            if ($Common::global::gMarkNaN) {
+                push @cdefs, "CDEF:unavail$ct=ds$ct,UN,INF,0,IF";
+                push @lines, "AREA:unavail$ct#FFCCCC:";
+            }
+
             my($legend, $color, $colorCode, $drawAs, $scale,
                $colormax, $clmxCode, $drmxAs);
 

@@ -14,6 +14,9 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	Jeremy Hinton
+		contributed the "NaN in pinkish background" feature
+
 	Nils Ketelsen and Raffael D'Albenzio
 		were instrumental in squashing the mtargets/mtargets-ops
 		bugs relating to mixed case targets and directories
