@@ -33,11 +33,14 @@ my($trapoid) = ".1.3.6.1.4.1.2595.1.1";
 my $MAXTRIES = 2;
 
 my %skipcnt;
+my %sessions;
+my @fifo;
 
 my $hostname = undef;
 
 sub init {
     %skipcnt = ();
+    %sessions = ();
 }
 
 # Establish an SNMP session to the given host.
@@ -101,6 +104,12 @@ sub opensnmp {
 
     $sessions{$snmp_url} = $session;    # Save the session for future reference.
     $skipcnt{$snmp_url} = $MAXTRIES;    # Init the blacklist counter.
+    push @fifo, $snmp_url;
+    if ($#fifo > 20) {
+        my $old_url = shift @fifo;
+        delete $sessions{$old_url};
+        # We keep the blacklist entry
+    }
 
     return $session;
 }
