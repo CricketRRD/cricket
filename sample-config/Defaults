@@ -201,6 +201,9 @@ graph   --default--
     # on the graphs at every zero-time, i.e. midnight, Monday, first of
     # the month, first of the year.
     vrule-color    =    red
+    # Set use-gprint to print the min, max and curr values into the
+    # graphic.
+    #use-gprint     =   "true"
 
 graph   ifInOctets
     color       =   dark-green

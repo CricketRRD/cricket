@@ -1265,6 +1265,7 @@ sub doGraph {
 
     my($width) = graphParam($gRefDef, 'width', 500);
     my($height) = graphParam($gRefDef, 'height', 200);
+    my($useGprint) = graphParam($gRefDef, 'use-gprint', 0);
 
     my($interlaced) = graphParam($gRefDef, 'interlaced', undef);
     my(@interlaced) = ();
@@ -1325,6 +1326,7 @@ sub doGraph {
     my(@linePushed);
     my(%scaled);
     my(@target_pass_args);
+    my(@gprints) = ();
 
     # prepare a dsmap, using the target and targettype dicts
     # we do this outside the loop to keep the DS map from expanding
@@ -1358,6 +1360,7 @@ sub doGraph {
         # Then pick up the values
         # things we pick up form the target dict
         my($rrd) = $targRef->{'rrd-datafile'};
+        my($lasttime) = scalar(localtime(RRDs::last($rrd)));
 
         # use the dslist to create a set of defs/cdefs
 
@@ -1531,6 +1534,21 @@ sub doGraph {
                                      "Max $legend" if ($mx);
                         push @lines, "$drawAs:sds$ct#$colorCode:$legend";
                     }
+
+                    if ($mx) {
+                        push (@gprints,
+                              "GPRINT:smx$ct:LAST:$legend  Last\\: %8.1lf%S",
+                              "GPRINT:smx$ct:AVERAGE:Avg\\: %8.1lf%S",
+                              "GPRINT:smx$ct:MIN:Min\\: %8.1lf%s",
+                              "GPRINT:smx$ct:MAX:Max\\: %8.1lf%s\\l");
+                    } else {
+                        push (@gprints,
+                              "GPRINT:sds$ct:LAST:$legend  Last\\: %8.1lf%S",
+                              "GPRINT:sds$ct:AVERAGE:Avg\\: %8.1lf%S",
+                              "GPRINT:sds$ct:MIN:Min\\: %8.1lf%s",
+                              "GPRINT:sds$ct:MAX:Max\\: %8.1lf%s\\l");
+                    }
+
                 } else {
                     if ($isMTargetsOps)  {
                         if (!$linePushed[$mod])  {
@@ -1544,6 +1562,21 @@ sub doGraph {
                                      "Max $legend" if ($mx);
                         push @lines, "$drawAs:ds$ct#$colorCode:$legend";
                     }
+
+                    if ($mx) {
+                        push (@gprints,
+                              "GPRINT:mx$ct:LAST:$legend  Last\\: %8.1lf%S",
+                              "GPRINT:mx$ct:AVERAGE:Avg\\: %8.1lf%S",
+                              "GPRINT:mx$ct:MIN:Min\\: %8.1lf%s",
+                              "GPRINT:mx$ct:MAX:Max\\: %8.1lf%s\\l");
+                    } else {
+                        push (@gprints,
+                              "GPRINT:ds$ct:LAST:$legend  Last\\: %8.1lf%S",
+                              "GPRINT:ds$ct:AVERAGE:Avg\\: %8.1lf%S",
+                              "GPRINT:ds$ct:MIN:Min\\: %8.1lf%s",
+                              "GPRINT:ds$ct:MAX:Max\\: %8.1lf%s\\l");
+                    }
+
                 }
                 $ct++;
             } else {
@@ -1719,13 +1752,20 @@ sub doGraph {
         @fmt = ('-a', 'PNG');
     }
 
+    if (isTrue($useGprint)) {
+        unshift @gprints, "COMMENT:\\s", "COMMENT:\\s";
+        push @gprints, "COMMENT:\\s", "COMMENT:Last updated at $lasttime",
+    } else {
+        @gprints = ();
+    }
+
     my(@args) = ($imageName, @fmt, @rigid, @interlaced,
                  @base, @pass, @rules,
                  '--start', "-$range",
                  '--vertical-label', $yaxis,
                  '--width',          $width,
                  '--height',         $height,
-                 @defs, @cdefs, @lines, @vrules);
+                 @defs, @cdefs, @lines, @vrules, @gprints);
 
     # we unlink the image so that if there's a failure, we
     # won't accidentally display an old image.
