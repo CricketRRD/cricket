@@ -1,5 +1,7 @@
 New features, fixes in version 1.0.4
 
+	Added new option to log entry format [Patch #565877].
+
 	Added new META monitor thresholds action [Patch #821255].
 
 	Added support for sparc64-netbsd from Edwin Mons [Patch #803408].
