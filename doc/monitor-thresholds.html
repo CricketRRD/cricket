@@ -79,8 +79,8 @@ checks to see if the current ifInOctets value is within 10% of the value
 recorded for the last interval (300 seconds ago). It computes abs(ifInOctets_now
 - ifInOctets_then)/ifInOctets_then and compares this with 10% (0.1). If
 traffic levels have increased more than 10% over the interval, it invokes
-mailx to send a mail message to me@mydomain.com (note the escaped back
-slash and escaped ampersand). The third monitor threshold checks to see
+mailx to send a mail message to me@mydomain.com (note the escaped
+backslash and escaped '@'). The third monitor threshold checks to see
 if input errors exceed 0.1% of input packets. If errors exceed this threshold,
 Cricket generates a SNMP trap.
 <p>The second target, pop-2, has a single monitor threshold. Cricket will
