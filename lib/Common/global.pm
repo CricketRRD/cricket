@@ -59,7 +59,7 @@ BEGIN {
     if ($^O eq 'MSWin32') {
         $gCacheDir ||= "$ENV{'TEMP'}\\cricket-cache"
             if (defined($ENV{'TEMP'}));
-        $gCacheDir ||= "c:\temp\cricket-cache";
+        $gCacheDir ||= "c:\\temp\\cricket-cache";
     } else {
         $gCacheDir ||= "$ENV{'TMPDIR'}/cricket-cache"
             if (defined($ENV{'TMPDIR'}));
