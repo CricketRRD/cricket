@@ -372,6 +372,9 @@ sub doHTMLPage {
 				print "</tr></table>\n";
 			}
 
+			if (defined($targRef->{'target-html'})) {
+				print $targRef->{'target-html'};
+			}
 
 			my($range, @ranges);
 			@ranges = getRanges($reqRanges);
