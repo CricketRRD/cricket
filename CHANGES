@@ -1,5 +1,10 @@
 New features, fixes in version 1.0.4
 
+	Fix for bug #666675; the "floating point comparison perl 5.8"
+	issue. The most prominent symptom of this issue is the message
+	"Current values not available: Something is wrong with the
+	header of this file" in the grapher summary panel.
+
 	Documentation for the failures monitor threshold. Permit
 	conditioning a failures monitor threshold on a range.
 

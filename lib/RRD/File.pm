@@ -40,6 +40,8 @@ sub rra_cnt { shift->_getAndSet('rra_cnt', @_) };
 sub pdp_step { shift->_getAndSet('pdp_step', @_) };
 sub cdp_xff { shift->_getAndSet('cdp_xff', @_) };
 sub last_up { shift->_getAndSet('last_up', @_) };
+# this is file property rather than an architecture format property
+sub version { shift->_getAndSet('version', @_) };
 
 sub _getAndSet {
     my($self, $field, $value) = @_;
@@ -139,13 +141,12 @@ sub loadHeader {
     $v = fixName($v);
 
     if ($c ne $fmt->format('cookie') ||
-# remove the version check: this code now support version 1 and 2
-#       ($v ne $fmt->format('version')) ||
-        ($fc != $fmt->format('float_cookie'))) {
+        ("$fc" != $fmt->format('float_cookie'))) {
         $RRD::File::gErr = "Something is wrong with the header of this file.";
         return;
     }
 
+    $self->version($v);
     # and save all the good stuff for later use
     $self->ds_cnt($ds_cnt);
     $self->rra_cnt($rra_cnt);
@@ -193,10 +194,22 @@ sub loadHeader {
     }
 
     {
-        my($block) = $self->_readNextBlock(sizeof($fmt->format('liveHead')));
-        croak("Could not read live header") unless (defined($block));
-
-        my($last_up) = unpack($fmt->format('liveHead'), $block);
+        my ($block);
+        my ($last_up, $last_up_usec); 
+        if ($v eq "0001" || $v eq "0002") {
+           $block = $self->_readNextBlock(sizeof($fmt->format('liveHead')));
+           croak("Could not read live header") unless (defined($block));
+           $last_up = unpack($fmt->format('liveHead'), $block);
+        } else {
+           if (!defined($fmt->format('liveHead3'))) {
+              $RRD::File::gErr = 
+                 "RRD file version " . $v . " not supported on this arch.";
+              return;
+           }
+           $block = $self->_readNextBlock(sizeof($fmt->format('liveHead3')));
+           croak("Could not read live header") unless (defined($block));
+           ($last_up, $last_up_usec) = unpack($fmt->format('liveHead3'), $block);
+        }
         $self->last_up($last_up);
     }
 
@@ -378,10 +391,14 @@ sub getDataOffset {
     my($ds_cnt) = $self->ds_cnt();
     my($rra_cnt) = $self->rra_cnt();
 
+    my($lhSz) = ($self->version() ne "0003") ? 
+      sizeof($fmt->format('liveHead')) :
+      sizeof($fmt->format('liveHead3')); 
+
     return (sizeof($fmt->format('statHead')) +
 	    $ds_cnt * sizeof($fmt->format('dsDef')) +
 	    $rra_cnt * sizeof($fmt->format('rraDef')) +
-	    sizeof($fmt->format('liveHead')) +
+	    $lhSz +
 	    $ds_cnt * sizeof($fmt->format('pdpDef')) +
 	    ($ds_cnt * $rra_cnt) * sizeof($fmt->format('cdpDef')) +
 	    $rra_cnt * sizeof($fmt->format('rraPtr')));

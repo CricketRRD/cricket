@@ -61,7 +61,6 @@ sub setArch {
     my($self, $archname) = @_;
 
     $self->{'cookie'}       = "RRD";
-    $self->{'version'}      = "0001";
     $self->{'float_cookie'} = 8.642135e130;
 
     $self->{'DST_COUNTER'}  = 0;
@@ -98,6 +97,7 @@ sub setArch {
         $self->{'cdpDef'} = "d L x4 x64";
 
         $self->{'liveHead'} = "L";
+        $self->{'liveHead3'} = "L L";
         $self->{'rraPtr'} = "L";
         $self->{'element'} = "d";
 
