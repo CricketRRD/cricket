@@ -1,7 +1,7 @@
 target --default--
 	short-desc	=	""
     long-desc   =   "%short-desc% is being monitored via this URL:
-                     <a href=%url%>%url%</a>."
+                     <a href=\"%url%\">%url%</a>."
 	# you'll probably want to change this... unless you
 	# have Cricket in ~/cricket and your config tree in ~/cricket-config
 	util-dir	=	%auto-base%/../cricket/util
@@ -9,14 +9,14 @@ target --default--
 	url			=	""
 
 datasource	total-time
-	ds-source	=	"exec:0:%util-dir%/test-url %url%"
+	ds-source	=	"exec:0:%util-dir%/test-url '%url%'"
 	desc		=	"The amount of time it took to fetch the entire page.
 					For large transfers, this will give an indication
 					of data throughput."
 	rrd-ds-type		=	GAUGE
 
 datasource	first-time
-	ds-source	=	"exec:1:%util-dir%/test-url %url%"
+	ds-source	=	"exec:1:%util-dir%/test-url '%url%'"
 	desc		=	"The amount of time it took to fetch the first-byte.
 					This time is the best approximation available of the
 					time to connect (i.e. DNS time, TCP connection
