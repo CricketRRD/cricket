@@ -660,6 +660,23 @@ sub doHTMLPage {
         htmlHeader($name, $targRef, $title);
 
         my(@children) = $ct->getChildren($name);
+        # check for search parameter to display only matching targets
+
+        my($searchCrit) = $gQ->param("search");
+        $gQ->delete("search") if (defined($searchCrit));
+
+        if ($searchCrit) {
+            @children = ();
+            foreach $subtree ($name) {
+                if ($gCT->nodeExists($subtree)) {
+                    $gCT->visitLeafs($subtree, \&searchHandleTarget,
+                                     $searchCrit, \@children);
+                } else {
+                    Warn("Unknown subtree $subtree.");
+                }
+
+            }
+        }
 
         my($targs, $t, @targets, @dirs);
         foreach $t (@children) {
@@ -813,8 +830,8 @@ sub doHTMLPage {
                 my($desc) = "&nbsp;";
                 $desc = $targs->{$item}->{'directory-desc'}
                         if ($targs->{$item}->{'directory-desc'});
-
-                my($newTarg) = "$name/$item";
+                my($itemPath) = $targs->{$item}->{'auto-target-path'};
+                my($newTarg) = "$itemPath/$item";
                 $newTarg =~ s#^\/\/#\/#;
 
                 urlTarget($gQ, $newTarg);
@@ -824,6 +841,13 @@ sub doHTMLPage {
                 print "<tr><td>$link</td><td>$desc</td></tr>\n";
             }
             print "</table><p>\n";
+        }
+        if ($Common::global::gEnableSearch) {
+            urlTarget($gQ, $name);
+            print "<FORM ACTION=\"",makeUrl($gQ),"\" METHOD=\"get\">\n";
+            print "Tag search: <input name=\"search\">";
+            print "<input type=\"submit\">\n";
+            print "</FORM>\n";
         }
     }
 
@@ -2321,6 +2345,35 @@ sub urlTarget {
         return $target;
     }
     $cgi->path_info($target);
+}
+
+# Find matching targets for arbitrary tag/value searching.
+# This currently only applies to searching against the chassis target.
+sub searchHandleTarget {
+    my($name) = shift;
+    my($search) = shift;
+    my($targList) = shift;
+    my($match) = 0;
+    my($path) = "";
+    my($target) = $gCT->configHash($name, 'target', undef, 1);
+    # Return if it is not the chassis target
+    return unless (defined($target->{'auto-target-name'}) && $target->{'auto-target-name'} eq 'chassis');
+
+    foreach my $val (split ",", $search) {
+#            ($attr, $val) = split (/=/, $prop);
+#            if (($target->{$attr}) && ($target->{$attr} =~ /$val/)) {
+            if (defined($target->{'display-name'}) && $target->{'display-name'} =~ /$val/i) {
+                    $path = $target->{'auto-target-path'};
+                    $match = 1;
+            } elsif (defined($target->{'snmp-host'}) && $target->{'snmp-host'} =~ /$val/i) {
+                    $path = $target->{'auto-target-path'};
+                    $match = 1;
+            } else {
+                    return;
+            }
+    }
+
+    push @$targList, $path;
 }
 
 # Local Variables:

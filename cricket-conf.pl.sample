@@ -55,3 +55,10 @@ $gLongDSName=0;
 #	e.g. When enabled, you get "/Switches/Cat4000/Core/FastEthernet0_1"
 #       instead of just "FastEthernet0_1".
 $gLogFullPath=0;
+
+#       Set this to "1" to enable the tag search feature. When enabled
+#       this adds a small search box to the bottom of the grapher
+#       window, which can be used to do a recursive search on
+#       values contained in the chassis target. It is currently
+#       limited to searching for a value in the snmp-host and display-name tags.
+$gEnableSearch=1;
