@@ -29,6 +29,14 @@ New features, fixes in version 1.0.6 (TBD)
   Added support for using a UNIX domain socket as the target of a "FILE"
   datasource. [Patch #1083977]
 
+  Fixed race condition in config-tree recompiles. If a compile is in progress
+  when "compile" tries to create a lock, it will now retry 5 times at 5
+  second intervalls before bailing out. If the previous compile seems to have
+  been abandoned -- i.e. lockfile is more than 900 seconds (15 minutes) -- it
+  will forcibly acquire the lock and procede with the recompile. Patch from
+  John Magne Bredal and the NAV project, by way of Morten Werner Olsen.
+  [Patch #1011277]
+
 New features, fixes in version 1.0.5
 
 	Cricket 1.0.5 is essentially a minor bugfix release.
