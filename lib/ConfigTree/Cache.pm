@@ -68,6 +68,14 @@ sub init {
     return $dbh;
 }
 
+sub compileTime {
+    my($self) = @_;
+
+    my($file) = $self->{"Base"} . "/config.db";
+    my($mtime) = (stat($file))[9];
+    return $mtime;
+}
+
 sub nodeExists {
     my($self, $node) = @_;
     return defined($self->{"DbRef"}->{'p:' . $node});
