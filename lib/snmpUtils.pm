@@ -32,6 +32,10 @@ my $MAXTRIES = 2;
 
 my %skipcnt;
 
+sub init {
+    %skipcnt = ();
+}
+
 # this funky wrapper is because SNMP_Session throws exceptions with
 # warn(), which we need to catch, instead of letting them run
 # roughshod over Cricket's output.

@@ -94,6 +94,8 @@ if ($recomp) {
     }
 }
 
+&snmpUtils::init();
+
 # if they gave us no subtrees to focus on, use the root of the config tree
 if ($#ARGV+1 == 0) {
     push @ARGV, '/';

@@ -36,6 +36,10 @@ my %skipcnt;
 
 my $hostname = undef;
 
+sub init {
+    %skipcnt = ();
+}
+
 # Establish an SNMP session to the given host.
 
 sub opensnmp {
