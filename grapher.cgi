@@ -327,29 +327,31 @@ sub doHTMLPage {
 
 			# save the ranges before we start messing around with them
 			my($reqRanges) = $gQ->param('ranges');
+			my(%dsDescr) = ();
+			my(@links) = makeNavLinks();
 
 			htmlHeader($name, $targRef, $title);
 
-			print "<table width=100% cellpadding=5 padding=3 border>\n";
-			print "<tr><td width=70%>\n";
+			if(!$targRef->{'summary-loc'} || $targRef->{'summary-loc'} eq "top") {
+				print "<table width=100% cellpadding=5 padding=3 border>\n";
+				print "<tr><td width=70%>\n";
 
-			my(%dsDescr) = ();
-			if (! $isMulti) {
-				%dsDescr = doHTMLSummary($name, $tname,
-								$targRef, $ttRef, $dslist);
-			} else {
-				if ($targRef->{'long-desc'}) {
-					print "$targRef->{'long-desc'}<p>\n";
+				if (! $isMulti) {
+					%dsDescr = doHTMLSummary($name, $tname,
+									$targRef, $ttRef, $dslist);
 				} else {
-					print "&nbsp;";
+					if ($targRef->{'long-desc'}) {
+						print "$targRef->{'long-desc'}<p>\n";
+					} else {
+						print "&nbsp;";
+					}
 				}
+				print "</td><td><center>\n";
+				print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
+				print "</center></td>\n";
+				print "</tr></table>\n";
 			}
 
-			print "</td><td><center>\n";
-			my(@links) = makeNavLinks();
-			print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
-			print "</center></td>\n";
-			print "</tr></table>\n";
 
 			my($range, @ranges);
 			@ranges = getRanges($reqRanges);
@@ -541,6 +543,26 @@ sub doHTMLPage {
 					print "<p>\n";
 				}
 				print "</dl>\n";
+			}
+
+			if($targRef->{'summary-loc'} eq "bottom") {
+				print "<table width=100% cellpadding=5 padding=3 border>\n";
+				print "<tr><td width=70%>\n";
+
+				if (! $isMulti) {
+					%dsDescr = doHTMLSummary($name, $tname,
+									$targRef, $ttRef, $dslist);
+				} else {
+					if ($targRef->{'long-desc'}) {
+						print "$targRef->{'long-desc'}<p>\n";
+					} else {
+						print "&nbsp;";
+					}
+				}
+				print "</td><td><center>\n";
+				print "<i>Time Ranges:</i><p>\n", join("<br>\n", @links);
+				print "</center></td>\n";
+				print "</tr></table>\n";
 			}
 		}
 	} else {
