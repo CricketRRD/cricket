@@ -1,0 +1,60 @@
+# Subtree for monitoring collection times for collect-subtree runs. The
+# syntax for the targets file is: 'target <name-of-subtree>'.
+# 
+# Originally written by Ethan Toretta <email-unavailable>. Currently being
+# maintained by Adam Meltzer <ameltzer@microsoft.com>.
+#
+# To utilize this tree, uncomment the line '# $subtreeTimes = 1' in the 
+# collect-subtrees script.
+#
+
+Target		--default--
+	target-type			= "subtree-times"
+	directory-desc		= "Just how long is the collector taking?"
+	disable-short-desc	= true
+	long-desc			= "%auto-target-name% collector information"
+	bindir				= %auto-base%/../cricket/util
+
+datasource	--default--
+	rrd-ds-type		=	GAUGE
+	rrd-heartbeat	=	1800
+	rrd-min			=	0
+	rrd-max			=	4294967295
+
+graph		--default--
+	draw-as		=	LINE1
+
+targetType	subtree-times
+	ds			=	"secondsPerRun, targetsPerRun, targetsPerSecond"
+	view		=	"# of targets:	targetsPerRun,
+					Subtree times:	secondsPerRun,
+					Throughput:		targetsPerSecond"
+
+datasource	secondsPerRun
+	ds-source	=	"exec:0:%bindir%/get-collector-stats %auto-target-name%"
+	desc		=	"Seconds elapsed per run"
+
+graph		secondsPerRun
+	y-axis		=	"Seconds"
+	units		=	"s"
+	legend		=	"Seconds per run"
+
+datasource	targetsPerRun
+	ds-source	=	"exec:1:%bindir%/get-collector-stats %auto-target-name%"
+	desc		=	"The number of targets collected"
+
+graph		targetsPerRun
+	y-axis		=	"Targets"
+	units		=	"targets"
+	legend		=	"targets per run"
+	# the line tends to be hard to see, so:
+	draw-as		=	LINE2
+
+datasource	targetsPerSecond
+	ds-source	=	"exec:2:%bindir%/get-collector-stats %auto-target-name%"
+	desc		=	"Targets processed per second"
+
+graph		targetsPerSecond
+	y-axis		=	"targets/sec"
+	units		=	"t/s"
+	legend		=	"Targets per second"
