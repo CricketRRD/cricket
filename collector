@@ -46,7 +46,7 @@ use snmp;
 use exec;
 use file;
 use field;
-use sql;
+eval "use sql";
 
 if (Common::Util::isWin32()) {
     eval "use wbem";
