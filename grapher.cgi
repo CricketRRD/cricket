@@ -230,7 +230,7 @@ sub doHTMLPage {
 
             # put the view into the target dict, so it's
             # there if they want to use it.
-            my($view) = $gQ->param('view');
+            my($view) = lc $gQ->param('view');
             if (defined($view)) {
                 $targRef->{'auto-view'} = $view;
             }
@@ -289,7 +289,7 @@ sub doHTMLPage {
                 foreach $v (split(/\s*,\s*/, $ttRef->{'view'})) {
                     # views are like this: "cpu: cpu1load  cpu5load"
                     my($vname, $dss) = split(/\s*:\s*/, $v, 2);
-                    if ($view eq $vname) {
+                    if ($view eq lc $vname) {
                         # check here for a view definition
                         $viewRef = $ct->configHash($name, 'view', $view,
                                                    $targRef);
@@ -1324,7 +1324,7 @@ sub doGraph {
     }
 
     # things we will need from the params
-    my($view) = $gQ->param('view');
+    my($view) = lc $gQ->param('view');
     # a comma-separated list of data sources
     my($dslist);
     my $viewRef = undef;
