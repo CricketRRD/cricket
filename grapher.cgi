@@ -2010,7 +2010,8 @@ sub fixHome {
 	# $Common::global::gCricketHome = '/path/to/cricket/home';
 	# return;
 
-	return if $Common::global::gCricketHome =~ /\//;
+	return if (defined($Common::global::gCricketHome) && 
+		   $Common::global::gCricketHome =~ /\//);
 
 	my($sname) = $gQ->script_name();
 	if ($sname =~ /\/~([^\/]*)\//) {
