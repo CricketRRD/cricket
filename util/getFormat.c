@@ -69,10 +69,10 @@ void format_stat_head (void) {
   addr1 = addr2;
   addr2 = (size_t)&h1.rra_cnt;
   if ((addr2 - addr1) == sizeof(h1.ds_cnt)) {
-    sprintf(rrdFormat, "%s L", rrdFormat);
+    sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(h1.ds_cnt)==8)?'Q':'L');
   } else {
     pad = addr2 - addr1 - sizeof(h1.ds_cnt);
-    sprintf(rrdFormat, "%s L x%d", rrdFormat, pad);
+    sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(h1.ds_cnt)==8)?'Q':'L', pad);
     total += pad;
   }
   total += sizeof(h1.ds_cnt);
@@ -80,10 +80,10 @@ void format_stat_head (void) {
   addr1 = addr2;
   addr2 = (size_t)&h1.pdp_step;
   if ((addr2 - addr1) == sizeof(h1.rra_cnt)) {
-    sprintf(rrdFormat, "%s L", rrdFormat);
+    sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(h1.rra_cnt)==8)?'Q':'L');
   } else {
     pad = addr2 - addr1 - sizeof(h1.rra_cnt);
-    sprintf(rrdFormat, "%s L x%d", rrdFormat, pad);
+    sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(h1.rra_cnt)==8)?'Q':'L', pad);
     total += pad;
   }
   total += sizeof(h1.rra_cnt);
@@ -91,10 +91,10 @@ void format_stat_head (void) {
   addr1 = addr2;
   addr2 = (size_t)&h1.par;
   if ((addr2 - addr1) == sizeof(h1.pdp_step)) {
-    sprintf(rrdFormat, "%s L", rrdFormat);
+    sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(h1.pdp_step)==8)?'Q':'L');
   } else {
     pad = addr2 - addr1 - sizeof(h1.pdp_step);
-    sprintf(rrdFormat, "%s L x%d", rrdFormat, pad);
+    sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(h1.pdp_step)==8)?'Q':'L', pad);
     total += pad;
   }
   total += sizeof(h1.pdp_step);
@@ -138,10 +138,10 @@ void format_ds_def (void) {
 
   /* Heartbeat is a long vs min and max values are doubles */
   if (sizeof(unival) - sizeof(unsigned long)) {
-	  sprintf(rrdFormat, "%s L x%d", rrdFormat, 
+	  sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(unival)==8)?'Q':'L', 
 		  sizeof(unival) - sizeof(unsigned long));
   } else {
-	  sprintf(rrdFormat, "%s L", rrdFormat);
+	  sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(unival)==8)?'Q':'L');
   }
   total += sizeof(unival);
 
@@ -180,10 +180,10 @@ void format_rra_def   (void) {
   addr1 = addr2;
   addr2 = (size_t)&h2.pdp_cnt;
   if ((addr2 - addr1) == sizeof(h2.row_cnt)) {
-    sprintf(rrdFormat, "%s L", rrdFormat);
+    sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(h2.row_cnt)==8)?'Q':'L');
   } else {
     pad = addr2 - addr1 - sizeof(h2.row_cnt);
-    sprintf(rrdFormat, "%s L x%d", rrdFormat, pad);
+    sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(h2.row_cnt)==8)?'Q':'L', pad);
     total += pad;
   }
   total += sizeof(h2.row_cnt);
@@ -191,10 +191,10 @@ void format_rra_def   (void) {
   addr1 = addr2;
   addr2 = (size_t)&h2.par;
   if ((addr2 - addr1) == sizeof(h2.pdp_cnt)) {
-    sprintf(rrdFormat, "%s L", rrdFormat);
+    sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(h2.pdp_cnt)==8)?'Q':'L');
   } else {
     pad = addr2 - addr1 - sizeof(h2.pdp_cnt);
-    sprintf(rrdFormat, "%s L x%d", rrdFormat, pad);
+    sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(h2.pdp_cnt)==8)?'Q':'L', pad);
     total += pad;
   }
   total += sizeof(h2.pdp_cnt);
@@ -217,7 +217,7 @@ void format_live_head (void) {
 
   memset(rrdFormat, 0, sizeof(rrdFormat));
 
-  sprintf(rrdFormat, "L"); /* Big assumption that time_t is a long */
+  sprintf(rrdFormat, "%c", (sizeof(time_t)==8)?'Q':'L');
   printf("$self->{'liveHead'} = \"%s\"\n", rrdFormat);
 }
 
@@ -244,10 +244,10 @@ void format_pdp_prep  (void) {
 
   /* unknown sec is a long and pdp_val is a double */
   if (sizeof(unival) - sizeof(unsigned long)) {
-	  sprintf(rrdFormat, "%s L x%d", rrdFormat, 
+	  sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(unival)==8)?'Q':'L', 
 		  sizeof(unival) - sizeof(unsigned long));
   } else {
-	  sprintf(rrdFormat, "%s L", rrdFormat);
+	  sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(unival)==8)?'Q':'L');
   }
   total += sizeof(unival);
 
@@ -274,10 +274,10 @@ void format_cdp_prep  (void) {
   total += sizeof(unival);
 
   if (sizeof(unival) - sizeof(unsigned long)) {
-	  sprintf(rrdFormat, "%s L x%d", rrdFormat, 
+	  sprintf(rrdFormat, "%s %c x%d", rrdFormat, (sizeof(unival)==8)?'Q':'L', 
 		  sizeof(unival) - sizeof(unsigned long));
   } else {
-	  sprintf(rrdFormat, "%s L", rrdFormat);
+	  sprintf(rrdFormat, "%s %c", rrdFormat, (sizeof(unival)==8)?'Q':'L');
   }
   total += sizeof(unival);
 
@@ -294,7 +294,7 @@ void format_rra_ptr   (void) {
 
   memset(rrdFormat, 0, sizeof(rrdFormat));
 
-  sprintf(rrdFormat, "L");      /* Assuming pointers are unsigned long */
+  sprintf(rrdFormat, "%c", (sizeof(&rrdFormat)==8)?'Q':'L');
 
   printf("$self->{'rraPtr'} = \"%s\"\n", rrdFormat);
 }
