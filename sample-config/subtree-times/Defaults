@@ -27,9 +27,7 @@ graph       --default--
 
 targetType  subtree-times
     ds          =   "secondsPerRun, targetsPerRun, targetsPerSecond"
-    view        =   "# of targets:  targetsPerRun,
-                    Subtree times:  secondsPerRun,
-                    Throughput:     targetsPerSecond"
+	view		=	"numtargets, subtreetimes, throughput"
 
 datasource  secondsPerRun
     ds-source   =   "exec:0:%bindir%/get-collector-stats %auto-target-name%"
@@ -59,3 +57,16 @@ graph       targetsPerSecond
     y-axis      =   "targets/sec"
     units       =   "t/s"
     legend      =   "Targets per second"
+
+view numtargets		
+	label	    =	"# of Targets"
+	elements	=	"targetsPerRun"
+
+view subtreetimes
+	label	    =	"Subtree times"
+	elements	=	"secondsPerRun"
+
+view throughput
+	label	    =	"Throughput"
+	elements	=	"targetsPerSecond"
+
