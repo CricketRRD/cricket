@@ -1,0 +1,37 @@
+  listInterfaces+ is an enhanced Cricket configuration generator
+
+  listInterfaces+ is a new version of listInterfaces, which allows
+building a config interfaces file for a variety of devices, including
+the Redback SMS which was previously impossible to monitor in Cricket. 
+It also allows retrieval of interface speeds via the ifSpeed OID.  The
+new listInterfaces+ also works nicely on Ciscos, and has been
+generalized enough that it also works on some switches, e.g. Foundry
+ServerIrons (to map the basic interfaces, not the more sophisticated
+features.) It can use either the ifName or ifDescr OID as the Cricket
+"target" key, and either the ifDescr or ifAlias OID as the textual
+interface description.  It also offers some handy options for
+automatically suppressing output of entries for irrelevant
+pseudo-interfaces such as Cisco's Loopback, BVI, or CEF-layer
+interfaces; this makes it easier to always build the cricket config
+files directly off the router.
+
+  In general if you play around to get the right parameters, it ought
+to be usable with nearly any device you can bulk-walk and which
+supports *either* the standard SNMP OIDs for ifName or ifDescr as
+unique identifiers for all its interfaces.
+
+  For instance, here's how I automatically regenerate interface
+definitions for a whole group of Cisco routers, 7200s, 3620s, 2600s,
+and 2524s: 
+
+for router in *;
+  do echo "Querying router $router for current interface list"
+   $HOME/cricket/util/listInterfacesPlus+ --speed --suppress BVI \
+        --suppress Loop --suppress Null --suppress T1 --suppress cef \
+        $router $PASSWD > $router/interfaces
+done
+
+  (On the Redback SMS only, it still may require some post-creation
+hand-editing of the config files until I can add some new code in,
+because it creates non-unique names for protocol layers on some
+physical ports.)
