@@ -26,11 +26,10 @@ use strict;
 
 $main::gDSFetch{'sql'} = \&sqlFetch;
 
-my %sqlFetches;
-
 sub sqlFetch {
     my($dsList, $name, $target) = @_;
-    my(@results);
+    my @results;
+    my %sqlFetches;
 
     foreach my $line (@{$dsList}) {
         my @components = split(/:/, $line, 6);
