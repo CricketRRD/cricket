@@ -1,0 +1,189 @@
+#!/usr/local/bin/perl -w
+# -*- perl -*-
+
+# Cricket: a configuration, polling and data display wrapper for RRD files
+#
+#    Copyright (C) 1998-2002 Jeff R. Allen and WebTV Networks, Inc.
+#    Copyright (C) 2002 Bert Driehuis <driehuis@playbeing.org>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+BEGIN {
+        my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . "..";
+        eval "require '$programdir/cricket-conf.pl'";
+        eval "require '/usr/local/etc/cricket-conf.pl'"
+                                        unless $Common::global::gInstallRoot;
+        $Common::global::gInstallRoot ||= $programdir;
+}
+
+use lib "$Common::global::gInstallRoot/lib";
+
+use RRDs 1.000101;
+
+use Common::Version;
+use Common::global;
+use Common::Log;
+use Common::Options;
+use Common::Util;
+use Common::Map;
+use Common::HandleTarget;
+use ConfigTree::Cache;
+
+Common::Options::commonOptions();
+
+$Common::global::gCT ||= new ConfigTree::Cache;
+$gCT = $Common::global::gCT;
+$gCT->Base($Common::global::gConfigRoot);
+$gCT->Warn(\&Warn);
+
+if (! $gCT->init()) {
+    Die("Failed to open compiled config tree from " .
+        "$Common::global::gConfigRoot/config.db: $!");
+}
+
+# if they gave us no subtrees to focus on, use the root of the config tree
+if ($#ARGV+1 == 0) {
+    push @ARGV, '/';
+}
+
+# foreach subtree to do
+#     find the base node of that subtree
+#    foreach leaf node of this subtree
+#        process it
+
+my($subtree);
+foreach $subtree (@ARGV) {
+    if ($gCT->nodeExists($subtree)) {
+        $gCT->visitLeafs($subtree, \&handleTarget,
+                         \&handleTargetInstance, \&localHandleTargetInstance);
+    } else {
+        Warn("Unknown subtree $subtree.");
+    }
+}
+
+exit;
+
+# only use strict for the subroutines
+use strict;
+
+sub localHandleTargetInstance {
+    my($name, $target) = @_;
+    my($tname) = $target->{'auto-target-name'};
+    my($tpath) = $target->{'auto-target-path'};
+
+    # first, dump the dict, to help debug things
+    my($k, $v, $t);
+    $t =  "target $tname\n";
+    foreach $k (sort (keys(%{$target}))) {
+        next if ($k eq "auto-target-name");
+
+        $v = $target->{$k};
+        $v = "[undef]" if (! defined($v));
+
+        $t .= "\t$k = $v\n";
+    }
+    Debug($t);
+
+    # skip this if it's a meta-target
+    if ((defined($target->{'targets'})) || (defined($target->{'mtargets'}))) {
+        Debug("Skipping meta target $tname");
+        return;
+    }
+
+    my($datafile) = $target->{'rrd-datafile'};
+
+    if (!defined($datafile)) {
+        Warn("Could not find a datafile for $tname.");
+        return;
+    }
+
+    if (-f $datafile) {
+        return unless fixRRD($name, $target);
+    }
+}
+
+sub fixRRD {
+    # Create a new RRD file base on the contents of the
+    # referenced dictionary.
+    my($name, $target) = @_;
+
+    my($datafile) = $target->{'rrd-datafile'};
+    my($tname) = $target->{'auto-target-name'};
+    my($ttype) = lc($target->{'target-type'});
+
+    my($type, $val);
+    my($valid) = 0;
+    my(@dsDesc) = ();
+    my($dsCnt) = 0;
+    my(@arg) = ($datafile);
+
+    my($ttRef) = $main::gCT->configHash($name, 'targettype', $ttype, $target);
+    if (! $ttRef) {
+        Warn("Unknown target type: $ttype.");
+        return;
+    }
+
+    # first, process the ds tag
+
+    my($dses) = $ttRef->{'ds'};
+    if (! $dses) {
+        Warn("No ds tag found for target type $ttype.");
+        return;
+    }
+
+    my($ds);
+    foreach $ds (split(/\s*,\s*/, $dses)) {
+        my($dsname) = lc($ds);
+        my($d) = $main::gCT->configHash($name, 'datasource', $dsname, $target);
+
+        if (defined($d)) {
+            my $old_dsname;
+            my $new_dsname;
+            if ($Common::global::gLongDSName) {
+                $old_dsname = "ds$dsCnt";
+                $new_dsname = Common::Util::mungeDsName($dsname);
+            } else {
+                $old_dsname = Common::Util::mungeDsName($dsname);
+                $new_dsname = "ds$dsCnt";
+            }
+
+            push @dsDesc, "-r", "$old_dsname:$new_dsname";
+            $dsCnt++;
+
+        } else {
+            Warn("Datasource $ds referenced by target " .
+                 "type $ttype does not exist.");
+            return;
+        }
+    }
+
+    push(@arg, @dsDesc);
+
+    Info("Updating datafile $datafile for target name $tname.");
+    Debug(join(' ', 'RRDs::tune', @arg));
+    RRDs::tune(@arg);
+    if (my $error = RRDs::error()) {
+        Warn("Cannot update $datafile: $error\n");
+    }
+
+    return 1;
+}
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
