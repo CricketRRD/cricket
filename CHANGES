@@ -1,5 +1,13 @@
 New features, fixes in version 1.1.x (?):
 
+	The top level Defaults now sets rrd-min to 0 rather than
+	undef. The default rrd-ds-type now is DERIVE instead of
+	COUNTER. These changes prevent spikes in graphs. For the
+	intrepid, Cricket can now monitor snmp-uptime in conjunction
+	with using COUNTER (usage of snmp-uptime is not recommended
+	unless you understand all possible causes of SNMP counter
+	rollover; not all agent resets can be detected).
+
 	squid-proxy subtree Defaults file has changed. One
 	more variable is being polled now (CurrentLRUExpiration)
 	so you'll need to either recreate your old RRDs, or
