@@ -1,0 +1,20 @@
+#!/bin/sh
+
+VER=$1
+if [ -z "$VER" ]; then
+	VER=devel
+fi
+
+now=`date`
+
+echo "Updating VERSION file"
+
+rm VERSION
+echo "Cricket version $VER (" $now ")" > VERSION
+
+echo "Updating lib/Common/Version.pm"
+(
+	echo '$Common::global::gVersion = "Cricket version $VER (' $now ')";'
+	echo '1;'
+) > lib/Common/Version.pm
+
