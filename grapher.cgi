@@ -2022,7 +2022,7 @@ sub fixHome {
 }
 
 sub isnan {
-    return ($_[0] =~ /^NaN$/);
+    return ($_[0] =~ /^NaN/);
 }
 
 sub convertOps {
