@@ -81,6 +81,11 @@ New features, fixes in version 1.0.3
 	All files were made consistent in their indentation. We now
 	use soft tabs exclusively, with a tab size of 4.
 
+	RPN now allows negative constants, like in this magic which
+	inverts a percentage from 0-100 to 100-0:
+		100,-,-1,*
+	Fixes bugs #472862 & # 450391.
+
 New features, fixes in version 1.0.2 (18-May-00):
 
 	Fixed bug #104757, $clmxCode/max-color bugs.
