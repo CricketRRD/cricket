@@ -1562,26 +1562,35 @@ sub doGraph {
 			# 
 			# Deal with unknown values 
 			# 
-			my($x, @e, @g); 
+			my($x, @e, @g, $sum, @l, @n); 
 			if ($unkIsZero)  { 
+				$sum = "sum";
 				foreach $x (@d)  { 
-					push @e, "$x,UN,0,$x,IF";
+					push @l, $x, "UN";
+					push @e, $x, "UN", 0, $x, "IF";
 				} 
 				foreach $x (@f)  { 
-					push @g, "$x,UN,0,$x,IF";
+					push @n, $x, "UN";
+					push @g, $x, "UN", 0, $x, "IF";
 				} 
 			} else { 
+				$sum = "";
+				@l = @n = ();
 				@e = @d;
 				@g = @f;
 			}
 
-			my($str2) = "CDEF:tot$j=" .
+			my($str2) = "CDEF:${sum}tot$j=" .
 					join(',', @e, convertOps($MTargetsOps, $#d+1));
 			push @cdefs, $str2;
+			push @cdefs, "CDEF:tot$j=" .
+					join(',', @l, "UNKN", ("${sum}tot$j", "IF") x @d) if ($sum);
 			if ($mx) {
-				my($str2) = "CDEF:totmx$j=" .
+				my($str2) = "CDEF:${sum}totmx$j=" .
 					join(',', @g, convertOps($MTargetsOps, $#d+1));
 				push @cdefs, $str2;
+				push @cdefs, "CDEF:totmx$j=" .
+					join(',', @n, "UNKN", ("${sum}totmx$j", "IF") x @f) if ($sum);
 			}
 
 			$j++;
