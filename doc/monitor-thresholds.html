@@ -1,6 +1,9 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>Monitor Tresholds</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 	</head>
 	<body>
 		<h1>Understanding and Utilizing Cricket Monitor Thresholds</h1>
@@ -56,23 +59,18 @@
 				&lt;monitor-threshold> := &lt;data source>:&lt;monitor
 				type>:&lt;monitor type args>:&lt;action>:&lt;action args>
 			</p>
-			<p>
-				&lt;data source> := a data source defined for the target<br>
-				&lt;monitor type> := One of the six supported types: exact,
-				value, relation, hunt, quotient, or failures.<br>
-				&lt;monitor type args> := a colon-delimited list of arguments
-				specific to each monitor type<br>
-				&lt;action> := One of five supported actions: SNMP, MAIL,
-				EXEC, FUNC, or FILE.<br>
-				&lt;action args> := a colon-delimited list of arguments
-				specific to each action.
-			</p>
+			<pre>
+&lt;data source&gt; := a data source defined for the target
+&lt;monitor type&gt; := One of the six supported types: exact, value, relation, hunt, quotient, or failures.
+&lt;monitor type args&gt; := a colon-delimited list of arguments specific to each monitor type
+&lt;action&gt; := One of five supported actions: SNMP, MAIL, EXEC, FUNC, or FILE.
+&lt;action args&gt; := a colon-delimited list of arguments specific to each action.
+			</pre>
 		</div>
 
 		<div>
 			<h2>Examples</h2>
-			<p>
-				<pre>
+			<pre>
 target --default--
 &nbsp;&nbsp;&nbsp; mail-pgm = /usr/bin/mailx
 &nbsp;&nbsp;&nbsp; trap-address = 127.0.0.1
@@ -85,8 +83,7 @@ target --default--
 target pop-2
 &nbsp;&nbsp;&nbsp; persistent-alarms = false
 &nbsp;&nbsp;&nbsp; monitor-thresholds = "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
-				</pre>
-			</p>
+			</pre>
 			<p>
 				The first target, presumably a network link, has three
 				monitor thresholds. The first generates a SNMP trap whenever

@@ -1,4 +1,6 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>Installing Cricket for the Complete Beginner</title>
 	</head>
@@ -36,8 +38,7 @@
 					Install the modules you need. You need to install the
 					following Perl modules for Cricket to work correctly.
 				</p>
-				<p>
-					<pre>
+				<pre>
 Module             From
 --------------------------------------------------------------------
 MD5                CPAN: by-authors/id/GAAS/Digest-MD5-*.tar.gz
@@ -48,8 +49,7 @@ Time::HiRes        CPAN: by-authors/id/DEWEG/Time-HiRes-*.tar.gz
 
 SNMP_Session       http://www.switch.ch/misc/leinen/snmp/perl
 RRD                http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
-					</pre>
-				</p>
+				</pre>
 				<p>
 					Don't forget to run <tt>make site-perl-install</tt>
 					when installing RRD! 
@@ -70,21 +70,21 @@ RRD                http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
 					make it simple to install the modules you need. The magic
 					command to do this is: 
 				</p>
-				<p>
-					<pre>
+				<pre>
 % cd cricket/lib
 % perl -I. -MCPAN -e 'install Bundle::CricketPrereq'
-					</pre>
-				</p>
+				</pre>
 			</li>
 			<li>
-				Choose a user to run Cricket. Many sites create a special user
-				to run Cricket, but that's not necessary. If you choose to run
-				Cricket from your own account understand that there will be
-				several directories in your home directory that Cricket needs.
-				Learn to live with them until you know how to move them
-				elsewhere, or use a dedicated user for Cricket so that the
-				directories won't bug you. 
+				<p>
+					Choose a user to run Cricket. Many sites create a
+					special user to run Cricket, but that's not necessary.
+					If you choose to run Cricket from your own account
+					understand that there will be several directories in
+					your home directory that Cricket needs. Learn to live
+					with them until you know how to move them elsewhere, or
+					use a dedicated user for Cricket so that the directories
+					won't bug you. 
 				</p>
 				<p>
 					Do <b>not</b> run Cricket as the <tt>root</tt> user.
@@ -109,42 +109,37 @@ RRD                http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
 				directory of the user that will be running Cricket. For
 				example, if this was Cricket version 1.0.0, it would look like
 				this: 
-				<p>
-					<pre>
+				<pre>
 % cd ~cricket
 % gunzip -c cricket-1.0.0.tar.gz | tar xvf -
-					</pre> 
-				</p>
+				</pre> 
 				<p>
 					You now need to run "sh configure" from
 					$HOME/cricket-1.0.0:
 				</p>
-				<p>
-					<pre>
+				<pre>
 % cd ~cricket/cricket-1.0.0
 % sh configure
-					</pre> 
-				</p>
+				</pre> 
 				<p>
 					This will fix the Perl scripts to work in your
 					environment.
 				</p>
 			</li>
 			<li>
-				Make a softlink to the version you are running. To make it
-				easier to upgrade later you'll want to make a link from a
-				generic name to the specific name you are currently running.
-				(Windows NT 4.0 users can't use this trick. A Win32 shortcut
-				is not the same thing as a Unix softlink and will not help
-				here.) 
+				<p>
+					Make a softlink to the version you are running. To make
+					it easier to upgrade later you'll want to make a link
+					from a generic name to the specific name you are
+					currently running. (Windows NT 4.0 users can't use this
+					trick. A Win32 shortcut is not the same thing as a Unix
+					softlink and will not help here.) 
 				</p>
 				<p>To do this:</p>
-				<p>
-					<pre>
+				<pre>
 % cd ~cricket
 % ln -s cricket-1.0.0 cricket
-					</pre> 
-				</p>
+				</pre> 
 				<p>
 					This makes it so that you can refer to things in
 					$HOME/cricket, and still get the version 1.0.0 copies of
@@ -165,12 +160,10 @@ RRD                http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
 					correctly without changing the sample, so cricket-conf.pl
 					will contain these two lines: 
 				</p>
-				<p>
-					<pre>
+				<pre>
 $gCricketHome = "/home/cricket";
 $gInstallRoot = "$gCricketHome/cricket";
-					</pre>
-				</p>
+				</pre>
 				<p>
 					There usually is no need to set $gConfigRoot explicitly,
 					so leave that line commented out. 
@@ -179,20 +172,18 @@ $gInstallRoot = "$gCricketHome/cricket";
 					Usually, there is no need to touch anything else in this
 					file.
 				</p>
-				<p>
 			</li>
 			<li>
-				Copy the sample-config tree and modify it for your site.
-				Copy the files you intend to use from the sample-config
-				tree from the cricket distribution to $HOME/cricket-config.
-				You can use 
-				</p>
 				<p>
-					<pre>
+					Copy the sample-config tree and modify it for your site.
+					Copy the files you intend to use from the sample-config
+					tree from the cricket distribution to
+					$HOME/cricket-config. You can use 
+				</p>
+				<pre>
 % cd ~cricket
 % cp -r cricket/sample-config cricket-config
-					</pre>
-				</p>
+				</pre>
 				<p>
 					but the parts of the tree you won't be using immediately
 					may cause some (otherwise harmless) warnings later on.
@@ -201,12 +192,12 @@ $gInstallRoot = "$gCricketHome/cricket";
 					subtrees, routers and router-interfaces. If you can get
 					these going, you'll be able to get others going too. 
 				</p>
-				</p>
 			</li>
 			<li>
-				Setup the routers subtree. Go into the routers tree and look
-				at the targets file. This is where you want to tell Cricket
-				which router to talk to. 
+				<p>
+					Setup the routers subtree. Go into the routers tree and
+					look at the targets file. This is where you want to tell
+					Cricket which router to talk to. 
 				</p>
 				<p>
 					Note: As far as beginners are concerned, statistics are
@@ -221,13 +212,11 @@ $gInstallRoot = "$gCricketHome/cricket";
 					You will be editing the file "Targets" to tell Cricket
 					about your router. You want to change these lines: 
 				</p>
-				<p>
-					<pre>
+				<pre>
 target  engineering-router
 target-type=Cisco-7500-Router
 short-desc  =   "Router for engineering folks"
-					</pre> 
-				</p>
+				</pre> 
 				<p>
 					You should change the words "engineering-router" in the
 					first line to the hostname of the router you want to talk
@@ -273,13 +262,11 @@ short-desc  =   "Router for engineering folks"
 					~/cricket-config/Default. It has a section like this in
 					it:
 				</p>
-				<p>
-					<pre>
+				<pre>
 Target  --default--
 	... other stuff ...
 	snmp-community      = public
-					</pre>
-				</p>
+				</pre>
 				<p>
 					Change "public" to your community string. Write the file
 					and exit.
@@ -289,7 +276,7 @@ Target  --default--
 					compile it. Storing it in a compiled form makes accessing
 					it quicker and easier. Do this: 
 				</p>
-				<p><pre>% ~/cricket/compile</pre></p>
+				<pre>% ~/cricket/compile</pre>
 				<p>
 					If the compile command give you any errors, stop at this
 					point and fix the problem. This is a good time to check
@@ -304,25 +291,23 @@ Target  --default--
 					run the collector by hand on just this subtree first to
 					see if there were any errors. 
 				</p>
-				<p><pre>% ~/cricket/collector /routers</pre></p>
+				<pre>% ~/cricket/collector /routers</pre>
 				<p>
 					You should see something like this on screen, though this
 					example was wrapped by hand for readability: 
 				</p>
-				<p>
-					<pre>
+				<pre>
 [25-Jan-1999 15:21:20 ] Starting collector: Cricket version 0.64
 					    ( Fri May 14 14:14:28 PDT 1999 )
 [25-Jan-1999 15:21:20 ] Retrieved data for engineering-router:
 					    19,19,15,22,2510380,49824724
 [25-Jan-1999 15:21:20 ] Processed 1 targets in 2 seconds.
-					</pre> 
-				</p>
+				</pre> 
 				<p>
 					You can add the arguments "-logLevel debug" on to the end
 					of the command-line to get more information to help to
 					solve problems.
-				<p>
+				</p>
 			</li>
 			<li>
 				<p>
@@ -343,9 +328,7 @@ Target  --default--
 					print a Cricket config to it's standard output. Thus,
 					you can use it like this to save some work: 
 				</p>
-				<p>
-					<pre>% ~/cricket/util/listInterfaces engineering-router > interfaces</pre> 
-				</p>
+				<pre>% ~/cricket/util/listInterfaces engineering-router > interfaces</pre> 
 				<p>
 					You should check the automatically generated interfaces
 					file and make certain it only lists interfaces you are
@@ -365,7 +348,7 @@ Target  --default--
 					it will be able to talk to your router and collect data.
 					The command to do this is: 
 				</p>
-				<p><pre>% ~/cricket/collector /router-interfaces</pre></p>
+				<pre>% ~/cricket/collector /router-interfaces</pre>
 				<p>
 					Once again, you should see that Cricket is successfully
 					retrieving data for your targets. 
@@ -399,9 +382,9 @@ Target  --default--
 				<p>
 					You'll need to add an entry like this to cron:
 				</p>
-				<p>
-					<pre>0,5,10,15,20,25,30,35,40,45,50,55 * * * * $HOME/cricket/collect-subtrees normal</pre>
-				</p>
+				<pre>
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * $HOME/cricket/collect-subtrees normal
+				</pre>
 				<p>
 					Usually, this is done by typing "crontab -e". In the
 					crontab, it will all be on one line. It has been manually
@@ -450,9 +433,9 @@ Target  --default--
 				<p>
 					Please do not continue until you are certain things are
 					configured correctly. 
-					<font color="red">Hint</font>: if you are using a vanilla
-					RedHat Linux install, you are not ready to continue until
-					you do something about <a
+					<span style="color: red">Hint</span>: if you are using a
+					vanilla RedHat Linux install, you are not ready to
+					continue until you do something about <a
 					href="http://www.apache.org/docs/suexec.html">suEXEC</a>.
 					See the <a
 						href="http://cricket.sourceforge.net/support/FAQ">Cricket
@@ -462,8 +445,7 @@ Target  --default--
 					OK, now that you have Apache (or some other web server)
 					correctly installed, you need to make some more links. 
 				</p>
-				<p>
-					<pre>
+				<pre>
 	% cd $HOME/public_html
 	% mkdir cricket
 	% cd cricket
@@ -472,8 +454,7 @@ Target  --default--
 	% ln -s $HOME/cricket/mini-graph.cgi .
 	% ln -s $HOME/cricket/lib .
 	% ln -s $HOME/cricket/images .
-					</pre>
-				</p>
+				</pre>
 				<p>
 					These links expose the minimal amount of Cricket necessary
 					to the web server. 
@@ -495,12 +476,10 @@ Target  --default--
 					another method to start grapher.cgi, you'll have to
 					edit grapher.cgi and uncomment the lines 
 				</p>
-				<p>
-					<pre>
+				<pre>
 # $ENV{'HOME'} = '/path/to/cricket/home';
 # return;
-					</pre>
-				</p>
+				</pre>
 				<p>
 					and replace <tt>/path/to/cricket/home</tt> with the
 					directory you actually installed Cricket in. 

@@ -1,8 +1,10 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-		<meta name="author" content="Jake Brutlag">
-		<meta name="Version" content="Draft 4: Aug 8, 2001">
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<meta name="author" content="Jake Brutlag" />
+		<meta name="Version" content="Draft 4: Aug 8, 2001" />
 		<title>Installing Cricket on Win2K to Monitor WMI Counters</title>
 	</head>
 	<body>
@@ -284,15 +286,15 @@
 				module, wbem.pm. This diagram illustrates the layers of the
 				data collection mechanism:
 			</p>
-			<p><img src="win2kw1.gif" height="261" width="363"></p>
+			<p><img src="win2kw1.gif" height="261" width="363" alt="" /></p>
 			<p>
 				As described in the Cricket documentation, each data
 				collection mechanism has a scheme, which describes a mapping
 				between the ds-source tag of the data source dictionary
 				entry and the list of arguments passed to the fetch module.
 				For WBEM, the scheme is:
-				<pre>wbem:host:namespace:class:field:predicate</pre>
 			</p>
+			<pre>wbem:host:namespace:class:field:predicate</pre>
 			<p>
 				The arguments host and namespace are used to establish a
 				connection to either the local or a remote machine. The
@@ -320,8 +322,8 @@
 				or more records, or instances. The attributes of the class
 				are the table fields. Conceptually, the class, field, and
 				predicate for a WBEM data source generate the query:
-				<pre>Select field from class where predicate</pre>
 			</p>
+			<pre>Select field from class where predicate</pre>
 			<p>
 				If the class of interest has only once instance, then the
 				predicate argument can be omitted. If the class has multiple
@@ -345,20 +347,25 @@
 				ReadOperationCount and WriteOperationCount for some
 				Win32_Process on the same machine. Here are the two
 				ds-source entries:
-				<pre>
+			</p>
+			<pre>
 wbem:host:Root\\CIMV2:Win32_Process:ReadOperationCount:Name='process.exe'
 wbem:host:Root\\CIMV2:Win32_Process:WriteOperationCount:Name='process.exe'
-				</pre>
+			</pre>
+			<p>
 				If these data source are in the same target, wbem.pm will
 				establish a single connection to host as username and issue
 				the WQL query:
-				<pre>
+			</p>
+			<pre>
 Select "ReadOperationCount", "WriteOperationCount" from "Win32_Process" where Name = 'process.exe'
-				</pre>
-If you are uncertain as to what can be monitored via WMI, you can use the
-WMI Object Browser included with the WMI SDK. You can test the semantics and
-syntax of WQL queries through wbemtest.exe, a utility included on all Win2K
-systems.
+			</pre>
+			<p>
+				If you are uncertain as to what can be monitored via WMI,
+				you can use the WMI Object Browser included with the WMI
+				SDK. You can test the semantics and syntax of WQL queries
+				through wbemtest.exe, a utility included on all Win2K
+				systems.
 			</p>
 		</div>
 
@@ -366,7 +373,7 @@ systems.
 			<h3>Acknowledgments</h3>
 			<p>
 				Thanks to Brian Gann, Cary Yee, Adam Meltzer, Jeff Allen,
-				and John Zola. <p>Questions or comments: contact <a
+				and John Zola. Questions or comments: contact <a
 				href="mailto:%20jakeb@users.sourceforge.net">Jake
 				Brutlag</a>.
 			</p>

@@ -1,4 +1,6 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
     	<title>Using Cricket with mod_perl </title>
 	</head>
@@ -31,14 +33,12 @@
 			Once you have an installation of Apache with mod_perl installed,
 			you need to add lines like the following to your httpd.conf file:
 		</p>
-		<p>
-		<blockquote><pre>
+		<pre>
 		&lt;Files *.cgi&gt;
 			SetHandler perl-script
 			PerlHandler Apache::Registry
 			Options ExecCGI
-		&lt;/Files&gt;</pre></blockquote>
-		</p>
+		&lt;/Files&gt;</pre>
 		<p>
 			These lines tell your webserver that whenever it sees a file
 			ending in .cgi, it should let the embedded Perl interpreter run

@@ -1,4 +1,6 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<title>copy-to SQL</title>
 	</head>
@@ -41,13 +43,8 @@
 		<div>
 			<h3>Using</h3>
 			<p>In a target definition create a copy-to:</p>
-			<p>
-				<tt>
-					target myImportantDatasource 
-					<br>
-					copy-to = "sql:dbi:Sybase:NMSDB,mylogin,mypassword" 
-				</tt>
-			</p>
+			<p><tt>target myImportantDatasource</tt></p>
+			<p><tt>copy-to = "sql:dbi:Sybase:NMSDB,mylogin,mypassword"</tt></p>
 			<p>
 				As you can see, it's pretty simple to define a copy-to. The
 				<tt>dbi:Sybase:NMSDB</tt> can be customized to use whatever

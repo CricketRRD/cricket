@@ -1,4 +1,6 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
     	<title>A Gentle Introduction to Cricket</title>
 	</head>
@@ -242,8 +244,7 @@
 					<tt>%snmp%</tt> into
 					<tt>public@engineering-router:161</tt>.
 				</p>
-				<p>
-					<pre>
+				<pre>
 From sample-config/Defaults
 			snmp-community      = public
 			snmp-port           = 161
@@ -251,8 +252,7 @@ From sample-config/Defaults
 From sample-config/routers/Defaults
 			router              = %auto-target-name%
 			snmp-host           = %router%
-					</pre>
-				</p>
+				</pre>
 				<p>
 					You can see that one level about the leaf, the
 					<tt>snmp-host</tt> tag gets set (via the <tt>router</tt>
