@@ -1,0 +1,27 @@
+Target --default--
+	wbem-ns = root\\cimv2
+	wbem-host = %auto-target-name%
+	wbem-obj = Win32_PerfRawData_Special_Application_Data
+
+	directory-desc = "Monitoring the health of the DBS"
+
+datasource --default--
+	rrd-ds-type = COUNTER
+
+graph --default--
+	units = "/sec"
+
+datasource FileDownloadStream
+	ds-source = "wbem:%wbem-host%:%wbem-ns%:%wbem-obj%:FileDownloadStream"
+
+datasource NotificationsStream
+	ds-source = "wbem:%wbem-host%:%wbem-ns%:%wbem-obj%:NotificationsStream"
+
+datasource TotalBytes
+	ds-source = "wbem:%wbem-host%:%wbem-ns%:%wbem-obj%:TotalBytes"
+
+targetType --default--
+	ds =   "FileDownloadStream,
+		NotificationsStream,
+		TotalBytes"
+
