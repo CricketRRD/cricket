@@ -1,0 +1,4 @@
+target nt-server-1
+target nt-server-2
+target nt-domaincontroller-1
+target nt-database-1

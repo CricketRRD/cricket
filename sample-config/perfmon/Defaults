@@ -1,0 +1,198 @@
+# Notes:
+#
+# y is the numerator - in this case the perfmon counter.
+# x is the denominator - usually a PerfTime counter.
+# tb is the timebase - usually PerfFreq.
+#
+datasource --default--
+	rrd-ds-type = DERIVE
+	rrd-max = 1288490188500
+
+graph --default--
+	units = %
+	legend = "If you're reading this, I need to add a legend!"
+	DRAW-AS = LINE1
+
+# PerfTime is a denominator used for durational counters. This is known as 'x'
+# in my formula examples.
+datasource PerfTime
+	ds-source = "perfmon:%auto-target-name%::::perftime,nodur"
+
+# PerfTime100ns is a 100nanosecond precision denominator used for some
+# durational counters. This is also known as 'x' in my formula examples.
+# Counters NEVER use both PerfTime and PerfTime100ns.
+datasource PerfTime100ns	
+	ds-source = "perfmon:%auto-target-name%::::perftime100ns,nodur"
+
+# PerfFreq is an NT TimeBase which is required for some counter calculation.
+datasource PerfFreq
+	ds-source = "perfmon:%auto-target-name%::::perffreq,nodur"
+
+# Collection for some raw counters
+datasource RawProcessorTime
+	ds-source = "perfmon:%auto-target-name%:Processor:% Processor Time:_Total"
+datasource RegistryQuotaBase
+	ds-source = "perfmon:%auto-target-name%:System:% Registry Quota in Use::base"
+datasource RegistryQuotaFraction
+	ds-source = "perfmon:%auto-target-name%:System:% Registry Quota in Use::fraction"
+datasource RawInterruptTime
+	ds-source = "perfmon:%auto-target-name%:Processor:% Interrupt Time:_Total"
+
+datasource RawUserTime
+	ds-source = "perfmon:%auto-target-name%:Processor:% User Time:_Total"
+
+datasource RawPrivilegedTime
+	ds-source = "perfmon:%auto-target-name%:Processor:% Privileged Time:_Total"
+
+datasource RawInterruptsSec
+	ds-source = "perfmon:%auto-target-name%:Processor:Interrupts/sec:_Total"
+
+datasource MemoryCommittedBase
+	ds-source = "perfmon:%auto-target-name%:Memory:% Commited Bytes In Use::base"
+
+datasource MemoryCommittedFraction
+	ds-source = "perfmon:%auto-target-name%:Memory:% Commited Bytes In Use::fraction"
+
+datasource PagingFileUsageBase
+	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage:_total:base"
+
+datasource PagingFileUsageFraction
+	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage:_total:fraction"
+
+datasource PagingFilePeakUsageBase
+	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage Peak:_total:base"
+
+datasource PagingFilePeakUsageFraction
+	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage Peak:_total:fraction"
+
+
+# These are instant counters, which require no further processing.
+datasource Processes
+	ds-source = "perfmon:%auto-target-name%:System:Processes"
+	rrd-ds-type = GAUGE
+
+graph Processes
+	legend = "System Processes"
+	units = "processes"
+
+datasource Threads
+	ds-source = "perfmon:%auto-target-name%:System:Threads"
+	rrd-ds-type = GAUGE
+
+graph Threads
+	legend = "System Threads"
+	draw-as = AREA
+	units = "threads"
+
+datasource TsActiveSessions
+	ds-source = "perfmon:%auto-target-name%:Terminal Services:Active Sessions"
+	rrd-ds-type = GAUGE
+
+graph TsActiveSessions
+	legend = "Terminal Server Active Sessions"
+	units = "sessions"
+
+datasource TsInactiveSessions
+	ds-source = "perfmon:%auto-target-name%:Terminal Services:Inactive Sessions"
+	rrd-ds-type = GAUGE
+
+graph TsInactiveSessions
+	legend = "Terminal Server Inactive Sessions"
+	units = "sessions"
+
+datasource MemoryAvailable
+	ds-source = "perfmon:%auto-target-name%:Memory:Available MBytes"
+	rrd-ds-type = GAUGE
+
+graph MemoryAvailable
+	draw-as = AREA
+	legend = "Memory Available"
+	units = "MBytes"
+
+# Computations for raw counters
+datasource PercentRegistryQuota
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds5,ds4,/
+
+graph PercentRegistryQuota
+	legend = "% Registry Quota"
+
+datasource AvgProcessorTime
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds3,ds1,/
+
+graph AvgProcessorTime
+	legend = "% Processor Time
+	draw-as = AREA
+
+datasource AvgInterruptTime
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds6,ds1,/
+
+graph AvgInterruptTime
+	legend = "% Interrupt Time"
+
+datasource AvgUserTime
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds7,ds1,/
+
+graph AvgUserTime
+	legend = "% User Time"
+
+datasource AvgPrivilegedTime
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds8,ds1,/
+
+graph AvgPrivilegedTime
+	legend = "% Privileged Time"
+
+# (x1-x0)/((y1-y0)/tb)
+# i don't know if this is right or not.. rpn expert help!
+datasource AvgInterruptsSec
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds9,ds0,ds2,/,/
+
+graph AvgInterruptsSec
+	legend = "Interrupts/sec"
+	units = "/sec"
+
+datasource MemoryCommitted
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds11,ds10,/
+
+graph MemoryCommitted
+	legend = "% Memory Committed"
+	draw-as = AREA
+
+datasource SwapUsage
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds13,ds12,/
+
+graph SwapUsage
+	legend = "% Swap Usage"
+
+datasource SwapUsagePeak
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds15,ds14,/
+
+graph SwapUsagePeak
+	legend = "% Swap Usage Peak"
+	draw-as = LINE2
+
+datasource TsSessionsTotal
+	rrd-ds-type = COMPUTE
+	rrd-cdef = ds18,ds19,+
+
+graph TsSessionsTotal
+	draw-as = AREA
+	legend = "Total Terminal Server Sessions"
+
+targetType --default--
+	ds =   "PerfTime, PerfTime100ns, PerfFreq, RawProcessorTime, RegistryQuotaBase, RegistryQuotaFraction, RawInterruptTime, RawUserTime, RawPrivilegedTime, RawInterruptsSec, MemoryCommittedBase, MemoryCommittedFraction, PagingFileUsageBase, PagingFileUsageFraction, PagingFilePeakUsageBase, PagingFilePeakUsageFraction, Processes, Threads, TsActiveSessions, TsInactiveSessions, MemoryAvailable,PercentRegistryQuota,AvgProcessorTime,AvgInterruptTime,AvgUserTime,AvgPrivilegedTime,AvgInterruptsSec,MemoryCommitted,SwapUsage,SwapUsagePeak"
+
+	view = "Processor: AvgProcessorTime AvgUserTime AvgInterruptTime AvgPrivilegedTime,
+		    Registry: PercentRegistryQuota,
+		    System: Threads Processes,
+		    Terminal Server: TsActiveSessions TsInactiveSessions,
+		    Memory: SwapUsage SwapUsagePeak MemoryCommitted,
+		    Memory Available: MemoryAvailable"
