@@ -18,7 +18,17 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+#
+# External modules.
+use Fcntl ':mode'; # stat() constants; check whether a file is a socket.
+#@@@FIXME: This pollutes our namespace. We should use qw(func) here.
+use Socket;        # Socket operations.
+#@@@FIXME;
+
+#
+# Cricket internal modules.
 use Common::Log;
+
 
 $main::gDSFetch{'file'} = \&fileFetch;
 
@@ -59,26 +69,36 @@ sub fileFetch {
         Info("Reading data from $file for " .
              $target->{'auto-target-name'});
 
-        if (open(F, "<$file")) {
-            my(@lines);
-            chomp(@lines = <F>);
-            close(F);
+        stat $file; # Populate magic "_" structure (and $!).
+        if (-S _) { # $file is connected to a UNIC domain socket.
+            socket  F, PF_UNIX, SOCK_STREAM, 0;
+            connect F, sockaddr_un($file)
+                or Debug("connect($file) returned: $!");
+        } elsif (-f _) { # $file is a plain file.
+            open F, "<$file"
+                or Debug("open($file) returned: $!");
+        }
 
-            while ($il = shift @{ $ilRef } ) {
-                my($index, $lineno) = split(/:/, $il, 2);
-                if (defined($lines[$lineno])) {
-                    push @results, "$index:$lines[$lineno]";
-                } else {
-                    push @results, "$index:U";
-                }
-            }
-        } else {
+        unless (defined F) { # No F means open() or connect() failed...
             Error("Could not fetch data for " .
                   $target->{'auto-target-name'} .
-                  " from file $file: $!.");
+                  " from $file: $!.");
+            next; # ...so skip it.
+        }
+
+        my @lines;
+        chomp(@lines = <F>);
+        close F;
+
+        while ($il = shift @{ $ilRef } ) {
+            my($index, $lineno) = split(/:/, $il, 2);
+            if (defined($lines[$lineno])) {
+                push @results, "$index:$lines[$lineno]";
+            } else {
+                push @results, "$index:U";
+            }
         }
     }
-
     return @results;
 }
 
