@@ -42,7 +42,7 @@ use exec;
 use file;
 use field;
 if (Common::Util::isWin32()) {
-   eval "use wbemodbc";
+   eval "use wbem";
 }
 
 # See the documentation on ds-source FUNC for why this defaults

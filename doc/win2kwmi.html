@@ -12,7 +12,7 @@
 <body>
 
 <h1>Installing Cricket on Win2K to Monitor WMI Counters</h1>
-<p>Draft 2: March 1, 2001&nbsp;<o:p>
+<p>Draft 3: April 6, 2001&nbsp;<o:p>
 </o:p>
 </p>
 <p>Windows 2000 includes Windows Management Instrumentation (WMI), an
@@ -22,7 +22,7 @@ performance data counters are available through WMI.</p>
 <p>Cricket is an open-source software tool originally designed for network
 monitoring and trend analysis on UNIX platforms. The source data monitored by
 Cricket is not restricted to network data and it has been successfully applied
-to monitor hosts and applications on the WebTV production service. Cricket is
+to monitor hosts and applications at WebTV. Cricket is
 written in Perl, and its underlying data storage technology, RRDtool, is
 available for Win32 platforms. Cricket includes a CGI component for monitoring
 access from any web browser.</p>
@@ -52,11 +52,6 @@ the components along with their provider.</p>
   <ul style="margin-top:0in" type="circle">
     <li class="MsoNormal" style="mso-list:l3 level2 lfo7;tab-stops:list 1.0in">RRDs</li>
   </ul>
-  <li class="MsoNormal" style="mso-list:l3 level1 lfo7;tab-stops:list .5in">Included
-    with Cricket distribution</li>
-  <ul style="margin-top:0in" type="circle">
-    <li class="MsoNormal" style="mso-list:l3 level2 lfo7;tab-stops:list 1.0in">LeanODBC</li>
-  </ul>
   <li class="MsoNormal" style="mso-list:l3 level1 lfo7;tab-stops:list .5in"><a href="http://www.switch.ch/misc/leinen/snmp/perl">www.switch.ch/misc/leinen/snmp/perl</a></li>
   <ul style="margin-top:0in" type="circle">
     <li class="MsoNormal" style="mso-list:l3 level2 lfo7;tab-stops:list 1.0in">SNMP_Session</li>
@@ -64,8 +59,6 @@ the components along with their provider.</p>
 </ul>
 <p>Binaries:</p>
 <ul style="margin-top:0in" type="disc">
-  <li class="MsoNormal" style="mso-list:l3 level1 lfo7;tab-stops:list .5in">WBEM
-    ODBC Adapter (Win2K install CD)</li>
   <li class="MsoNormal" style="mso-list:l3 level1 lfo7;tab-stops:list .5in">Berkeley
     DB (<a href="http://www.sleepycat.com">www.sleepycat.com</a>)</li>
   <li class="MsoNormal" style="mso-list:l3 level1 lfo7;tab-stops:list .5in">ActivePerl
@@ -126,35 +119,30 @@ directory to your path.</p>
 tab-stops:list .25in">4.
 Install Berkeley DB. Following the instructions included with the
 distribution. Your goal is compile the DLL libdb31.dll. Once compiled, make
-certain this DLL is on your path.</p>
+certain this DLL is on your path..</p>
 <p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
 tab-stops:list .25in">5.
-Install the WBEM ODBC Adapter. On your Win2K source media, the WBEM ODBC
-Adapter setup program is in the Valueadd\MSFT\MGMT\WBEMODBC directory.</p>
-<p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
-tab-stops:list .25in">6.
 Install Cricket. You may find John Zola's <a href="http://cricket.sourceforge.net/support/FAQ/nt_cricket.html">Installing
 Cricket on NT 4.0</a> helpful. The remainder of the document refers to the installation
 directory as &lt;install dir&gt;. The cricket subdirectory of &lt;install
 dir&gt; contains the Cricket source code.</p>
 <p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
-tab-stops:list .25in">7.
+tab-stops:list .25in">6.
 Install the additional Perl packages. For Perl extensions (a package that
 includes a compiled DLL), the extension build must be compatible with the build
 of ActiveState installed. Currently, ActiveState builds 5xx are Perl 5.005 and
 ActiveState builds 6xx are Perl 5.6. The packages DB_File, Digest-MD5, and
 TimeDate are available at the ActiveState Perl Package Archive for both 5xx and
 6xx ActiveState builds. They can be installed via the utility <a href="http://velocity.activestate.com/docs/ActivePerl/faq/ActivePerl-faq2.html">ppm</a>.
-You will need to compile the source for the RRDs and LeanODBC packages after
+You will need to compile the source for the RRDs package after
 installing ActiveState. The source of RRDs is available from <a href="http://www.rrdtool.org/">www.rrdtool.org</a>.
-For LeanODBC, refer to the README under &lt;install dir&gt;\cricket\util\LeanODBC.
-After compilation, manually install these packages to the site/lib subtree of
+After compilation, manually install this packages to the site/lib subtree of
 your Perl installation.
 SNMP_Session package does not need to be compiled because it does rely on an
 auxiliary DLL. After you download the archive, extract the *.pm files and
 install them in your site/lib subtree.</p>
 <p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
-tab-stops:list .25in">8.
+tab-stops:list .25in">7.
 Configure IIS. Start the Internet Services Manager.</p>
 <p style="margin-left:1.0in;text-indent:-.25in;mso-list:l4 level2 lfo5;
 tab-stops:list 1.0in">a.
@@ -188,7 +176,7 @@ mini-graph.cgi. In mini-graph.cgi you may also need to replace 'perl' with the
 complete path to the Perl executable (c:/perl/bin/perl) on the exec() call mini-graph.cgi
 uses to invoke grapher.cgi in the doGraph() subroutine.</p>
 <p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
-tab-stops:list .25in">9.
+tab-stops:list .25in">8.
 Create a scheduled task to run the Cricket script collect-subtrees (this
 the a wrapper script which invokes the Cricket collector and performs logging).</p>
 <p style="margin-left:1.0in;text-indent:-.25in;mso-list:l4 level2 lfo5;
@@ -221,76 +209,79 @@ whatever interval you are using).</p>
 tab-stops:list 1.0in">e.
 Back on the Task tab, uncheck the Enabled checkbox.</p>
 <p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
-tab-stops:list .25in">10. Create and compile a Cricket config tree. Configure the subtree-sets file (in
+tab-stops:list .25in">9. Create and compile a Cricket config tree. Configure the
+subtree-sets file (in
 &lt;install dir&gt;\cricket). Refer to <a href="reference.html">Cricket
 documentation</a> and the next section on this document, <a href="#wbemodbc">Monitoring
 WMI Counters</a>. After successful compilation, you may choose to run the
 collector manually to check for any errors.</p>
 <p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
-tab-stops:list .25in">11. Enable the scheduled task you created in step (9).</p>
+tab-stops:list .25in">10. Enable the scheduled task you created in step (8).</p>
 <p style="margin-left:.25in;text-indent:-.25in;mso-list:l4 level1 lfo5;
-tab-stops:list .25in">12. After a few minutes, check log files in &lt;install dir&gt;/cricket-logs to verify
+tab-stops:list .25in">11. After a few minutes, check log files in &lt;install dir&gt;/cricket-logs to verify
 everything is running okay. Test the grapher on the monitoring machine with the
 URL: <a href="http://localhost/crickethome/cricket/grapher.cgi">http://localhost/crickethome/cricket/grapher.cgi</a></p>
 <h2><a name="wbemodbc">Monitoring WMI Counters</a></h2>
 <p>&nbsp;<o:p>
 </o:p>
-Polling WMI counters is facilitated through the fetch module, wbemodbc.pm. This
+Polling WMI counters is facilitated through the fetch module, wbem.pm. This
 diagram illustrates the layers of the data collection mechanism:</p>
 
-<p><img src="win2kw1.gif" v:shapes="_x0000_s1026 _x0000_s1027 _x0000_s1028 _x0000_s1029 _x0000_s1030 _x0000_s1031 _x0000_s1032 _x0000_s1033 _x0000_s1034 _x0000_s1035 _x0000_s1036 _x0000_s1037 _x0000_s1038 _x0000_s1039 _x0000_s1040 _x0000_s1041 _x0000_s1042" width="430" height="413"></p>
+<p><img border="0" src="win2kw1.gif" width="363" height="261"></p>
 
-<!--[if gte vml 1]></o:wrapblock><![endif]-->
-<br style="mso-ignore:vglayout" clear="ALL">
-&nbsp;<o:p>
-</o:p>
 <p>As described in the Cricket documentation, each data collection mechanism has
 a scheme, which describes a mapping between the ds-source tag of the data source
-dictionary entry and the list of arguments passed to the fetch module. For
-WBEMODBC, the scheme is:</p>
+dictionary entry and the list of arguments passed to the fetch module. For WBEM, the scheme is:</p>
 <pre>
-wbemodbc:username:\\\\host:namespace:class:field:predicate
+wbem:host:namespace:class:field:predicate
 </pre>
-<p>The arguments username, host, and namespace are used to establish a
+<p class="MsoNormal">The arguments host and namespace are used to establish a
 connection to either the local or a remote machine. The arguments class, field,
-and predicate are use to control a WQL query.</p>
-<p>Username should always be the monitoring account, which is the account the
-Cricket collector runs under. There is no password field for security reasons
-(i.e. including the password would require it to appear in clear text in a
-Cricket configuration file). The DCOM layer automatically substitutes the
-password of the monitoring account when a connection is established to a remote
-machine. When collecting data from the local machine, omit the username.</p>
-<p>Host is a Win2K host name, preceded by the double-backslash (each of which
-must be escaped). Host may be blank or specified for the local machine.</p>
-<p>Namespace refers to the WMI namespace to be queried. Most of the interesting
-WMI classes are under Root\CIMV2. Backslashes in the namespace specification
-must also be escaped.</p>
-<p>WQL is a language very similar to SQL for querying WMI classes. A WMI class
-can be thought of as a table, with one or more records, or instances. The
-attributes of the class are the table fields. Conceptually, the class, field,
-and predicate for a WBEMODBC data source generate the query:</p>
-<pre>Select &#034field&#034 from &#034class&#034 where predicate</pre>
-<p>If the class of instance has only once instance, then the predicate argument
-can be omitted. If the class has multiple instances, you should specific a
-predicate to restrict the result to a single instance. Although Cricket supports
-multiple instances for SNMP data sources, this is not the case for WBEMODBC data
-sources. Each data source must be mapped to exactly one WMI instance; in other
-words, each WQL query must be a singleton select.</p>
-<p>Similar to the Cricket SNMP fetch modules, wbemodbc.pm consolidates multiple
-requests to the same remote host and the same WMI class (table) as long as the
-data sources are within the same target (RRD file). Separate targets requiring
-remote connections to the same host will result in separate connections.</p>
-<p>For example, suppose you wish to monitor both the ReadOperationCount and
-WriteOperationCount for some Win32_Process on the same machine. Here are the two
-ds-source entries:
+and predicate are use to construct a WQL query.<o:p>
+</o:p>
 </p>
-<pre>&nbsp;<o:p> </o:p>
-wbemodbc:username:\\\\host:Root\\CIMV2:Win32_Process:ReadOperationCount:Name=&#039process.exe&#039
-wbemodbc:username:\\\\host:Root\\CIMV2:Win32_Process:WriteOperationCount:Name=&#039process.exe&#039
+<p class="MsoNormal">No username and password are specified for remote queries.
+The DCOM layer automatically substitutes the username and password of the
+monitoring account when a connection is established to a remote machine.<o:p>
+</o:p>
+</p>
+<p class="MsoNormal">Host is a Win2K host name. Host should be blank or
+unspecified for the local machine.</p>
+<p class="MsoNormal">Namespace refers to the WMI namespace to be queried. Most
+of the interesting WMI classes are under Root\CIMV2. Backslashes in the
+namespace specification must be escaped.</p>
+<p class="MsoNormal"><span style="font-size: 12.0pt; mso-bidi-font-size: 13.0pt; mso-fareast-font-family: Times New Roman; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-bidi-font-weight: bold">WQL
+is a language very similar to SQL for querying WMI classes. A WMI class can be
+thought of as a table, with one or more records, or instances. The attributes of
+the class are the table fields. Conceptually, the class, field, and predicate
+for a WBEM data source generate the query:</span></p>
+<pre>Select field from class where predicate</pre>
+<p class="MsoNormal">If the class of interest has only once instance, then the
+predicate argument can be omitted. If the class has multiple instances, you
+should specific a predicate to restrict the result to a single instance.
+Although Cricket supports multiple instances for SNMP data sources, this is not
+the case for WBEM data sources. Each data source must be mapped to exactly one
+WMI instance; in other words, each WQL query must be a singleton select.<o:p>
+</o:p>
+</p>
+<p class="MsoNormal">Similar to the Cricket SNMP fetch modules, wbem.pm
+consolidates multiple requests to the same remote host and the same WMI class
+(table) as long as the data sources are within the same target (RRD file).
+Separate targets requiring remote connections to the same host will result in
+separate connections.<o:p>
+</o:p>
+</p>
+<span style="font-size: 12.0pt; mso-bidi-font-size: 13.0pt; mso-fareast-font-family: Times New Roman; mso-ansi-language: EN-US; mso-fareast-language: EN-US; mso-bidi-language: AR-SA; mso-bidi-font-weight: bold">For
+example, suppose you wish to monitor both the ReadOperationCount and
+WriteOperationCount for some Win32_Process on the same machine. Here are the two
+ds-source entries:</span>
+<pre>
+wbem:host:Root\\CIMV2:Win32_Process:ReadOperationCount:Name='process.exe'
+wbem:host:Root\\CIMV2:Win32_Process:WriteOperationCount:Name='process.exe'
 </pre>
-<p>If these data source are in the same target, wbemodbc.pm will establish a
+<p>If these data source are in the same target, wbem.pm will establish a
 single connection to host as username and issue the WQL query:</p>
-<pre>Select &#034ReadOperationCount&#034, &#034WriteOperationCount&#034 from &#034Win32_Process&#034 where Name = &#039process.exe&#039</pre>
+<pre>Select &quot;ReadOperationCount&quot;, &quot;WriteOperationCount&quot; from &quot;Win32_Process&quot; where Name = 'process.exe'</pre>
 <p>If you are uncertain as to what can be monitored via WMI, you can use the WMI
 Object Browser included with the WMI SDK. You can test the semantics and syntax
 of WQL queries through wbemtest.exe, a utility included on all Win2K systems.</p>
