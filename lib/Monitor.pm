@@ -29,6 +29,7 @@ $Common::global::gMonitorTable{'hunt'} = \&monHunt;
 $Common::global::gMonitorTable{'relation'} = \&monRelation;
 # Support for aberrant behavior detection
 $Common::global::gMonitorTable{'failures'} = \&monFailures;
+$Common::global::gMonitorTable{'quotient'} = \&monQuotient;
 
 sub new {
 	my($package) = @_;
@@ -52,6 +53,11 @@ sub monValue {
 		return 1;
 	}
 
+	if ($value eq 'NaN')  {
+		Info("Skipping: Last value from datafile was NaN.");
+		return 1;
+	}
+
 	$min = shift(@Thresholds);
 	$min = 'n' if (! defined($min));
 
@@ -69,8 +75,9 @@ sub monValue {
 	} else {
 		$maxOK = ($value < $max)
 	}
+	Debug ("Value is $value; min is $min; max is $max");
 
-	return ($maxOK && $minOK);
+	return ($maxOK && $minOK,$value);
 }
 
 sub monHunt {
@@ -125,6 +132,12 @@ sub monHunt {
 	return ($cmp_value >= $roll);
 }
 
+# if X and Y are data sources (Y is possibly X shifted by some temporal offset)
+# and Z is a threshold, then a relation monitor checks:
+# abs(Y - X)/Y > Z for Z a percentage (marked pct)
+# abs(Y - X) > Z for Z not a percentage
+# Default > can be replaced with <
+# return 1 if the check passes or error, 0 if fail
 sub monRelation {
 	my($self, $target, $ds, $type, $args) = @_;
 
@@ -153,50 +166,18 @@ sub monRelation {
 		Warn("Skipping: Couldn't fetch last value from datafile.");
 		return 1;
 	}
-
-	my($cmp_target);
-	if(! $cmp_name) {
-		$cmp_target = $target;
-	} else {
-		$cmp_name = join('/',$target->{'auto-target-path'}, $cmp_name)
-			if (!($cmp_name =~ /^\//));
-
-		$cmp_target = $Common::global::gCT->configHash(lc($cmp_name), 'target');
-		if(defined($cmp_target)) {
-			ConfigTree::Cache::addAutoVariables(lc($cmp_name),
-							$cmp_target, $Common::global::gConfigRoot);
-			ConfigTree::Cache::expandHash($cmp_target, $cmp_target, \&Warn);
-		} else { 
-			Warn("Skipping: No such target: $cmp_name");
-			return 1;
-		}
-	}
-
-	$cmp_ds = $ds unless ($cmp_ds);
-
-	my($cmp_value) = $self->rrdFetch($cmp_target->{'rrd-datafile'},
-							$self->getDSNum($cmp_target,$cmp_ds), $cmp_time);
-
-	if(!defined($cmp_value)) {
-		Warn("Skipping: Couldn't fetch value for $cmp_time ".
-				"seconds ago from $cmp_name.");
-		return 1;
-	}
-
-	if($cmp_value =~ /NaN/) {
-		Info("Skipping: Data for $cmp_time seconds ago from " .
-				"$cmp_name is NaN");
-		return 1;
-	}
+    
+	my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
+	return 1 if ($cmp_value eq 'NaN');
 
 	my($difference) = abs($cmp_value - $value);
 	$thresh = abs($thresh); # differences are always positive
 
-	if(defined($pct)) {
+	if($pct) {
 		# threshold is a percentage
 		if($cmp_value == 0) {
-			# avoid division by 0 
-			if($difference == 0 && $gtlt eq '<') {
+			#avoid division by 0 
+			if ($difference == 0 && $gtlt eq '<') {
 				return 1;
 			} else {
 				return 0; 
@@ -204,8 +185,9 @@ sub monRelation {
 		}
 		$difference = $difference / abs($cmp_value) * 100;
 	}
-	return 0 if(!(eval "$difference $gtlt $thresh"));
-	return 1;
+    Debug("Values $value, $cmp_value; Difference is $difference; gtlt is $gtlt; thresh is $thresh.");
+	return (0,$value) if(!(eval "$difference $gtlt $thresh"));
+	return (1,$value);
 }
 
 # check the FAILURES array for failure recorded by the aberrant behavior
@@ -251,6 +233,105 @@ sub monFailures {
 	return !($ret);
 }
 
+# if X and Y are data sources (Y is possibly X shifted by some temporal offset)
+# and Z is a threshold, then a quotient monitor checks:
+# X/Y > Z for Z a percentage (marked pct)
+# abs(Y - X) > Z for Z not a percentage (deprecated)
+# Default > can be replaced with < 
+# return 1 if the check passes or error, 0 if fail
+sub monQuotient {
+    my($self, $target, $ds, $type, $args) = @_;
+
+    my($thresh, $cmp_name, $cmp_ds, $cmp_time) = split(/:/, $args);
+    my($pct) = ($thresh =~ s/\s*pct\s*//i);
+    $cmp_time = 0 unless(defined($cmp_time));
+    Info("Use of quotient monitors without percent threshold is deprecated")
+	   unless (defined($pct));
+
+    if(!defined($thresh) || !defined($cmp_time)) {
+        Warn("Skipping: Improperly formatted quotient monitor.");
+        return 1;
+    }
+
+    my($gtlt);
+    if(substr($thresh,0,1) eq '<' || substr($thresh,0,1) eq '>') {
+        $gtlt = substr($thresh,0,1);
+        $thresh = substr($thresh,1);
+    } else {
+        $gtlt = '>';
+    }
+    # Fetch the current value from target's rrd file
+    my($value) = $self->rrdFetch($target->{'rrd-datafile'},
+                                    $self->getDSNum($target,$ds), 0);
+
+    if(!defined($value)) {
+        Warn("Skipping: Couldn't fetch last value from datafile.");
+        return 1;
+    }
+
+    my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
+	return 1 if ($cmp_value eq 'NaN');
+
+    my($difference) = abs($cmp_value - $value);
+    $thresh = abs($thresh); # differences are always positive
+
+    if($pct) {
+        # threshold is a percentage
+        if($cmp_value == 0) {
+            # avoid division by 0
+            if($difference == 0 && $gtlt eq '>') {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        $difference = abs($value/$cmp_value) * 100;
+    }
+    Debug("Difference is $difference; gtlt is $gtlt; thresh is $thresh.");
+    return (0,$value) if (eval "$difference $gtlt $thresh");
+    return (1,$value);
+}
+
+# shared code used by monRelation and monQuotient
+sub FetchComparisonValue {
+    my($self,$target,$ds,$cmp_name,$cmp_ds,$cmp_time) = @_; 
+    my($cmp_target);
+    if(! $cmp_name) {
+        $cmp_target = $target;
+    } else {
+        $cmp_name = join('/',$target->{'auto-target-path'}, $cmp_name)
+            if (!($cmp_name =~ /^\//));
+
+        $cmp_target = $Common::global::gCT->configHash(lc($cmp_name), 'target');
+        if(defined($cmp_target)) {
+            ConfigTree::Cache::addAutoVariables(lc($cmp_name),
+                            $cmp_target, $Common::global::gConfigRoot);
+            ConfigTree::Cache::expandHash($cmp_target, $cmp_target, \&Warn);
+        } else {
+            Warn("Skipping: No such target: $cmp_name");
+            return 'NaN';
+        }
+    }
+
+    $cmp_ds = $ds unless ($cmp_ds);
+
+    my($cmp_value) = $self->rrdFetch($cmp_target->{'rrd-datafile'},
+                            $self->getDSNum($cmp_target,$cmp_ds), $cmp_time);
+
+    if(!defined($cmp_value)) {
+        Warn("Skipping: Couldn't fetch value for $cmp_time ".
+                "seconds ago from $cmp_name.");
+        return 'NaN';
+    }
+
+    if($cmp_value =~ /NaN/) {
+        Info("Skipping: Data for $cmp_time seconds ago from " .
+                "$cmp_name is NaN");
+        return 'NaN';
+    }
+	return $cmp_value;
+}
+
 # fetches any data you might need from a rrd file
 # in a RRA with consolidation function AVERAGE
 # caching the open RRD::File object for later use
@@ -261,6 +342,7 @@ sub rrdFetch {
 	return if(!defined($dsNum));
 	return if(!defined($sec));
 	return if(!defined($datafile));
+	Debug("in rrdFetch: file is $datafile");
 	if(!defined($self->{currentfile}) || $datafile ne $self->{currentfile}) {
 		my($rrd) = new RRD::File( -file => $datafile );
 		return if(!$rrd->open() || !$rrd->loadHeader()); 
@@ -274,6 +356,7 @@ sub rrdFetch {
 		$rra = $self->{openrrd}->rra_def($rraNum);
 		# if the consolidation function is not AVERAGE, we can
 		# skip this RRA
+		Debug("in rrdFetch: skipping RRA");
 		next if ($rra->{rraName} ne "AVERAGE");
 		$lastrecord = $rra->{row_cnt} * $rra->{pdp_cnt} *
 						$self->{openrrd}->pdp_step();
@@ -293,7 +376,10 @@ sub rrdFetch {
 	}
 
 	my($rowNum) = $sec / ($self->{openrrd}->pdp_step() * $rra->{pdp_cnt});
+	Debug("in rrdFetch: rraNum is $rraNum rowNum is $rowNum dsNum is $dsNum");
 
+	my ($foo) = $self->{openrrd}->getDSRowValue($rraNum,$rowNum,$dsNum);
+	Debug("in rrdFetch: return is $foo");
 	return $self->{openrrd}->getDSRowValue($rraNum,$rowNum,$dsNum);
 }
 
@@ -312,15 +398,14 @@ sub getDSNum {
 	my($Counter) = 0;
 	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,$ttRef->{'ds'});
 	
-	return $dsMap{lc($dsName)};
+	return $dsMap{$dsName};
 }
 
 # Subroutines to handle alarms
 
-# Action to send an alarm, you can change this to do whatever you need
-# Default is to send a trap
+# Process alarm action
 sub Alarm {
-	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs) = @_;
+	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs,$val) = @_;
 
 	if($alarmType eq 'EXEC') {
 		system($alarmArgs->[0]);
@@ -328,11 +413,13 @@ sub Alarm {
 	} elsif($alarmType eq 'MAIL') {
 		$self->sendEmail(
 				'alarm',
-				$target->{'email-address'},
+				$alarmArgs,
 				$type,
 				$threshold,
 				$name,
-				$ds);
+				$ds,
+				$val,
+				$target->{'inst'});
 	} elsif($alarmType eq 'FUNC') {
 		if(defined $main::gMonFuncEnabled)
 		{
@@ -344,12 +431,12 @@ sub Alarm {
 	} elsif($alarmType eq 'SNMP') {
 		my($Specific_Trap_Type) = 4; # Violation Trap
 		$self->sendMonitorTrap(
-					$target->{'trap-address'},
+					$target,
 					$Specific_Trap_Type,
 					$type,
 					$threshold,
 					$name,
-					$ds );
+					$ds);
 	} elsif($alarmType eq 'FILE') {
         $self->LogToFile($alarmArgs->[0],'ADD',$name,$ds);
 	} else {
@@ -360,7 +447,7 @@ sub Alarm {
 # Action to clear an alarm, you can change this to do whatever you need
 # Default is to send a trap
 sub Clear {
-	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs) = @_;
+	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs,$val) = @_;
 
 	if($alarmType eq 'EXEC') {
                 system($alarmArgs->[1]) ;
@@ -368,23 +455,25 @@ sub Clear {
 	} elsif($alarmType eq 'MAIL') {
 		$self->sendEmail(
 				'clear',
-				$target->{'email-address'},
+				$alarmArgs,
 				$type,
 				$threshold,
 				$name,
-				$ds);
-        } elsif($alarmType eq 'FUNC') {
-                if(defined $main::gMonFuncEnabled)
-                {
-                        eval($alarmArgs->[1]);
+				$ds,
+				$val,
+				$target->{'inst'});
+	} elsif($alarmType eq 'FUNC') {
+		if(defined $main::gMonFuncEnabled)
+		{
+			eval($alarmArgs->[1]);
 			Info("Cleared event with FUNC '".$alarmArgs->[1]."' .");
-                } else {
-                        Warn("Exec monitor $threshold triggered, but executable alarms are not enabled."); 
-                }
-        } elsif($alarmType eq 'SNMP') {
+		} else {
+			Warn("Exec monitor $threshold triggered, but executable alarms are not enabled."); 
+		}
+	} elsif($alarmType eq 'SNMP') {
 	 	my($Specific_Trap_Type) = 5; # Clear Trap
 		$self->sendMonitorTrap(
-					$target->{'trap-address'},
+					$target,
 					$Specific_Trap_Type,
 					$type,
 					$threshold,
@@ -399,8 +488,9 @@ sub Clear {
 
 # Attempt to send an alarm trap for a given target
 sub sendMonitorTrap {
-	my($self,$to,$spec,$type,$threshold,$target,$ds) = @_;
-
+	my($self,$target,$spec,$type,$threshold,$name,$ds) = @_;
+ 
+    my $to = $target -> {'trap-address'};
 	if(!defined($to)) {
 		Warn("No trap address defined for $target, couldn't send trap.");
 		Info("Threshold Failed: $threshold for target $target");
@@ -412,8 +502,22 @@ sub sendMonitorTrap {
 	my(@VarBinds);
 	push(@VarBinds, "${OID_Prefix}.1", 'string', $type);
 	push(@VarBinds, "${OID_Prefix}.2", 'string', $threshold);
-	push(@VarBinds, "${OID_Prefix}.3", 'string', $target);
+    # name is the fully qualified target name
+	push(@VarBinds, "${OID_Prefix}.3", 'string', $name);
 	push(@VarBinds, "${OID_Prefix}.4", 'string', $ds);
+	my($logName) = "cricket";
+	if (!Common::Util::isWin32() && defined($ENV{'LOGNAME'})) 
+	{
+		$logName = $ENV{'LOGNAME'};
+	}
+	push(@VarBinds, "${OID_Prefix}.5", 'string', $logName);
+	# Common::HandleTarget overloads this tag
+	# for scalar targets, it could be "" or 0
+	# otherwise, it is set the instance number
+	if ($target->{'inst'})
+	{
+		push(@VarBinds, "${OID_Prefix}.6", 'string', $target->{'inst'});
+	}
 
 	Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
 	snmpUtils::trap2($to,$spec,@VarBinds);
@@ -486,23 +590,38 @@ sub LogToFile {
 }
 
 sub sendEmail {
-	my($self, $spec, $to, $type, $threshold, $target, $ds) = @_;
+	my($self, $spec, $alarmArgs, $type, $threshold, $target, $ds, $val, $inst) = @_;
 
+	my $to = $alarmArgs -> [1];
 	if(!defined($to)) {
 		Warn("No destination address defined for $target, couldn't send email.");
+        return;
 	}
-	Debug ("made it to sendEmail\n");
 
 	my @Message;
 	push @Message, "type:\t\t$type";
 	push @Message, "threshold:\t$threshold";
-	push @Message, "target:\t\t$target";
+	push @Message, "target:\t$target";
 	push @Message, "ds:\t\t$ds";
+	if (defined($val))  {
+		push @Message, "val:\t\t$val";
+	}
+	# for scalar targets, inst is either "" or 0
+	if ($inst) {
+		push @Message, "inst:\t\t$inst";
+	}
 
-	Info("Email sent to: $to\n" . join(' -- ', @Message));
-	open(MAIL, "|$target->{'email-program'} -s 'Cricket $spec: $target' $to\n") || Warn("No email-program defined in Defaults. Not sending email");
-
+	my $mail_program = $alarmArgs -> [0];
+	if (!defined($mail_program)) {
+	   Warn("No email-program defined. Not sending email");
+	   return;
+	} elsif (!open(MAIL, "|$mail_program -s 'Cricket $spec: $target' $to\n")) { 
+	   Warn("Failed to open pipe to mail program");
+	   return;
+	}
+    Debug("|$mail_program -s 'Cricket $spec: $target' $to\n");
 	print (MAIL join ("\n", @Message));
+	Info("Email sent to: $to\n" . join(' -- ', @Message));
 	close(MAIL);
 }
 1;

@@ -120,32 +120,48 @@ sub checkTargetInstance {
 	my(@ThresholdStrings) = split(/\s*,\s*/, $ThresholdString );
 	 
 	my($Threshold);
+	# General monitor threshold format:
+	# datasource:monitor type:monitor args:action:action args
+	# Current supported actions: FUNC, EXEC, FILE, MAIL, SNMP
+	# Action args are colon (:) delimited.
+	# Monitor args are colon (:) delimited, but must not collide with
+	# any of the action tags.
+	# SNMP is the exception; it has no action args and instead uses
+	# the target variable trap-address. This exception is maintained for
+	# backwards compatibility.
 	foreach $Threshold (@ThresholdStrings) {
+		# restore escaped commas
 		$Threshold =~ s/\0/,/g ;
 		my($ds,$type,$args) = split(/\s*:\s*/, $Threshold, 3);
+		# hide escaped colons
 		$args =~ s/\\:/\0/g ;
-		my($alarmType) = 'SNMP' ;
-		my($alarmArgs) ;
-		if( $args =~ /^(.*)\s*:\s*(FUNC|EXEC|FILE)\s*:\s*([^:]*)\s*:\s*([^:]*)$/ ) {
+		# default action type is SNMP
+		my($actionType) = 'SNMP' ;
+		my(@actionArgs);
+		# search for an action tag
+		if( $args =~ /^(.*)\s*:\s*(FUNC|EXEC|FILE|MAIL)\s*:\s*(.*)$/ ) {
 			$args = $1 ;
-			$alarmType = $2 ;
-			my $alarmCommand = $3 ;
-			my $clearCommand = $4 ;
+			$actionType = $2 ;
+			# restore escaped colons in the monitor args field
 			$args =~ s/\0/:/g ;
-			$alarmCommand =~ s/\0/:/g ;
-			$clearCommand =~ s/\0/:/g ;
-			$alarmArgs->[0] = $alarmCommand ;
-			$alarmArgs->[1] = $clearCommand ;
+            my $action_args = $3;
+			# action args are colon-delimited
+			@actionArgs = split(/\s*:\s*/, $action_args);
+			# restore escaped colons in the action args field
+			map { $_ =~ s/\0/:/g } @actionArgs;
 		} elsif( $args =~ /^(.*)\s*:\s*SNMP\s*$/ ) {
 			$args = $1 ;
+			# restore escaped colons
 			$args =~ s/\0/:/g ;
 		}				
 		if(defined($Common::global::gMonitorTable{"$type"})) {
-			my $persistent = 'false';
-			$persistent = $target->{'persistent-alarms'};
+			my $persistent = $target->{'persistent-alarms'};
+            $persistent = 'false' if (!defined($persistent));
 
-			if(&{$Common::global::gMonitorTable{"$type"}}
-				($m, $target, $ds, $type, $args)) {
+			my ($rc, $val) = 
+				&{$Common::global::gMonitorTable{"$type"}}
+				($m, $target, $ds, $type, $args);
+			if ($rc) {
 				# the test succeeded, check to see if we
 				# should send a trap or not
 				LogMonitor("$name - $Threshold passed.");
@@ -153,7 +169,7 @@ sub checkTargetInstance {
 				my($metaRef) = $rrd->getMeta();
 				if(defined($metaRef->{$Threshold})) {
 					LogMonitor("Triggering recovery for $Threshold.");
-					$m->Clear($target,$name,$ds,$type,$Threshold,$alarmType,$alarmArgs);
+					$m->Clear($target,$name,$ds,$type,$Threshold,$actionType,\@actionArgs,$val);
 					delete($metaRef->{$Threshold});
 					$rrd->setMeta($metaRef);
 				}
@@ -161,9 +177,8 @@ sub checkTargetInstance {
 				my($metaRef) = $rrd->getMeta();
 				LogMonitor("$name - $Threshold failed.");
 				if($persistent eq "true" || !defined($metaRef->{$Threshold})) {
-				#if(!defined($metaRef->{$Threshold})) {
 					LogMonitor("Triggering alarm for $Threshold.");
-					$m->Alarm($target,$name,$ds,$type,$Threshold,$alarmType,$alarmArgs);
+					$m->Alarm($target,$name,$ds,$type,$Threshold,$actionType,\@actionArgs,$val);
 					$metaRef->{$Threshold} = 'Failed';
 					$rrd->setMeta($metaRef);
 				}
