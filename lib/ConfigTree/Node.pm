@@ -582,6 +582,7 @@ sub skipFile {
     $res = 1 if ($file =~ /\/config.db$/);
     $res = 1 if ($file =~ /\/config.db.new$/);
     $res = 1 if ($file =~ /\.dpkg-/);
+    $res = 1 if ($file =~ /^\./);
     $res = 1 if ($file =~ /\/CVS$/);
 
     return $res;
