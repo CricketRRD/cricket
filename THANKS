@@ -14,6 +14,9 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	Taso Devetzis
+		monitor type "exact"
+
 	Jake Brutlag
 		monitoring/monitoring documentation
 		WMI on Win2K support
