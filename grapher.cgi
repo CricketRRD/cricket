@@ -46,7 +46,7 @@ use lib "$Common::global::gInstallRoot/lib";
 
 use CGI 2.42 qw(fatalsToBrowser);
 use RRDs 1.000101;
-use MD5;
+use Digest::MD5;
 
 use RPN;
 use RRD::File;
@@ -235,7 +235,7 @@ sub doHTMLPage {
 
 			# check to make certain that the key and the target
 			# are set up right.
-			my($md5) = new MD5;
+			my($md5) = new Digest::MD5;
 			$md5->add($targRef->{'auto-target-name'});
 			my($hash) = $md5->hexdigest();
 			if ($hash eq '808ff9abef8942fcb2ac676abe4ecc5e') {
@@ -1998,7 +1998,7 @@ sub generateImageName {
 	my($q, $type) = @_;
 	my($param, $md5);
 
-	$md5 = new MD5;
+	$md5 = new Digest::MD5;
 
 	foreach $param ($q->param()) {
 		next if ($param eq 'rand');

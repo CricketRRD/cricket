@@ -36,7 +36,7 @@ BEGIN {
 use lib "$gInstallRoot/lib";
 
 use CGI qw(fatalsToBrowser);
-use MD5;
+use Digest::MD5;
 
 use Common::Log;
 use Common::Util;
@@ -132,7 +132,7 @@ sub generateImageName {
 	my($q) = @_;
 	my($param, $md5);
 
-	$md5 = new MD5;
+	$md5 = new Digest::MD5;
 
 	foreach $param ($q->param()) {
 		next if ($param eq 'rand');
