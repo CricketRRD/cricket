@@ -66,12 +66,6 @@ my $gLongDSName = $Common::global::gLongDSName;
 # working on Cricket configs, or hacking Cricket itself.
 $log = 'warn';
 
-# This is for debugging here at WebTV. Feel free to nuke this
-# if you happen to _also_ be running Cricket on a machine named
-# small. :)
-if ($ENV{'HTTP_HOST'} =~ /small/) {
-    $log = 'debug';
-}
 Common::Log::setLevel($log);
 
 # cache cleaning params
