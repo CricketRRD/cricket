@@ -1,0 +1,59 @@
+#!/usr/local/bin/perl -w 
+
+use strict;
+use lib "$ENV{HOME}/cricket/lib";
+
+use HTTP::Date; 
+use RRDs;
+
+my $subtree = shift || die "Must provide a subtree.\n";
+my @output  = (); 
+my $dur     = 0;
+my $tnum    = 0;
+my $when    = 0;
+my $now		= time();
+
+if (! -f "$ENV{HOME}/cricket-logs/$subtree.times") {
+	die "Couldn't find $ENV{HOME}/cricket-logs/$subtree.times.\n";
+} else {
+	@output = `/bin/tail -1 $ENV{"HOME"}/cricket-logs/$subtree.times 2>&1`;
+	if ($?) {
+		die "Error tailing $ENV{HOME}/cricket-logs/$subtree.times: $?\n";
+	}
+}
+
+if ($output[0] =~ /\[(.*?)\]\s+Processed\s+([0-9]+)\s+targets\s+in\s+(.*)\.$/) {
+	my $date = 0;
+
+	$date = str2time($1), $tnum = $2, $dur = $3;
+	$dur  = &durationToSeconds($dur);
+	$when = $date - $dur;
+
+	# if the log file hasn't been updated, send back the special time "N"
+	if ($when < $now - 301) {
+		$when = "N";
+	}
+} else {
+	die "Bad line in $subtree.times: $output[0]";
+}
+
+printf("%d\@%s\n", $dur, $when);
+printf("%d\@%s\n", $tnum, $when);
+printf("%.2f\@%s\n", $tnum/$dur, $when);
+
+exit(0);
+
+sub durationToSeconds {
+	my $durLong = shift;
+	my $durSecs = 0;
+
+	$durSecs += $1 * 60 if $durLong =~ m/([0-9]+)\s+minutes/;
+	$durSecs += $1 if $durLong =~ m/([0-9]+)\s+seconds/;
+
+	if ($durSecs == 0) {
+		warn "Duration $durLong resolved to 0 seconds.\n";
+		$durSecs = 1;
+	}
+		
+	return($durSecs);
+}
