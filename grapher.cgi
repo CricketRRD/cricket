@@ -651,7 +651,13 @@ sub doHTMLPage {
         # there was no explicit target name, so we need to give them a
         # target and directory list
 
-        htmlHeader($name, $targRef, "Choose a target");
+        my $title;
+        if (defined($targRef->{'display-name'})) {
+            $title = "Choose a target for $targRef->{'display-name'}";
+        } else {
+            $title = "Choose a target :";
+        }
+        htmlHeader($name, $targRef, $title);
 
         my(@children) = $ct->getChildren($name);
 
