@@ -189,20 +189,20 @@ sub loadHeader {
 		 'cf' => $cf,
 		 'row_cnt' => $row_cnt,
 		 'pdp_cnt' => $pdp_cnt );
-	
+
         push @{$self->{'rra_def'}}, \%def;
     }
 
     {
         my ($block);
-        my ($last_up, $last_up_usec); 
+        my ($last_up, $last_up_usec);
         if ($v eq "0001" || $v eq "0002") {
            $block = $self->_readNextBlock(sizeof($fmt->format('liveHead')));
            croak("Could not read live header") unless (defined($block));
            $last_up = unpack($fmt->format('liveHead'), $block);
         } else {
            if (!defined($fmt->format('liveHead3'))) {
-              $RRD::File::gErr = 
+              $RRD::File::gErr =
                  "RRD file version " . $v . " not supported on this arch.";
               return;
            }
@@ -234,19 +234,19 @@ sub loadHeader {
         my(%def) = ();
         my($block) = $self->_readNextBlock(sizeof($fmt->format('cdpDef')));
         croak("Could not read CDP $i") unless (defined($block));
-	
+
         my($value, $unkn_pdp) = unpack($fmt->format('cdpDef'), $block);
 
         %def = ( 'value' => $value,
 		 'unkn_pdp' => $unkn_pdp );
-	
+
         push @{$self->{'cdps'}}, \%def;
     }
 
     foreach $i (0 .. ($rra_cnt-1)) {
         my($block) = $self->_readNextBlock(sizeof($fmt->format('rraPtr')));
         croak("Could not read RRD cur $i") unless (defined($block));
-	
+
         my($ptr) = unpack($fmt->format('rraPtr'), $block);
         push @{$self->{'rra_ptr'}}, $ptr;
     }
@@ -391,9 +391,9 @@ sub getDataOffset {
     my($ds_cnt) = $self->ds_cnt();
     my($rra_cnt) = $self->rra_cnt();
 
-    my($lhSz) = ($self->version() ne "0003") ? 
+    my($lhSz) = ($self->version() ne "0003") ?
       sizeof($fmt->format('liveHead')) :
-      sizeof($fmt->format('liveHead3')); 
+      sizeof($fmt->format('liveHead3'));
 
     return (sizeof($fmt->format('statHead')) +
 	    $ds_cnt * sizeof($fmt->format('dsDef')) +

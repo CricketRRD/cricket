@@ -439,7 +439,7 @@ sub dispatchAlarm {
 # order of arguments: $self, $target, $name, $ds, $type, $threshold,
 #                     $alarmType, $alarmArgs, $val
     my ($args, $action) = @_;
-                             
+
     my ($target, $ds, $val) = ($$args[1], $$args[3], $$args[8]);
 
     if (defined($val) && $val =~ /^nan/i) {
@@ -482,7 +482,7 @@ sub Clear {
 # order of arguments: $self, $target, $name, $ds, $type, $threshold,
 #                     $alarmType, $alarmArgs, $val
     my $action = 'CLEAR';
-    
+
     my $return = \&dispatchAlarm(\@_, $action);
     return;
 };
@@ -491,7 +491,7 @@ sub alarmExec {
     my ($args, $action) = @_;
     my $alarmArgs       = $$args[7];
     system($alarmArgs->[0]);
-                            
+
     if ($action eq 'ADD') {
         Info("Triggered event with system command '".$alarmArgs->[0]."' .");
     }
@@ -499,7 +499,7 @@ sub alarmExec {
     else {
         Info("Cleared event with shell command '".$alarmArgs->[1]."' .");
     }
-    
+
     return;
 };
 
@@ -509,7 +509,7 @@ sub alarmFile {
     my ($name, $ds)        = ($$args[2], $$args[3]);
     my ($type, $threshold) = ($$args[4], $$args[5]);
     my ($alarmArgs, $val)  = ($$args[7], $$args[8]);
-        
+
     $self->LogToFile($alarmArgs, $action, $name, $ds, $val);
     return;
 };
@@ -517,7 +517,7 @@ sub alarmFile {
 sub alarmFunc {
     my ($args, $action) = @_;
     my $alarmArgs       = $$args[7];
-                                    
+
     if (defined $main::gMonFuncEnabled) {
 
         if ($action eq 'ADD') {

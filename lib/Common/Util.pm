@@ -166,10 +166,8 @@ sub isNonNull {
 sub mergeHash {
     my ($hashRef1, $hashRef2, $bOverride) = @_;
     my $curKey;
-    foreach $curKey (keys %{$hashRef2})
-    {
-        if (!(exists $hashRef1->{$curKey}) || $bOverride) 
-        {
+    foreach $curKey (keys %{$hashRef2}) {
+        if (!(exists $hashRef1->{$curKey}) || $bOverride) {
             $hashRef1->{$curKey} = $hashRef2->{$curKey};
         }
     }
