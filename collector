@@ -46,7 +46,8 @@ use snmp;
 use exec;
 use file;
 use field;
-use sql;
+# Remove the comment on the next line if you want to use sql logging
+# use sql;
 if (Common::Util::isWin32()) {
     eval "use wbem";
     eval "use perfmon";
