@@ -5,6 +5,8 @@
 # <stuart.grimshaw@blackburn.gov.uk>
 # Hacked beyond recognition by Bert Driehuis to update the MIBs used and
 # remove some dependancy on the presence of MIB files.
+# Michael Han added the handling of network interface and sanitized the
+# SNMP interface.
 #
 # Options are shown by running this script with the --help option.
 # Use like you would use listInterfaces, i.e. make sure these directories
@@ -20,8 +22,18 @@
 #   % systemPerfConf.pl --host mailserver.yourcompany.com \
 #            > cricket-config/systemperf/mailserver.yourcompany.com/Targets
 
+BEGIN {
+    my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . "..";
+    eval "require '$programdir/cricket-conf.pl'";
+    eval "require '/usr/local/etc/cricket-conf.pl'"
+        unless $Common::global::gInstallRoot;
+    $Common::global::gInstallRoot ||= $programdir;
+}
+
+use lib "$Common::global::gInstallRoot/lib";
+
 use Getopt::Long;
-use SNMP;
+use snmpUtils;
 
 # Option values
 my $help = 0;
@@ -31,9 +43,21 @@ my $host;
 my $include;
 my $skip;
 
+# OID dictionary
+my %oid = ("sysDescr" =>	               "1.3.6.1.2.1.1.1",
+           "ifDescr" =>                    "1.3.6.1.2.1.2.2.1.2",
+           "ssCpuRawUser" =>               "1.3.6.1.4.1.2021.11.50.0",
+           "diskIODevice" =>               "1.3.6.1.4.1.2021.13.15.1.1.2",
+           "hrStorageFixedDisk" =>         "1.3.6.1.2.1.25.2.1.4",
+           "hrStorageType" =>              "1.3.6.1.2.1.25.2.3.1.2",
+           "hrStorageDescr" =>             "1.3.6.1.2.1.25.2.3.1.3",
+           "hrStorageAllocationUnits" =>   "1.3.6.1.2.1.25.2.3.1.4",
+           "hrStorageSize" =>              "1.3.6.1.2.1.25.2.3.1.5",
+           "hrSystemNumUsers" =>           "1.3.6.1.2.1.25.1.5.0");
+
 # Options accepted:
 GetOptions('auto'=>\$auto, 'community:s'=>\$community, 'help'=>\$help,
-    'host:s'=>\$host, 'include:s'=>\$include, 'skip:s'=>\$skip);
+           'host:s'=>\$host, 'include:s'=>\$include, 'skip:s'=>\$skip);
 
 print_help() if $help;
 print_help("--host is a required option") if !$host;
@@ -41,7 +65,11 @@ print_help("Specify either --auto or --include=...") if !$auto && !$include;
 
 my $unavailable_ok = 1 if $auto;
 
-my %include = ("system", 1, "storage", 1, "diskio", 1, "cpu", 1) if $auto;
+my %include = ("system" => 1,
+               "storage" => 1,
+               "diskio" => 1,
+               "cpu" => 1,
+               "interface" => 1) if $auto;
 if ($include) {
     foreach my $what (split(/\s*,\s*/, $include)) {
         $include{$what} = 1;
@@ -50,14 +78,15 @@ if ($include) {
 
 my @skip = split(/\s*,\s*/, $skip) if $skip;
 
-my $snmp = open_snmp($host, $community);
-my $system_objectId = $snmp->get(".1.3.6.1.2.1.1.1.0");
+my $snmp = "$community\@$host";
+my $system_objectId = snmpUtils::get($snmp, "$oid{sysDescr}.0");
 die "Can't contact $host" unless $system_objectId;
 
 my $order = 999;
 print template_header($host, $community);
 print get_systemtable($snmp) if defined($include{"system"});
 print get_cputable($snmp) if defined($include{"cpu"});
+print get_iftable($snmp) if defined($include{"interface"});
 print get_disktable($snmp) if defined($include{"storage"});
 print get_diskiotable($snmp) if defined($include{"diskio"});
 
@@ -137,7 +166,6 @@ sub template_hr_storage {
 
 target $target
     target-type   = hr_Storage
-    #inst          = $index
     inst          = map(hr-storage-name)
     hr-storage-name = "$path"
     short-desc    = \"Bytes used on $path\"
@@ -145,6 +173,22 @@ target $target
     min-size      = $blocksize
     storage       = $target
     units         = $blocksize,*
+    order         = $order
+EOF
+    $order--;
+    return $tmpl;
+}
+
+sub template_interface {
+    my ($target) = @_;
+    return "" if isSkipTarget("if_$target");
+    my $tmpl = <<"EOF";
+
+target if_$target
+    target-type   = standard-interface
+    inst          = map(interface-name)
+    interface-name= "$target"
+    short-desc    = \"network activity on $target\"
     order         = $order
 EOF
     $order--;
@@ -167,65 +211,35 @@ EOF
     return $tmpl;
 }
 
-
-sub open_snmp {
-    my ($host, $community, $port) = @_;
-    $port ||= 161;
-    my $timeout = 2;
-    my $retries = 5;
-    my $version = 1;
-
-    $SNMP::auto_init_mib = 0;
-
-    my %session_opts = (Community    => $community,
-                        DestHost     => $host,
-                        RemotePort   => $port,
-                        Timeout      => $timeout * 1000000,
-                        Retries      => $retries,
-                        Version      => $version,
-                        UseNumeric   => 1,
-                        UseLongNames => 1);
-
-    my $session = new SNMP::Session(%session_opts);
-    die "Couldn't establish an SNMP session with $host" unless $session;
-    return $session;
-}
-
-sub snmp_walk {
-    my ($snmp, $oidbase) = @_;
-
-    my %return = ();
-    my $var = new SNMP::Varbind([$oidbase]);
-    while ($snmp->getnext($var)) {
-        last if substr($var->tag, 0, length($oidbase)) ne $oidbase;
-        if (length($var->tag) > length($oidbase)) {
-            my $index = substr($var->tag, length($oidbase) + 1);
-            if (length($index) > 0) {
-                $index .= "." . $var->iid;
-            } else {
-                $index = $var->iid;
-            }
-            $return{$index} = $var->val;
-        } else {
-            $return{$var->iid} = $var->val;
-        }
-    }
-    return %return;
-}
-
 sub get_cputable {
     my $snmp = shift;
-    my $rawcpu = $snmp->get(".1.3.6.1.4.1.2021.11.50.0");
+    my $rawcpu = snmpUtils::get($snmp, $oid{"ssCpuRawUser"});
     print STDERR "Could not fetch ucd_rawcpu table\n" unless $auto;
     return template_ucd_sys();
+}
+
+sub get_iftable {
+    my $snmp = shift;
+    my $tmpl = "";
+    my $junk;
+
+    my @interfaces = snmpUtils::walk($snmp, $oid{"ifDescr"});
+    map { ($junk, $_)= split /:/, $_ } @interfaces;
+    foreach (@interfaces) {
+        $tmpl .= template_interface($_);
+    }
+    return $tmpl;
 }
 
 sub get_diskiotable {
     my $snmp = shift;
     my $tmpl = "";
-    my %disknames = snmp_walk($snmp, ".1.3.6.1.4.1.2021.13.15.1.1.2");
-    foreach my $idx (sort {$a <=> $b} keys %disknames) {
-        $tmpl .= template_ucd_diskio($disknames{$idx});
+    my $junk;
+
+    my @disknames = snmpUtils::walk($snmp, $oid{"diskIODevice"});
+    map { ($junk, $_)= split /:/, $_ } @disknames;
+    foreach (@disknames) {
+        $tmpl .= template_ucd_diskio($_);
     }
     return $tmpl;
 }
@@ -233,21 +247,24 @@ sub get_diskiotable {
 sub get_disktable {
     my $snmp = shift;
     my $tmpl = "";
+    my ($junk, $key, $val, @list);
 
-    my @disknames = snmp_walk($snmp, ".1.3.6.1.2.1.25.2.3.1.3");
-    if ($#disknames < 0) {
+    @list = snmpUtils::walk($snmp, $oid{"hrStorageDescr"});
+    if ($#list < 0) {
         print STDERR "Could not fetch hr_storage table\n" unless $auto;
         return "";
     }
-    my %disknames = @disknames;
-    my %disktypes = snmp_walk($snmp, ".1.3.6.1.2.1.25.2.3.1.2");
-    my %diskunits = snmp_walk($snmp, ".1.3.6.1.2.1.25.2.3.1.4");
-    my %disksizes = snmp_walk($snmp, ".1.3.6.1.2.1.25.2.3.1.5");
-    my %diskbytes;
-    my $disktype_fixeddisk = ".1.3.6.1.2.1.25.2.1.4";
-    foreach my $idx (keys %disknames) {
+    map { ($key, $val) = split /:/, $_; $disknames{$key} = $val; } @list;
+    @list = snmpUtils::walk($snmp, $oid{"hrStorageType"});
+    map { ($key, $val) = split /:/, $_; $disktypes{$key} = $val; } @list;
+    @list = snmpUtils::walk($snmp, $oid{"hrStorageAllocationUnits"});
+    map { ($key, $val) = split /:/, $_; $diskunits{$key} = $val; } @list;
+    @list = snmpUtils::walk($snmp, $oid{"hrStorageSize"});
+    map { ($key, $val) = split /:/, $_; $disksizes{$key} = $val; } @list;
+    my (%diskbytes, %disktargets);
+    foreach my $idx (sort { $a<=>$b } keys %disknames) {
         my $targetname = $disknames{$idx};
-        if (    ($disktypes{$idx} ne $disktype_fixeddisk) ||
+        if (    ($disktypes{$idx} ne $oid{"hrStorageFixedDisk"}) ||
                 ($idx > 100) ||
                 ($targetname =~ /\/proc\b/)) {
             delete $disknames{$idx};
@@ -262,8 +279,7 @@ sub get_disktable {
     my $saved_order = $order--;
     my $saved_order2 = $order--;
     my @alltargets = ();
-    foreach my $idx (sort {$a <=> $b} keys %disknames) {
-        #printf STDERR "%s: %s (%.0f)\n", $idx, $disknames{$idx}, $diskbytes{$idx};
+    foreach $idx (sort { $a<=>$b } keys %disknames) {
         $tmpl .= template_hr_storage($disktargets{$idx}, $idx, $disknames{$idx},
                                      $diskbytes{$idx}, $diskunits{$idx});
         push @alltargets, $disktargets{$idx};
@@ -288,7 +304,7 @@ EOF
 
 sub get_systemtable {
     my $snmp = shift;
-    my $system_numusers = $snmp->get(".1.3.6.1.2.1.25.1.5.0");
+    my $system_numusers = snmpUtils::get($snmp, $oid{"hrSystemNumUsers"});
     if (!defined($system_numusers)) {
         return "" if $unavailable_ok;
         die "Cannot get number of users logged on";
@@ -303,3 +319,10 @@ sub isSkipTarget {
     }
     return 0;
 }
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
