@@ -25,13 +25,15 @@
 			</li>
 			<li>
 				Insure you are on a supported platform. For your purposes as a
-				beginner, any Unix should work. If you are using Windows, you
-				must use Windows NT 4.0 (no other variations of Windows have
-				been tested). If you are using Windows NT, the specific
-				recommendations about where to put files and the examples will
-				not make any sense to you. Please follow along and do your
-				best. We'll hopefully have NT versions of these instructions
-				in the future. 
+				beginner, any Unix should work. Cricket also runs on Windows NT
+				4.0 and Windows 2000. This document assumes a Unix platform.
+				Unfortunately, there is no comparable document for beginners
+				on the Windows platform. The instructions in 
+				<a href=win2kwmi.html">Installing Cricket on Win2K to Monitor 
+				WMI Counters</a> will help with installation, then refer to 
+				this document to learn about the config tree. Do your best
+				to translate Unix commands in this document to their Windows
+				counterparts (i.e. Windows xcopy can replace Unix cp -r).
 			</li>
 			<li>
 				<p>
@@ -131,9 +133,7 @@ RRD                http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool
 					Make a softlink to the version you are running. To make
 					it easier to upgrade later you'll want to make a link
 					from a generic name to the specific name you are
-					currently running. (Windows NT 4.0 users can't use this
-					trick. A Win32 shortcut is not the same thing as a Unix
-					softlink and will not help here.) 
+					currently running.
 				</p>
 				<p>To do this:</p>
 				<pre>
