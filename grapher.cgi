@@ -1322,7 +1322,7 @@ sub doGraph {
     my(@lines) = ();
     my($ct) = 0;
     my($usedArea) = 0;
-    my($usedStack) = 1;
+    my($usedStack) = 0;
     my(@linePushed);
     my(%scaled);
     my(@target_pass_args);
@@ -1396,9 +1396,10 @@ sub doGraph {
 
             # if stack first must be area
             if ($drawAs eq "STACK") {
-                if (!$usedStack)  {
+                if (!$usedStack && !$usedArea)  {
                     $drawAs = 'AREA';
                     $usedStack = 1;
+                    $usedArea = 1;
                 }
             }
 
