@@ -37,6 +37,11 @@ New features, fixes in version 1.0.6 (TBD)
   John Magne Bredal and the NAV project, by way of Morten Werner Olsen.
   [Patch #1011277]
 
+  Added an Hourly graph that will show the last 10 hours; which is short enough
+  to show individual data points with 5-minute polling, and something sane with
+  1-minute polling, while still showing an entire 8-hour period (an entire work
+  day, say). [Patch #921537]
+
 New features, fixes in version 1.0.5
 
 	Cricket 1.0.5 is essentially a minor bugfix release.

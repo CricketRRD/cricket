@@ -492,7 +492,7 @@ sub doHTMLPage {
                         # somebody clicks on the title or the graph
 
                         $gQ->delete_all();
-                        $gQ->param('ranges', 'd:w');
+                        $gQ->param('ranges', 'h:d:w');
                         urlTarget($gQ, $thisTarget2);
                         $gQ->param('inst', $thisInst) if (defined($thisInst));
                         if (defined($view))  {
@@ -1219,14 +1219,15 @@ sub initConst {
     $kMonth  = 30 * $kDay;   #  30 days/month
     $kYear   = 365 * $kDay;  # 365 days/year
 
-    $kTypeUnknown   = 0;
-    $kTypeUnknown   = 0;    # shut up, -w.
-    $kTypeDaily     = 1;
-    $kTypeWeekly    = 2;
-    $kTypeMonthly   = 3;
-    $kTypeYearly    = 4;
+    $kTypeUnknown = 0;
+    $kTypeUnknown = 0;    # shut up, -w.
+    $kTypeHourly  = 1;
+    $kTypeDaily   = 2;
+    $kTypeWeekly  = 3;
+    $kTypeMonthly = 4;
+    $kTypeYearly  = 5;
 
-    @gRangeNameMap = ( undef, 'Daily', 'Weekly', 'Monthly', 'Yearly' );
+    @gRangeNameMap = ( undef, 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly' );
 
     $gKey = "M)&=1+3YH96%D97(H)W1E>'0O<&QA:6XG*2P\@*&]P96XH5" .
             "\"P\@(CPD0V]M;6]N\nM.CIG;&]B86PZ.F=);G-T86QL4F]" .
@@ -1262,13 +1263,16 @@ sub si_unit {
 
 sub getRanges {
     my($scales) = @_;
-    $scales = "d:w:m:y" unless (defined($scales));
+    $scales = "h:d:w:m:y" unless defined $scales;
 
     # these definitions mirror how MRTG 2.5 sets up its graphs
-    my(%scaleMap) = (   'd' => $kHour * 42,
-                        'w' => $kDay * 10,
-                        'm' => $kWeek * 6,
-                        'y' => $kMonth * 16);
+    my(%scaleMap) = (
+        'h' => $kHour  * 10,
+        'd' => $kHour  * 42,
+        'w' => $kDay   * 10,
+        'm' => $kWeek  *  6,
+        'y' => $kMonth * 16,
+    );
 
     my($scale, @res);
     foreach $scale (split(/\s*:\s*/, $scales)) {
@@ -1290,7 +1294,9 @@ sub rangeType {
 
     # question: when is kTypeUnknown appropriate?
 
-    if ($range < $kWeek) {
+    if ($range < $kDay) {
+        return $kTypeHourly;
+    } elsif ($range < $kWeek) {
         return $kTypeDaily;
     } elsif ($range < $kMonth) {
         return $kTypeWeekly;
@@ -2126,10 +2132,10 @@ sub graphParam {
 
 # make the range-size navigation links
 sub makeNavLinks {
-    my($reqRanges) = shift;
+    my $reqRanges = shift;
     my($r, @links);
-    my(@r) = ('d', 'w', 'm', ,'y', 'd:w', 'm:y', 'd:w:m:y');
-    my(@rName) = ('Daily', 'Weekly', 'Monthly', 'Yearly', 'Short-Term',
+    my @r     = ('h', 'd', 'w', 'm', ,'y', 'h:d:w', 'm:y', 'h:d:w:m:y');
+    my @rName = ('Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly', 'Short-Term',
                   'Long-Term', 'All');
     my($i) = 0;
     foreach $r (@r) {
