@@ -1119,8 +1119,7 @@ sub initConst {
 	$kTypeMonthly	= 3;
 	$kTypeYearly 	= 4;
 
-	@gRangeNameMap = ( undef, 'Hourly', 'Daily', 'Weekly',
-						'Monthly' );
+	@gRangeNameMap = ( undef, 'Daily', 'Weekly', 'Monthly', 'Yearly' );
 
 	$gKey = "M)&=1+3YH96%D97(H)W1E>'0O<&QA:6XG*2P\@*&]P96XH5" .
 			"\"P\@(CPD0V]M;6]N\nM.CIG;&]B86PZ.F=);G-T86QL4F]" .
