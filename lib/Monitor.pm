@@ -179,8 +179,15 @@ sub monRelation {
     }
     return ($nanErr, 'NaN') if isNaN($value);
 
-    my($cmp_value) = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return ($nanErr,'NaN') if isNaN($cmp_value);
+    my ($cmp_value);
+    # Is this a straight comparison value or should we fetch it as a DS
+    if ($cmp_ds =~ /^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/) {
+        $cmp_value = $cmp_ds;
+    # Fetch the value it must be a DS
+    } else {
+        ($cmp_value) = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
+        return ($nanErr,'NaN') if isNaN($cmp_value);
+    }
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -321,8 +328,16 @@ sub monQuotient {
     }
     return ($nanErr,'NaN') if isNaN($value);
 
-    my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return ($nanErr,'NaN') if isNaN($cmp_value);
+    my ($cmp_value);
+    # Is this a straight comparison value or should we fetch it as a DS
+    if ($cmp_ds =~ /^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/) {
+        $cmp_value = $cmp_ds;
+
+    # Fetch the value it must be a DS
+    } else {
+        ($cmp_value) = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
+        return ($nanErr,'NaN') if isNaN($cmp_value);
+    }
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
