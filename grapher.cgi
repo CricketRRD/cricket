@@ -449,7 +449,7 @@ sub doHTMLPage {
                         $gQ->delete_all();
                         $gQ->param('ranges', 'd:w');
                         $gQ->param('target', $thisTarget2);
-                        $gQ->param('inst', $thisInst) if ($thisInst);
+                        $gQ->param('inst', $thisInst) if (defined($thisInst));
                         if (defined($view))  {
                             $gQ->param('view', $view);
                         }
@@ -466,7 +466,7 @@ sub doHTMLPage {
 							($targetsLD[$i] ne ''))  {
 							$name = "<h4>$targetsLD[$i]</h4>";
 						}  else  {
-							if ($thisInst)  {
+							if (defined($thisInst))  {
 								my($n) = $instNameMap->{$thisInst};
 								if ($n) {
 	                        		$name="<h4>$thisTarget2 ($n)";
