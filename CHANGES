@@ -93,6 +93,11 @@ New features, fixes in version 1.0.4
         you will get e.g. "Switches/Cat4000/core/FastEthernet0_1" instead
         of just "FastEthernet0_1" in your logs.
 
+        Added a new "hidden" tag to the "target" dictionary. When this is
+        set to a true value the target will be skipped by the grapher to
+        enable you to display the data combined in an "mtarget" instead.
+        [Patch #697737]
+
 New features, fixes in version 1.0.3
 
 	The many disk accesses to the config database that collector

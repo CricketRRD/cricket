@@ -709,6 +709,14 @@ sub doHTMLPage {
 
             my($item);
             foreach $item (@targets) {
+
+                # Skip display of targets that are "hidden".The data is
+                # presumably being presnted in an "mtarget" elsewhere.
+                if (defined $targs->{$item}->{'hide'}
+                    and isTrue($targs->{$item}->{'hide'})) {
+                    next; # Skip to next target.
+                }
+
                 my($desc);
                 if (defined($targs->{$item}->{'short-desc'})) {
                     $desc = $targs->{$item}->{'short-desc'};
