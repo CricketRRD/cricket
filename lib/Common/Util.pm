@@ -22,7 +22,8 @@ package Common::Util;
 require Exporter;
 @ISA = qw(Exporter);
 
-@EXPORT = qw(Eval isNonNull isTrue isFalse mapOid runTime quoteString mergeHash);
+@EXPORT = qw(Eval isNonNull isTrue isFalse isNaN mapOid runTime quoteString
+             mergeHash);
 
 use Common::Log;
 use Digest::MD5;
@@ -133,6 +134,10 @@ sub isFalse {
 
 sub isTrue {
     return ! isFalse(@_);
+}
+
+sub isNaN {
+    return ($_[0] =~ /^NaN/i);
 }
 
 sub Eval {

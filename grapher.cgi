@@ -958,7 +958,7 @@ sub doHTMLSummary {
                 # get and scale the value (if necessary)
                 my($value) = $rrd->getDSCurrentValue($dsnum);
 
-                if (defined($value) && !isnan($value) && defined($scale)) {
+                if (defined($value) && !isNaN($value) && defined($scale)) {
                     my($rpn) = new RPN;
                     my($res) = $rpn->run("$value,$scale");
 
@@ -976,7 +976,7 @@ sub doHTMLSummary {
                     # to get slightly wrong sums than no sum at all.
                     # (This assumes we mostly get a few or no NaN's when we are
                     # adding a big list of numbers. YMMV.)
-                    $value = 0 if (isnan($value));
+                    $value = 0 if (isNaN($value));
                     push @{$str{$dsname}}, $value;
                 }
 
@@ -1199,7 +1199,7 @@ sub initConst {
 
 sub si_unit {
     my($value, $bytes) = @_;
-    return ($value, '') if ($value eq "?" || $value eq "nan" || $value == 0);
+    return ($value, '') if ($value eq "?" || isNaN($value) || $value == 0);
 
     my(@symbol) = ('a', 'f', 'p', 'n', '&#181;', 'milli',
                    '',
@@ -2216,10 +2216,6 @@ sub fixHome {
     $Common::global::gCricketHome ||= $Common::global::gInstallRoot . "/..";
 }
 
-sub isnan {
-    return ($_[0] =~ /^NaN/);
-}
-
 sub convertOps {
     my($mto, $num) = @_;
 
@@ -2281,7 +2277,7 @@ sub makeInstMap {
 sub prepareValue {
     my($value, $dosi, $bytes, $precision, $space, $unit) = @_;
 
-    if (isnan($value)) {
+    if (isNaN($value)) {
         return "$value$space$unit";
     }
 
@@ -2290,7 +2286,7 @@ sub prepareValue {
         ($value, $prefix) = si_unit($value, $bytes);
     }
 
-    if ($value ne "?" && $value ne "nan") {
+    if ($value ne "?" && !isNaN($value)) {
         $value = sprintf("%0.${precision}f", $value);
     }
     return "$value$space$prefix$unit";

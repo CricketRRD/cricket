@@ -54,7 +54,7 @@ sub monValue {
         return 1;
     }
 
-    if ($value =~ /^NaN|^nan/)  {
+    if (isNaN($value))  {
         Info("Skipping: Last value from datafile was $value.");
         return 1;
     }
@@ -168,7 +168,7 @@ sub monRelation {
     }
 
     my($cmp_value) = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return (1,'NaN') if ($cmp_value =~ /^nan/i);
+    return (1,'NaN') if isNaN($cmp_value);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -260,7 +260,7 @@ sub monFailures {
         return 1;
     }
     # FAILURES array stores a 1 for a failure (so should return 0)
-    return 1 if ($ret =~ /^NaN|^nan/);
+    return 1 if isNaN($ret);
     return !($ret);
 }
 
@@ -301,7 +301,7 @@ sub monQuotient {
     }
 
     my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return 1 if ($cmp_value =~ /^NaN|^nan/);
+    return 1 if isNaN($cmp_value);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -356,7 +356,7 @@ sub FetchComparisonValue {
         return 'NaN';
     }
 
-    if ($cmp_value =~ /^NaN|^nan/) {
+    if (isNaN($cmp_value)) {
         Info("Skipping: Data for $cmp_time seconds ago from " .
              "$cmp_name is NaN");
         return 'NaN';
@@ -442,7 +442,7 @@ sub dispatchAlarm {
 
     my ($target, $ds, $val) = ($$args[1], $$args[3], $$args[8]);
 
-    if (defined($val) && $val =~ /^nan/i) {
+    if (defined($val) && isNaN($val)) {
         Info("NaN in last value for target: $target->{'auto-target-path'} $target->{'auto-target-name'} for $ds.");
         return (0,'NaN');
     }
