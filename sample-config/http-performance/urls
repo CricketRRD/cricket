@@ -1,7 +1,6 @@
-target	cricket-home
-	short-desc = "The Cricket Homepage"
-	url = "http://www.munitions.com/~jra/test-file.txt"
+target  cricket-home
+    short-desc = "The Cricket Homepage"
+    url = "http://www.munitions.com/~jra/test-file.txt"
 
-target	www.cnn.com
-	url = "http://www.cnn.com"
-
+target  www.cnn.com
+    url = "http://www.cnn.com"

@@ -6,439 +6,439 @@
 #
 
 datasource --default--
-	rrd-ds-type = FOR_SANITY_SET_ME
-	rrd-max = 1288490188500
+    rrd-ds-type = FOR_SANITY_SET_ME
+    rrd-max = 1288490188500
 
 graph --default--
-	units = %
-	legend = "If you're reading this, I need to add a legend!"
-	DRAW-AS = LINE1
-	y-min = 0
-#	show-max = true
-	si-units = false
-#	show-avg-max = true
+    units = %
+    legend = "If you're reading this, I need to add a legend!"
+    DRAW-AS = LINE1
+    y-min = 0
+#   show-max = true
+    si-units = false
+#   show-avg-max = true
 
 #ds0
 datasource PerfTime
-	ds-source = "perfmon:%auto-target-name%::::perftime,nodur"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%::::perftime,nodur"
+    rrd-ds-type = DERIVE
 #ds1
-datasource PerfTime100ns	
-	ds-source = "perfmon:%auto-target-name%::::perftime100ns,nodur"
-	rrd-ds-type = DERIVE
+datasource PerfTime100ns
+    ds-source = "perfmon:%auto-target-name%::::perftime100ns,nodur"
+    rrd-ds-type = DERIVE
 #ds2
 datasource PerfFreq
-	ds-source = "perfmon:%auto-target-name%::::perffreq,nodur"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%::::perffreq,nodur"
+    rrd-ds-type = GAUGE
 #
 # System Counters
 #
 #
 #ds3
 datasource rawbaseRegistryQuota
-	ds-source = "perfmon:%auto-target-name%:System:% Registry Quota in Use::base"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:System:% Registry Quota in Use::base"
+    rrd-ds-type = GAUGE
 #ds4
 datasource rawfractRegistryQuota
-	ds-source = "perfmon:%auto-target-name%:System:% Registry Quota in Use::fraction"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:System:% Registry Quota in Use::fraction"
+    rrd-ds-type = GAUGE
 datasource RegistryQuota
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds4,ds3,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds4,ds3,/
 graph RegistryQuota
-	units = %
-	legend = "% Registry Quota In Use"
-	scale = 100,*
-	draw-as = AREA
-	y-max = 100
-	
+    units = %
+    legend = "% Registry Quota In Use"
+    scale = 100,*
+    draw-as = AREA
+    y-max = 100
+
 
 #ds5
 datasource rawProcessorProcessorTime
-	ds-source = "perfmon:%auto-target-name%:Processor:% Processor Time:_Total"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Processor:% Processor Time:_Total"
+    rrd-ds-type = DERIVE
 datasource ProcessorTime
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds5,ds1,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds5,ds1,/
 graph ProcessorTime
-	legend = "% Processor Time"
-	
-	y-max = 100
-	draw-as = AREA
-	color = dark-green
-	units = %
-	scale = -100,*
+    legend = "% Processor Time"
+
+    y-max = 100
+    draw-as = AREA
+    color = dark-green
+    units = %
+    scale = -100,*
 
 #ds6
 datasource rawProcessorInterruptTime
-	ds-source = "perfmon:%auto-target-name%:Processor:% Interrupt Time:_Total"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Processor:% Interrupt Time:_Total"
+    rrd-ds-type = DERIVE
 datasource InterruptTime
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds6,ds1,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds6,ds1,/
 graph InterruptTime
-	legend = "% Interrupt Time"
-	units = %
-	
-	y-max = 100
-	scale = 100,*
+    legend = "% Interrupt Time"
+    units = %
+
+    y-max = 100
+    scale = 100,*
 
 #ds7
 datasource rawProcessorUserTime
-	ds-source = "perfmon:%auto-target-name%:Processor:% User Time:_Total"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Processor:% User Time:_Total"
+    rrd-ds-type = DERIVE
 datasource UserTime
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds7,ds1,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds7,ds1,/
 graph UserTime
-	legend = "% User Time"
-	
-	y-max = 100
-	units = %
-	scale = 100,*
+    legend = "% User Time"
+
+    y-max = 100
+    units = %
+    scale = 100,*
 
 #ds8
 datasource rawProcessorPrivilegedTime
-	ds-source = "perfmon:%auto-target-name%:Processor:% Privileged Time:_Total"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Processor:% Privileged Time:_Total"
+    rrd-ds-type = DERIVE
 datasource PrivilegedTime
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds8,ds1,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds8,ds1,/
 graph PrivilegedTime
-	legend = "% Privileged Time"
-	units = %
-	
-	y-max = 100
-	scale = 100,*
+    legend = "% Privileged Time"
+    units = %
+
+    y-max = 100
+    scale = 100,*
 
 #ds9
 datasource rawProcessorInterruptsSec
-	ds-source = "perfmon:%auto-target-name%:Processor:Interrupts/sec:_Total"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Processor:Interrupts/sec:_Total"
+    rrd-ds-type = DERIVE
 datasource InterruptsSec
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds9,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds9,ds0,ds2,/,/
 graph InterruptsSec
-	legend = "Interrupts/sec"
-	units = "/sec"
+    legend = "Interrupts/sec"
+    units = "/sec"
 
 #ds10
 datasource rawbaseMemoryCommitted
-	ds-source = "perfmon:%auto-target-name%:Memory:% Committed Bytes In Use::base"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Memory:% Committed Bytes In Use::base"
+    rrd-ds-type = GAUGE
 #ds11
 datasource rawfractMemoryCommitted
-	ds-source = "perfmon:%auto-target-name%:Memory:% Committed Bytes In Use::fraction"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Memory:% Committed Bytes In Use::fraction"
+    rrd-ds-type = GAUGE
 datasource MemoryCommitted
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds11,ds10,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds11,ds10,/
 graph MemoryCommitted
-	legend = "% Committed Bytes"
-	draw-as = AREA
-	scale = 100,*
-	
-	y-max = 100
-	units = %
+    legend = "% Committed Bytes"
+    draw-as = AREA
+    scale = 100,*
+
+    y-max = 100
+    units = %
 
 #ds12
 datasource rawbasePagingFileUsage
-	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage:_Total:base"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Paging File:% Usage:_Total:base"
+    rrd-ds-type = GAUGE
 #ds13
 datasource rawfractPagingFileUsage
-	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage:_Total:fraction"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Paging File:% Usage:_Total:fraction"
+    rrd-ds-type = GAUGE
 datasource PagingFileUsage
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds13,ds12,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds13,ds12,/
 graph PagingFileUsage
-	legend = "% Paging File Usage (_Total)"
-	units = %
-	draw-as = LINE3	
-	y-max = 100
-	scale = 100,*
-	color = black
+    legend = "% Paging File Usage (_Total)"
+    units = %
+    draw-as = LINE3
+    y-max = 100
+    scale = 100,*
+    color = black
 
 #ds14
 datasource rawbasePagingFilePeakUsage
-	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage Peak:_Total:base"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Paging File:% Usage Peak:_Total:base"
+    rrd-ds-type = GAUGE
 #ds15
 datasource rawfractPagingFilePeakUsage
-	ds-source = "perfmon:%auto-target-name%:Paging File:% Usage Peak:_Total:fraction"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Paging File:% Usage Peak:_Total:fraction"
+    rrd-ds-type = GAUGE
 datasource PagingFilePeakUsage
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds15,ds14,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds15,ds14,/
 graph PagingFilePeakUsage
-	legend = "% Paging File Peak Usage (_Total)"
-	units = %
-	
-	y-max = 100
-	scale = 100,*
-	draw-as = AREA
-	color = dark-green
+    legend = "% Paging File Peak Usage (_Total)"
+    units = %
+
+    y-max = 100
+    scale = 100,*
+    draw-as = AREA
+    color = dark-green
 
 #ds16
 datasource rawPhysicalDiskDiskReads
-	ds-source = "perfmon:%auto-target-name%:PhysicalDisk:Disk Reads/sec:_Total"	
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:PhysicalDisk:Disk Reads/sec:_Total"
+    rrd-ds-type = DERIVE
 datasource DiskReadsSec
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds16,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds16,ds0,ds2,/,/
 graph DiskReadsSec
-	legend = "Disk Reads/sec"
-	units = "/sec"
+    legend = "Disk Reads/sec"
+    units = "/sec"
 
 #ds17
 datasource rawPhysicalDiskDiskWrites
-	ds-source = "perfmon:%auto-target-name%:PhysicalDisk:Disk Writes/sec:_Total"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:PhysicalDisk:Disk Writes/sec:_Total"
+    rrd-ds-type = DERIVE
 datasource DiskWritesSec
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds17,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds17,ds0,ds2,/,/
 graph DiskWritesSec
-	legend = "Disk Writes/sec"
-	units = "/sec"
+    legend = "Disk Writes/sec"
+    units = "/sec"
 #ds18
 datasource rawMemoryPagesSec
-	ds-source = "perfmon:%auto-target-name%:Memory:Pages/sec"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Memory:Pages/sec"
+    rrd-ds-type = DERIVE
 datasource MemoryPagesSec
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds18,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds18,ds0,ds2,/,/
 graph MemoryPagesSec
-	legend = "Memory Pages/sec"
-	units = "/sec"
+    legend = "Memory Pages/sec"
+    units = "/sec"
 
 #ds19
 datasource ProcessorQueueLength
-	ds-source = "perfmon:%auto-target-name%:System:Processor Queue Length:_Total"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:System:Processor Queue Length:_Total"
+    rrd-ds-type = GAUGE
 graph ProcessorQueueLength
-	legend = "Processor Queue Length"
-	draw-as = AREA
-	color = red
-	units = "seconds"
+    legend = "Processor Queue Length"
+    draw-as = AREA
+    color = red
+    units = "seconds"
 
 #ds20
 datasource ServerPoolPagedBytes
-	ds-source = "perfmon:%auto-target-name%:Server:Pool Paged Bytes:_Total"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Server:Pool Paged Bytes:_Total"
+    rrd-ds-type = GAUGE
 graph ServerPoolPagedBytes
-	legend = "Pool Paged Bytes"
-	units = "bytes"
-	precision = 0
-	draw-as = LINE3
-	color = black
+    legend = "Pool Paged Bytes"
+    units = "bytes"
+    precision = 0
+    draw-as = LINE3
+    color = black
 
 #ds21
 datasource ServerPoolPagedPeak
-	ds-source = "perfmon:%auto-target-name%:Server:Pool Paged Peak:_Total"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Server:Pool Paged Peak:_Total"
+    rrd-ds-type = GAUGE
 graph ServerPoolPagedPeak
-	legend "Pool Paged Peak"
-	units = "bytes"
-	draw-as = AREA
-	color = dark-green
-	precision = 0
+    legend "Pool Paged Peak"
+    units = "bytes"
+    draw-as = AREA
+    color = dark-green
+    precision = 0
 
 #ds22
 datasource Processes
-	ds-source = "perfmon:%auto-target-name%:System:Processes"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:System:Processes"
+    rrd-ds-type = GAUGE
 graph Processes
-	legend = "Processes"
-	units = "processes"
-	precision = 0
+    legend = "Processes"
+    units = "processes"
+    precision = 0
 
 #ds23
 datasource Threads
-	ds-source = "perfmon:%auto-target-name%:System:Threads"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:System:Threads"
+    rrd-ds-type = GAUGE
 graph Threads
-	legend = "Threads"
-	units = "threads"
-	precision = 0
+    legend = "Threads"
+    units = "threads"
+    precision = 0
 
 #ds24
 datasource TsActiveSessions
-	ds-source = "perfmon:%auto-target-name%:Terminal Services:Active Sessions"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Terminal Services:Active Sessions"
+    rrd-ds-type = GAUGE
 graph TsActiveSessions
-	units = "sessions"
-	legend = "Active Sessions"
-	draw-as = LINE3
-	precision = 0
+    units = "sessions"
+    legend = "Active Sessions"
+    draw-as = LINE3
+    precision = 0
 #ds25
 datasource TsInactiveSessions
-	ds-source = "perfmon:%auto-target-name%:Terminal Services:Inactive Sessions"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:Terminal Services:Inactive Sessions"
+    rrd-ds-type = GAUGE
 graph TsInactiveSessions
-	units = "sessions"
-	legend = "Inactive Sessions"
-	draw-as = LINE3
-	precision = 0
+    units = "sessions"
+    legend = "Inactive Sessions"
+    draw-as = LINE3
+    precision = 0
 datasource TsTotalSessions
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds24,ds25,+
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds24,ds25,+
 graph TsTotalSessions
-	units = "sessions"
-	color = dark-green
-	draw-as = AREA
-	legend = "Sessions Total"
-	precision = 0
+    units = "sessions"
+    color = dark-green
+    draw-as = AREA
+    legend = "Sessions Total"
+    precision = 0
 
 #
 # DB Counters
 #
 #ds26
 datasource rawSqlDbTransSecOnePoint
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Databases:Transactions/sec:OnePoint"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Databases:Transactions/sec:OnePoint"
+    rrd-ds-type = DERIVE
 datasource SqlDbTransSecOnePoint
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds26,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds26,ds0,ds2,/,/
 graph SqlDbTransSecOnePoint
-	legend = "Transactions/sec (OnePoint)"
-	units = "/sec"
-	draw-as = AREA
+    legend = "Transactions/sec (OnePoint)"
+    units = "/sec"
+    draw-as = AREA
 
 #ds27
 datasource rawbaseSqlLocksAvgWaitTime
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Average Wait Time (ms):database:base"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Average Wait Time (ms):database:base"
+    rrd-ds-type = GAUGE
 #ds28
 datasource rawfractSqlLocksAvgWaitTime
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Average Wait Time (ms):database:fraction"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Average Wait Time (ms):database:fraction"
+    rrd-ds-type = GAUGE
 datasource LocksAvgWaitTime
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds28,ds27,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds28,ds27,/
 graph LocksAvgWaitTime
-	units = "ms"
-	scale = 100,*
-	legend = "Lock Average Wait Time (ms)"
+    units = "ms"
+    scale = 100,*
+    legend = "Lock Average Wait Time (ms)"
 
 #ds29
 datasource rawbaseSqlLockWaitTime
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Wait Time (ms):database:base"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Wait Time (ms):database:base"
+    rrd-ds-type = GAUGE
 #ds30
 datasource rawfractSqlLockWaitTime
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Wait Time (ms):database:fraction"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Wait Time (ms):database:fraction"
+    rrd-ds-type = GAUGE
 datasource LocksWaitTime
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds30,ds29,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds30,ds29,/
 graph LocksWaitTime
-	units = "ms"
-	scale = 100,*
-	legend = "Lock Wait Time (ms)"
+    units = "ms"
+    scale = 100,*
+    legend = "Lock Wait Time (ms)"
 
 #ds31
 datasource rawSqlLocksLockReqsSec
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Requests/sec:database"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Requests/sec:database"
+    rrd-ds-type = DERIVE
 datasource LockReqsSec
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds31,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds31,ds0,ds2,/,/
 graph LockReqsSec
-	legend = "Lock Requests/sec (Database)"
-	units = "/sec"
+    legend = "Lock Requests/sec (Database)"
+    units = "/sec"
 
 #ds32
 datasource rawSqlLocksLockTimeoutsSec
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Timeouts/sec:database"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Lock Timeouts/sec:database"
+    rrd-ds-type = DERIVE
 datasource LockTimeoutsSec
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds32,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds32,ds0,ds2,/,/
 graph LockTimeoutsSec
-	legend = "Lock Timeouts/sec (Database)"
-	units = "/sec"
+    legend = "Lock Timeouts/sec (Database)"
+    units = "/sec"
 
 #ds33
 datasource rawSqlLocksNumDeadlocksSec
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Number of Deadlocks/sec:database"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Locks:Number of Deadlocks/sec:database"
+    rrd-ds-type = DERIVE
 datasource DeadlocksSec
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds33,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds33,ds0,ds2,/,/
 graph DeadlocksSec
-	legend = "Number of Deadlocks/sec (Database)"
-	units = "/sec"
+    legend = "Number of Deadlocks/sec (Database)"
+    units = "/sec"
 
 #ds34
 datasource SqlMemoryManagerTotalMemory
-	ds-source = "perfmon:%auto-target-name%:SQLServer=Memory Manager:Total Server Memory (KB)"
-	rrd-ds-type = GAUGE
+    ds-source = "perfmon:%auto-target-name%:SQLServer=Memory Manager:Total Server Memory (KB)"
+    rrd-ds-type = GAUGE
 graph SqlMemoryManagerTotalMemory
-	legend = "Total Server Memory (KB)"
-	units = "MB"
-	scale = 100,/
-	precision = 0
+    legend = "Total Server Memory (KB)"
+    units = "MB"
+    scale = 100,/
+    precision = 0
 
 # IIS Counters
 #ds26
 datasource rawIisBytesTotalSecDefault
-	ds-source = "perfmon:%auto-target-name%:Web Service:Bytes Total/sec:Default Web Site"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Web Service:Bytes Total/sec:Default Web Site"
+    rrd-ds-type = DERIVE
 datasource IisBytesTotalSecDefault
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds26,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds26,ds0,ds2,/,/
 graph IisBytesTotalSecDefault
-	legend = "Bytes Total/sec (Default Web Site)"
-	units = "bytes"
+    legend = "Bytes Total/sec (Default Web Site)"
+    units = "bytes"
 
 #ds27
 datasource rawIisAnonymousUsersSecDefault
-	ds-source = "perfmon:%auto-target-name%:Web Service:Anonymous Users/sec:Default Web Site"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Web Service:Anonymous Users/sec:Default Web Site"
+    rrd-ds-type = DERIVE
 datasource IisAnonymousUsersSecDefault
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds27,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds27,ds0,ds2,/,/
 graph IisAnonymousUsersSecDefault
-	legend = "Anonymous Users/sec (Default Web Site)"
-	units = "/sec"
-	precision = 0
+    legend = "Anonymous Users/sec (Default Web Site)"
+    units = "/sec"
+    precision = 0
 
 #ds28
 datasource rawIisFilesSecDefault
-	ds-source = "perfmon:%auto-target-name%:Web Service:Files/sec:Default Web Site"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Web Service:Files/sec:Default Web Site"
+    rrd-ds-type = DERIVE
 datasource IisFilesSecDefault
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds28,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds28,ds0,ds2,/,/
 graph IisFilesSecDefault
-	legend = "Anonymous Users/sec (Default Web Site)"
-	unis = "/sec"
-	precision = 0
+    legend = "Anonymous Users/sec (Default Web Site)"
+    unis = "/sec"
+    precision = 0
 
 #ds29
 datasource rawIisGetRequestsSecDefault
-	ds-source = "perfmon:%auto-target-name%:Web Service:Get Requests/sec:Default Web Site"
-	rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Web Service:Get Requests/sec:Default Web Site"
+    rrd-ds-type = DERIVE
 datasource IisGetRequestsSecDefault
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds29,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds29,ds0,ds2,/,/
 graph IisGetRequestsSecDefault
-	legend = "GET Requests/sec (Default Web Site)"
-	units = "/sec"
-	precision = 0
+    legend = "GET Requests/sec (Default Web Site)"
+    units = "/sec"
+    precision = 0
 
 #ds30
 datasource rawIisNonAnonymousUsersSecDefault
-	rrd-ds-type = DERIVE
-	ds-source = "perfmon:%auto-target-name%:Web Service:Non Anonymous Users/sec:Default Web Site"
+    rrd-ds-type = DERIVE
+    ds-source = "perfmon:%auto-target-name%:Web Service:Non Anonymous Users/sec:Default Web Site"
 datasource IisNaUsersSecDefault
-	rrd-ds-type = COMPUTE
-	rrd-cdef = ds30,ds0,ds2,/,/
+    rrd-ds-type = COMPUTE
+    rrd-cdef = ds30,ds0,ds2,/,/
 graph IisNaUsersSecDefault
-	legend = "Non Anonymous Users/sec"
-	units = "/sec"
-	precision = 0
+    legend = "Non Anonymous Users/sec"
+    units = "/sec"
+    precision = 0
 
 
 #
@@ -446,48 +446,48 @@ graph IisNaUsersSecDefault
 #
 #
 targetType DCAMMachine
-	ds = "PerfTime,PerfTime100ns,PerfFreq,rawbaseRegistryQuota,rawfractRegistryQuota,rawProcessorProcessorTime,rawProcessorInterruptTime,rawProcessorUserTime,rawProcessorPrivilegedTime,rawProcessorInterruptsSec,rawbaseMemoryCommitted,rawfractMemoryCommitted,rawbasePagingFileUsage,rawfractPagingFileUsage,rawbasePagingFilePeakUsage,rawfractPagingFilePeakUsage,rawPhysicalDiskDiskReads,rawPhysicalDiskDiskWrites,rawMemoryPagesSec,ProcessorQueueLength,ServerPoolPagedBytes,ServerPoolPagedPeak,Processes,Threads,TsActiveSessions,TsInactiveSessions,rawSqlDbTransSecOnePoint,rawbaseSqlLocksAvgWaitTime,rawfractSqlLocksAvgWaitTime,rawbaseSqlLockWaitTime,rawfractSqlLockWaitTime,rawSqlLocksLockTimeoutsSec,rawSqlLocksNumDeadlocksSec,SqlMemoryManagerTotalMemory,DeadlocksSec,LockTimeoutsSec,LockReqsSec,LocksWaitTime,LocksAvgWaitTime,SqlDbTransSecOnePoint,RegistryQuota,ProcessorTime,InterruptTime,UserTime,PrivilegedTime,InterruptsSec,MemoryCommitted,PagingFileUsage,PagingFilePeakUsage,DiskReadsSec,DiskWritesSec,MemoryPagesSec,TsTotalSessions"
-	view = "Registry: RegistryQuota,
-		CPU: ProcessorTime InterruptTime PrivilegedTime,
-		Memory Usage: MemoryCommitted ,
-		Paging File Usage: PagingFilePeakUsage PagingFileUsage, 
-		Disk: DiskReadsSec DiskWritesSec,
-		Processor Queue: ProcessorQueueLength,
-		Paging I/O: MemoryPagesSec,
-		Processes: Processes Threads,
-		Server Service Pool: ServerPoolPagedPeak ServerPoolPagedBytes,
-		Terminal Services: TsTotalSessions TsActiveSessions TsInactiveSessions,
-		Database Memory Usage: SqlMemoryManagerTotalMemory,
-		Database Transactions (OnePoint): SqlDbTransSecOnePoint,
-		Database Locks:  LockReqsSec LockTimeoutsSec "
+    ds = "PerfTime,PerfTime100ns,PerfFreq,rawbaseRegistryQuota,rawfractRegistryQuota,rawProcessorProcessorTime,rawProcessorInterruptTime,rawProcessorUserTime,rawProcessorPrivilegedTime,rawProcessorInterruptsSec,rawbaseMemoryCommitted,rawfractMemoryCommitted,rawbasePagingFileUsage,rawfractPagingFileUsage,rawbasePagingFilePeakUsage,rawfractPagingFilePeakUsage,rawPhysicalDiskDiskReads,rawPhysicalDiskDiskWrites,rawMemoryPagesSec,ProcessorQueueLength,ServerPoolPagedBytes,ServerPoolPagedPeak,Processes,Threads,TsActiveSessions,TsInactiveSessions,rawSqlDbTransSecOnePoint,rawbaseSqlLocksAvgWaitTime,rawfractSqlLocksAvgWaitTime,rawbaseSqlLockWaitTime,rawfractSqlLockWaitTime,rawSqlLocksLockTimeoutsSec,rawSqlLocksNumDeadlocksSec,SqlMemoryManagerTotalMemory,DeadlocksSec,LockTimeoutsSec,LockReqsSec,LocksWaitTime,LocksAvgWaitTime,SqlDbTransSecOnePoint,RegistryQuota,ProcessorTime,InterruptTime,UserTime,PrivilegedTime,InterruptsSec,MemoryCommitted,PagingFileUsage,PagingFilePeakUsage,DiskReadsSec,DiskWritesSec,MemoryPagesSec,TsTotalSessions"
+    view = "Registry: RegistryQuota,
+        CPU: ProcessorTime InterruptTime PrivilegedTime,
+        Memory Usage: MemoryCommitted ,
+        Paging File Usage: PagingFilePeakUsage PagingFileUsage,
+        Disk: DiskReadsSec DiskWritesSec,
+        Processor Queue: ProcessorQueueLength,
+        Paging I/O: MemoryPagesSec,
+        Processes: Processes Threads,
+        Server Service Pool: ServerPoolPagedPeak ServerPoolPagedBytes,
+        Terminal Services: TsTotalSessions TsActiveSessions TsInactiveSessions,
+        Database Memory Usage: SqlMemoryManagerTotalMemory,
+        Database Transactions (OnePoint): SqlDbTransSecOnePoint,
+        Database Locks:  LockReqsSec LockTimeoutsSec "
 
 
 targetType IISMachine
-	ds = "PerfTime,PerfTime100ns,PerfFreq,rawbaseRegistryQuota,rawfractRegistryQuota,rawProcessorProcessorTime,rawProcessorInterruptTime,rawProcessorUserTime,rawProcessorPrivilegedTime,rawProcessorInterruptsSec,rawbaseMemoryCommitted,rawfractMemoryCommitted,rawbasePagingFileUsage,rawfractPagingFileUsage,rawbasePagingFilePeakUsage,rawfractPagingFilePeakUsage,rawPhysicalDiskDiskReads,rawPhysicalDiskDiskWrites,rawMemoryPagesSec,ProcessorQueueLength,ServerPoolPagedBytes,ServerPoolPagedPeak,Processes,Threads,TsActiveSessions,TsInactiveSessions, rawIisBytesTotalSecDefault,rawIisAnonymousUsersSecDefault,rawIisFilesSecDefault,rawIisGetRequestsSecDefault,rawIisNonAnonymousUsersSecDefault,IisBytesTotalSecDefault,IisAnonymousUsersSecDefault,IisFilesSecDefault,IisGetRequestsSecDefault,RegistryQuota,ProcessorTime,InterruptTime,UserTime,PrivilegedTime,InterruptsSec,MemoryCommitted,PagingFileUsage,PagingFilePeakUsage,DiskReadsSec,DiskWritesSec,IisNaUsersSecDefault,MemoryPagesSec,TsTotalSessions"
-	view = "Registry: RegistryQuota,
-		CPU: ProcessorTime InterruptTime PrivilegedTime,
-		Memory Usage: MemoryCommitted,
-		Paging File Usage: PagingFilePeakUsage PagingFileUsage, 
-		Disk: DiskReadsSec DiskWritesSec,
-		Processor Queue: ProcessorQueueLength,
-		Memory: InterruptsSec MemoryPagesSec,
-		Processes: Processes Threads,
-		Server Pool: ServerPoolPagedPeak ServerPoolPagedBytes,
-		Terminal Services: TsTotalSessions TsActiveSessions TsInactiveSessions,
-		IIS Traffic (Default): IisBytesTotalSecDefault,
-		IIS Requests (Default): IisGetRequestsSecDefault IisFilesSecDefault,
-		IIS Users (Default): IisAnonymousUsersSecDefault IisNonAnonymousUsersSecDefault"
+    ds = "PerfTime,PerfTime100ns,PerfFreq,rawbaseRegistryQuota,rawfractRegistryQuota,rawProcessorProcessorTime,rawProcessorInterruptTime,rawProcessorUserTime,rawProcessorPrivilegedTime,rawProcessorInterruptsSec,rawbaseMemoryCommitted,rawfractMemoryCommitted,rawbasePagingFileUsage,rawfractPagingFileUsage,rawbasePagingFilePeakUsage,rawfractPagingFilePeakUsage,rawPhysicalDiskDiskReads,rawPhysicalDiskDiskWrites,rawMemoryPagesSec,ProcessorQueueLength,ServerPoolPagedBytes,ServerPoolPagedPeak,Processes,Threads,TsActiveSessions,TsInactiveSessions, rawIisBytesTotalSecDefault,rawIisAnonymousUsersSecDefault,rawIisFilesSecDefault,rawIisGetRequestsSecDefault,rawIisNonAnonymousUsersSecDefault,IisBytesTotalSecDefault,IisAnonymousUsersSecDefault,IisFilesSecDefault,IisGetRequestsSecDefault,RegistryQuota,ProcessorTime,InterruptTime,UserTime,PrivilegedTime,InterruptsSec,MemoryCommitted,PagingFileUsage,PagingFilePeakUsage,DiskReadsSec,DiskWritesSec,IisNaUsersSecDefault,MemoryPagesSec,TsTotalSessions"
+    view = "Registry: RegistryQuota,
+        CPU: ProcessorTime InterruptTime PrivilegedTime,
+        Memory Usage: MemoryCommitted,
+        Paging File Usage: PagingFilePeakUsage PagingFileUsage,
+        Disk: DiskReadsSec DiskWritesSec,
+        Processor Queue: ProcessorQueueLength,
+        Memory: InterruptsSec MemoryPagesSec,
+        Processes: Processes Threads,
+        Server Pool: ServerPoolPagedPeak ServerPoolPagedBytes,
+        Terminal Services: TsTotalSessions TsActiveSessions TsInactiveSessions,
+        IIS Traffic (Default): IisBytesTotalSecDefault,
+        IIS Requests (Default): IisGetRequestsSecDefault IisFilesSecDefault,
+        IIS Users (Default): IisAnonymousUsersSecDefault IisNonAnonymousUsersSecDefault"
 
 targetType --default--
-	ds = "PerfTime,PerfTime100ns,PerfFreq,rawbaseRegistryQuota,rawfractRegistryQuota,rawProcessorProcessorTime,rawProcessorInterruptTime,rawProcessorUserTime,rawProcessorPrivilegedTime,rawProcessorInterruptsSec,rawbaseMemoryCommitted,rawfractMemoryCommitted,rawbasePagingFileUsage,rawfractPagingFileUsage,rawbasePagingFilePeakUsage,rawfractPagingFilePeakUsage,rawPhysicalDiskDiskReads,rawPhysicalDiskDiskWrites,rawMemoryPagesSec,ProcessorQueueLength,ServerPoolPagedBytes,ServerPoolPagedPeak,Processes,Threads,TsActiveSessions,TsInactiveSessions,RegistryQuota,ProcessorTime,InterruptTime,UserTime,PrivilegedTime,InterruptsSec,MemoryCommitted,PagingFileUsage,PagingFilePeakUsage,DiskReadsSec,DiskWritesSec,MemoryPagesSec,TsTotalSessions"
-	view = "Registry: RegistryQuota,
-		CPU: ProcessorTime InterruptTime PrivilegedTime,
-		Memory Usage: MemoryCommitted,
-		Paging File Usage: PagingFilePeakUsage PagingFileUsage, 
-		Disk: DiskReadsSec DiskWritesSec,
-		Processor Queue: ProcessorQueueLength,
-		Paging I/O: MemoryPagesSec,
-		Processes: Processes Threads,
-		Server Service Pool: ServerPoolPagedPeak ServerPoolPagedBytes,
-		Terminal Services: TsTotalSessions TsActiveSessions TsInactiveSessions "
+    ds = "PerfTime,PerfTime100ns,PerfFreq,rawbaseRegistryQuota,rawfractRegistryQuota,rawProcessorProcessorTime,rawProcessorInterruptTime,rawProcessorUserTime,rawProcessorPrivilegedTime,rawProcessorInterruptsSec,rawbaseMemoryCommitted,rawfractMemoryCommitted,rawbasePagingFileUsage,rawfractPagingFileUsage,rawbasePagingFilePeakUsage,rawfractPagingFilePeakUsage,rawPhysicalDiskDiskReads,rawPhysicalDiskDiskWrites,rawMemoryPagesSec,ProcessorQueueLength,ServerPoolPagedBytes,ServerPoolPagedPeak,Processes,Threads,TsActiveSessions,TsInactiveSessions,RegistryQuota,ProcessorTime,InterruptTime,UserTime,PrivilegedTime,InterruptsSec,MemoryCommitted,PagingFileUsage,PagingFilePeakUsage,DiskReadsSec,DiskWritesSec,MemoryPagesSec,TsTotalSessions"
+    view = "Registry: RegistryQuota,
+        CPU: ProcessorTime InterruptTime PrivilegedTime,
+        Memory Usage: MemoryCommitted,
+        Paging File Usage: PagingFilePeakUsage PagingFileUsage,
+        Disk: DiskReadsSec DiskWritesSec,
+        Processor Queue: ProcessorQueueLength,
+        Paging I/O: MemoryPagesSec,
+        Processes: Processes Threads,
+        Server Service Pool: ServerPoolPagedPeak ServerPoolPagedBytes,
+        Terminal Services: TsTotalSessions TsActiveSessions TsInactiveSessions "
 

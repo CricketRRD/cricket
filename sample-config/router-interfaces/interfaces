@@ -1,27 +1,26 @@
 target --default--
-	router = bsn-router
+    router = bsn-router
 
 target Serial0_0_5
- 	interface-name	=	Serial0/0/5
-	short-desc	=	"T1 to Nebraska"
+    interface-name  =   Serial0/0/5
+    short-desc  =   "T1 to Nebraska"
 
 target Serial0_0_6
- 	interface-name	=	Serial0/0/6
-	short-desc	=	"T-1 to Minnesota"
+    interface-name  =   Serial0/0/6
+    short-desc  =   "T-1 to Minnesota"
 
 target FastEthernet0_1_0
- 	interface-name	=	FastEthernet0/1/0
-	short-desc	=	"Engineering Network"
+    interface-name  =   FastEthernet0/1/0
+    short-desc  =   "Engineering Network"
 
 target FastEthernet1_0_0
- 	interface-name	=	FastEthernet1/0/0
-	short-desc	=	"Engineering Servers Network"
+    interface-name  =   FastEthernet1/0/0
+    short-desc  =   "Engineering Servers Network"
 
 target FastEthernet1_1_0
- 	interface-name	=	FastEthernet1/1/0
-	short-desc	=	"Router Nexus"
+    interface-name  =   FastEthernet1/1/0
+    short-desc  =   "Router Nexus"
 
 target Hssi4_0_0
- 	interface-name	=	Hssi4/0/0
-	short-desc	=	"DS3 (45 Mbit, full duplex) to Internet"
-
+    interface-name  =   Hssi4/0/0
+    short-desc  =   "DS3 (45 Mbit, full duplex) to Internet"

@@ -1,41 +1,41 @@
 target --default--
-	short-desc	=	""
+    short-desc  =   ""
     long-desc   =   "%short-desc% is being monitored via this URL:
                      <a href=\"%url%\">%url%</a>."
-	# you'll probably want to change this... unless you
-	# have Cricket in ~/cricket and your config tree in ~/cricket-config
-	util-dir	=	%auto-base%/../cricket/util
-	target-type	=	http-performance
-	url			=	""
+    # you'll probably want to change this... unless you
+    # have Cricket in ~/cricket and your config tree in ~/cricket-config
+    util-dir    =   %auto-base%/../cricket/util
+    target-type =   http-performance
+    url         =   ""
 
-datasource	total-time
-	ds-source	=	"exec:0:%util-dir%/test-url '%url%'"
-	desc		=	"The amount of time it took to fetch the entire page.
-					For large transfers, this will give an indication
-					of data throughput."
-	rrd-ds-type		=	GAUGE
+datasource  total-time
+    ds-source   =   "exec:0:%util-dir%/test-url '%url%'"
+    desc        =   "The amount of time it took to fetch the entire page.
+                    For large transfers, this will give an indication
+                    of data throughput."
+    rrd-ds-type     =   GAUGE
 
-datasource	first-time
-	ds-source	=	"exec:1:%util-dir%/test-url '%url%'"
-	desc		=	"The amount of time it took to fetch the first-byte.
-					This time is the best approximation available of the
-					time to connect (i.e. DNS time, TCP connection
-					setup time, webserver response time)."
-	rrd-ds-type		=	GAUGE
+datasource  first-time
+    ds-source   =   "exec:1:%util-dir%/test-url '%url%'"
+    desc        =   "The amount of time it took to fetch the first-byte.
+                    This time is the best approximation available of the
+                    time to connect (i.e. DNS time, TCP connection
+                    setup time, webserver response time)."
+    rrd-ds-type     =   GAUGE
 
-targetType	http-performance
-	ds	=	"total-time, first-time"
+targetType  http-performance
+    ds  =   "total-time, first-time"
 
 graph --default--
-	y-axis  =   "Time in Seconds"
-	units	=	secs
-	# cut off spikes above 5 seconds
-	y-max	=	5
+    y-axis  =   "Time in Seconds"
+    units   =   secs
+    # cut off spikes above 5 seconds
+    y-max   =   5
 
 graph total-time
-	legend = "Total Time"
-	draw-as = AREA
+    legend = "Total Time"
+    draw-as = AREA
 
 graph first-time
-	legend = "Time to First Byte"
-	draw-as = LINE1
+    legend = "Time to First Byte"
+    draw-as = LINE1

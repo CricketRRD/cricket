@@ -1,4 +1,3 @@
-target  news 
-    server = news 
-    user   = news 
-
+target  news
+    server = news
+    user   = news
