@@ -57,7 +57,8 @@ if (Common::Util::isWin32()) {
 # to commented out.
 # use func;
 
-Common::Options::commonOptions();
+Common::Options::commonOptions(
+                 "skipMonitor" => \$Common::global::gSkipMonitor);
 
 Info("Starting collector: $Common::global::gVersion");
 $gTargetCt = 0;
@@ -111,11 +112,13 @@ foreach $subtree (@ARGV) {
     }
 }
 
-foreach $subtree (@ARGV) {
-    if ($gCT->nodeExists($subtree)) {
-        $gCT->visitLeafs($subtree, \&handleTarget, \&checkTargetInstance);
-    } else {
-        Warn("Unknown subtree $subtree.");
+if (!$Common::global::gSkipMonitor) {
+    foreach $subtree (@ARGV) {
+        if ($gCT->nodeExists($subtree)) {
+            $gCT->visitLeafs($subtree, \&handleTarget, \&checkTargetInstance);
+        } else {
+            Warn("Unknown subtree $subtree.");
+        }
     }
 }
 

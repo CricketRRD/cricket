@@ -70,6 +70,8 @@ BEGIN {
     $hasPersistantGlobals = 1 if $ENV{'MOD_PERL'};
     $hasPersistantGlobals = 1 if $CGI::SpeedyCGI::i_am_speedy;
 
+    $gSkipMonitor ||= 0;
+
     if (!defined($isGrapher)) {
         $isGrapher = 0;
     }
