@@ -14,8 +14,8 @@
 package Common::global;
 
 $gCricketHome = "/home/cricket";
-$gInstallRoot = "/home/cricket/cricket";
-#$gConfigRoot = "/home/cricket/cricket/cricket-config";
+$gInstallRoot = "$gCricketHome/cricket";
+#$gConfigRoot = "$gCricketHome/cricket-config";
 
 #	Whether to optimize config tree access for the collector by
 #	copying the database into memory on startup.
