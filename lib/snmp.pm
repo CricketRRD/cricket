@@ -105,7 +105,10 @@ sub snmpFetch {
             for $ctr ( 0..$#indices ) {
                 my($res) = $hostResults[$ctr];
                 $res = "U" if (! defined($res));
-                push(@results, "$indices[$ctr]:" . Common::Util::fixNum($res));
+				# previously called fixNum() here, but that breaks mapped
+				# instances which rely on the fact that the snmp result
+				# may be non-numeric
+                push(@results, "$indices[$ctr]:" . $res);
             }
         }
     }
