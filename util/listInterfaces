@@ -3,7 +3,7 @@
 
 # Cricket: a configuration, polling and data display wrapper for RRD files
 #
-#    Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+#    Copyright (C) 1998-2002 Jeff R. Allen and WebTV Networks, Inc.
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,13 +20,13 @@
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 BEGIN {
-	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
-	eval "require '$programdir/cricket-conf.pl'";
-	eval "require '$programdir/../cricket-conf.pl'"
-					unless $Common::global::gInstallRoot;
-	eval "require '/usr/local/etc/cricket-conf.pl'"
-					unless $Common::global::gInstallRoot;
-	$Common::global::gInstallRoot ||= $programdir;
+    my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+    eval "require '$programdir/cricket-conf.pl'";
+    eval "require '$programdir/../cricket-conf.pl'"
+                    unless $Common::global::gInstallRoot;
+    eval "require '/usr/local/etc/cricket-conf.pl'"
+                    unless $Common::global::gInstallRoot;
+    $Common::global::gInstallRoot ||= $programdir;
 }
 
 use lib "$Common::global::gInstallRoot/lib";
@@ -55,70 +55,67 @@ my($usealias) = 0;
 my($usedescr) = 0;
 my($units) = "bits";
 my($showspeed) = 0;
-Common::Options::commonOptions( 
- "speed!", \$showspeed,
- "ifname!", \$useifnamekey,
- "ifdesc!", \$useifdesckey,
- "alias!", \$usealias,
- "descript!", \$usedescr,
- "redback!", \$redback,
- "cisco!", \$cisco,
- "bytes|b!", \$bytes,
- "help|usage|h|?!", \$usage,
- "suppress=s@", \@main::suppress
- );
+Common::Options::commonOptions(
+    "speed!", \$showspeed,
+    "ifname!", \$useifnamekey,
+    "ifdesc!", \$useifdesckey,
+    "alias!", \$usealias,
+    "descript!", \$usedescr,
+    "redback!", \$redback,
+    "cisco!", \$cisco,
+    "bytes|b!", \$bytes,
+    "help|usage|h|?!", \$usage,
+    "suppress=s@", \@main::suppress
+    );
 
-if ( $cisco && $redback ) {
-  $usage = 1;
-}
-elsif ( $cisco ) {
-  $showspeed = 1;
-  $useifdesckey = 1;
-  $usealias = 1;
-  $useifnamekey = 0;
-  $usedescr = 0;
-}
-elsif ( $redback ) {
-  $showspeed = 1;
-  $useifnamekey = 1;
-  $usedescr = 1;
-  $useifdesckey = 0;
-  $usealias = 0;
-}
-else {
-  $useifdesckey = 1 if ! $useifnamekey;
-  $usealias = 1 if ! $usedescr;
+if ($cisco && $redback) {
+    $usage = 1;
+} elsif ($cisco) {
+    $showspeed = 1;
+    $useifdesckey = 1;
+    $usealias = 1;
+    $useifnamekey = 0;
+    $usedescr = 0;
+} elsif ($redback) {
+    $showspeed = 1;
+    $useifnamekey = 1;
+    $usedescr = 1;
+    $useifdesckey = 0;
+    $usealias = 0;
+} else {
+    $useifdesckey = 1 if ! $useifnamekey;
+    $usealias = 1 if ! $usedescr;
 }
 
-if ($#ARGV+1 < 1 || $#ARGV+1 > 2 || $usage ) {
-	print STDERR "Usage: $0 [options] hostname [community]\n";
-	print STDERR "\tcommunity will default to public if you don't give it.\n\n";
-	print STDERR "Options:\n";
-	print STDERR "  --help or --usage or -? show this message\n";
-	print STDERR "  --speed \tinclude interface speed in output (platform-dependent)\n";
-	print STDERR "  --ifdesc \tuse ifDescr as interface key (default)\n";
-	print STDERR "  --ifname \tuse ifName as interface key instead of ifDescr\n";
-	print STDERR "  --alias \tuse ifAlias as interface description (default)\n";
-	print STDERR "  --descr \tuse ifDescr as interface description\n";
-	print STDERR "  --bytes \tuse units of bytes (default bits)\n";
-	print STDERR "  --cisco \tsame as --speed --ifdesc --alias \n";
-	print STDERR "  --redback \tsame as --speed --ifname --descr \n";
-	print STDERR "  --suppress [pattern] \tignore/skip interfaces matching pattern\n";
-	print STDERR "  \t\tMultiple --suppress entries may be used.\n\n";
-	print STDERR "Examples:\n";
-	print STDERR "  $0 --cisco --suppress BVI --suppress Loop mycisco mySNMP\n";;
-	print STDERR "Generate interfaces config for a Cisco, including speed information \n";
-	print STDERR "per interface but skipping loopback and BVI (bridge) interfaces \n";
-	exit 1;
+if ($#ARGV+1 < 1 || $#ARGV+1 > 2 || $usage) {
+    print STDERR "Usage: $0 [options] hostname [community]\n";
+    print STDERR "\tcommunity will default to public if you don't give it.\n\n";
+    print STDERR "Options:\n";
+    print STDERR "  --help or --usage or -? show this message\n";
+    print STDERR "  --speed \tinclude interface speed in output (platform-dependent)\n";
+    print STDERR "  --ifdesc \tuse ifDescr as interface key (default)\n";
+    print STDERR "  --ifname \tuse ifName as interface key instead of ifDescr\n";
+    print STDERR "  --alias \tuse ifAlias as interface description (default)\n";
+    print STDERR "  --descr \tuse ifDescr as interface description\n";
+    print STDERR "  --bytes \tuse units of bytes (default bits)\n";
+    print STDERR "  --cisco \tsame as --speed --ifdesc --alias \n";
+    print STDERR "  --redback \tsame as --speed --ifname --descr \n";
+    print STDERR "  --suppress [pattern] \tignore/skip interfaces matching pattern\n";
+    print STDERR "  \t\tMultiple --suppress entries may be used.\n\n";
+    print STDERR "Examples:\n";
+    print STDERR "  $0 --cisco --suppress BVI --suppress Loop mycisco mySNMP\n";;
+    print STDERR "Generate interfaces config for a Cisco, including speed information \n";
+    print STDERR "per interface but skipping loopback and BVI (bridge) interfaces \n";
+    exit 1;
 }
 
 $units = "bytes" if $bytes;
 my($router) = $ARGV[0];
 my($community) = "public";
-$community = $ARGV[1] unless (! defined($ARGV[1]));
+$community = $ARGV[1] unless (!defined($ARGV[1]));
 my($snmp) = "$community\@$router";
 print "target --default--\n";
-print "	router = $router\n";
+print "    router = $router\n";
 
 print "\n";
 
@@ -136,84 +133,84 @@ my($outputme) = 0;
 my($test)= "";
 my($row);
 foreach $row (snmpUtils::walk($snmp, $interface_key)) {
-	my($oid, $value) = split(/:/, $row, 2);
+    my($oid, $value) = split(/:/, $row, 2);
 
-	$oid =~ s/$interface_key//;
+    $oid =~ s/$interface_key//;
 
-	my($stat) = snmpUtils::get($snmp, "1.3.6.1.2.1.2.2.1.7.$oid");
-	my($connector) = snmpUtils::get($snmp, "1.3.6.1.2.1.31.1.1.1.17.$oid");
-	my($desc) = snmpUtils::get($snmp, "$interface_name.$oid");
-	my($ifSpeed) = snmpUtils::get($snmp, "1.3.6.1.2.1.2.2.1.5.$oid");
+    my($stat) = snmpUtils::get($snmp, "1.3.6.1.2.1.2.2.1.7.$oid");
+    my($connector) = snmpUtils::get($snmp, "1.3.6.1.2.1.31.1.1.1.17.$oid");
+    my($desc) = snmpUtils::get($snmp, "$interface_name.$oid");
+    my($ifSpeed) = snmpUtils::get($snmp, "1.3.6.1.2.1.2.2.1.5.$oid");
 
-	# Sanitize $desc value because current Redback SNMP implementation
-	# as of 11/2000 returns corrupted garbage in ifDescr sometimes.
-	$desc =~ tr/!-~/ /cs; # convert all non-printable ASCIIs to a space
+    # Sanitize $desc value because current Redback SNMP implementation
+    # as of 11/2000 returns corrupted garbage in ifDescr sometimes.
+    $desc =~ tr/!-~/ /cs; # convert all non-printable ASCIIs to a space
 
-	# second fetched value is oper status -- use it to decide which
-	# targets to print
+    # second fetched value is oper status -- use it to decide which
+    # targets to print
 
-	$outputme = ($stat == 1);
+    $outputme = ($stat == 1);
 
-	# suppress array is list of strings to be pattern-matched to
-	# decide whether we ignore this interface.
-	TEST: foreach $test (@main::suppress) {
-		if ( $outputme && $value =~ m/$test/ ) {
-			$outputme = 0;
-			last TEST;
-		}
-	}
+    # suppress array is list of strings to be pattern-matched to
+    # decide whether we ignore this interface.
+    TEST: foreach $test (@main::suppress) {
+        if ($outputme && $value =~ m/$test/) {
+            $outputme = 0;
+            last TEST;
+        }
+    }
 
-	if ($outputme) {
-		my($target) = $value;
-		$target =~ s/[\/\s:]/\_/g;
+    if ($outputme) {
+        my($target) = $value;
+        $target =~ s/[\/\s:]/\_/g;
 
-		print "target $target\n";
-		output("interface-name", $value);
-		output("short-desc", $desc);
-		if ( $showspeed && $ifSpeed ) {
-			output( "if-speed", $ifSpeed );
-			output( "fmt-speed", fmispeed( $ifSpeed, $units ) );
-		}
+        print "target $target\n";
+        output("interface-name", $value);
+        output("short-desc", $desc);
+        if ($showspeed && $ifSpeed) {
+            output("if-speed", $ifSpeed);
+            output("fmt-speed", fmispeed($ifSpeed, $units));
+        }
 
-		# experience shows that subinterfaces (like those
-		# representing the endpoints of PVCs riding on a
-		# frame relay link) need a special config.
+        # experience shows that subinterfaces (like those
+        # representing the endpoints of PVCs riding on a
+        # frame relay link) need a special config.
 
-		if (defined($connector) && $connector == 2) {
-			output("target-type", "sub-interface");
-		}
-		print "\n";
-	}
+        if (defined($connector) && $connector == 2) {
+            output("target-type", "sub-interface");
+        }
+        print "\n";
+    }
 }
 
 sub output {
-	my($name, $value) = @_;
-	my($quote) = '';
-	
-	if (defined($value)) {
-		# quote empty (or white-space only) lines, or lines which
-		# will have embedded spaces.
-		$quote = '"' if ($value =~ /^\s*$/ || $value =~ /\s/);
-		print "\t$name	=	$quote$value$quote\n";
-	}
+    my($name, $value) = @_;
+    my($quote) = '';
+
+    if (defined($value)) {
+        # quote empty (or white-space only) lines, or lines which
+        # will have embedded spaces.
+        $quote = '"' if ($value =~ /^\s*$/ || $value =~ /\s/);
+        print "\t$name    =    $quote$value$quote\n";
+    }
 }
 
 sub fmispeed {
-  my($number, $units) = @_;
-  my @short;
+    my($number, $units) = @_;
+    my @short;
 
-  if ($units eq "bytes") {
-      @short = ("Bytes/sec","kBytes/sec","MBytes/sec","GBytes/sec");
-  } else {
-      @short = ("bits/sec","kbits/sec","Mbits/sec","Gbits/sec");
-  }
+    if ($units eq "bytes") {
+        @short = ("Bytes/sec","kBytes/sec","MBytes/sec","GBytes/sec");
+    } else {
+        @short = ("bits/sec","kbits/sec","Mbits/sec","Gbits/sec");
+    }
 
-  my $digits = length( "".$number );
-  my $divm = 0;
-  while ($digits - $divm*3 > 3) { $divm++; }
-  my $divnum = $number/10**($divm*3);
-  if ( $divnum == int $divnum  ) {
-    return sprintf("%1d %s", $divnum, $short[$divm]);
-  }
-  return sprintf("%1.3f %s", $divnum, $short[$divm]);
+    my $digits = length("".$number);
+    my $divm = 0;
+    while ($digits - $divm*3 > 3) { $divm++; }
+    my $divnum = $number/10**($divm*3);
+    if ($divnum == int $divnum) {
+        return sprintf("%1d %s", $divnum, $short[$divm]);
+    }
+    return sprintf("%1.3f %s", $divnum, $short[$divm]);
 }
