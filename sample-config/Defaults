@@ -4,7 +4,7 @@
 
 Target	--default--
 	dataDir				= %auto-base%/../cricket-data/%auto-target-path%
-	summary-loc			= top
+	email-program		= /usr/bin/mailx
 	rrd-datafile		= %dataDir%/%auto-target-name%.rrd
 	rrd-poll-interval	= 300
 	persistent-alarms   = false
@@ -12,6 +12,7 @@ Target	--default--
 	snmp-community		= public
 	snmp-port			= 161
 	snmp				= %snmp-community%@%snmp-host%:%snmp-port%
+	summary-loc		= top
 
 OID	sysUptime  			1.3.6.1.2.1.1.3.0
 OID	ifNumber   			1.3.6.1.2.1.2.1.0
