@@ -102,6 +102,7 @@ sub init {
 		# this is the first call to init().
 		$name = '/';
 		$self->Files({});
+		$self->Info("Config directory is " . $self->Base());
 	}
 
 	$self->Debug("Setting name to $name");
