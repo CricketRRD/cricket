@@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
-		<title>Monitor Tresholds</title>
+		<title>Monitor Thresholds</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 	</head>
 	<body>
@@ -59,22 +59,26 @@
 				&lt;monitor-threshold> := &lt;data source>:&lt;monitor
 				type>:&lt;monitor type args>:&lt;action>:&lt;action args>
 			</p>
-			<pre>
+			
+  <pre>
 &lt;data source&gt; := a data source defined for the target
 &lt;monitor type&gt; := One of the six supported types: exact, value, relation, hunt, quotient, or failures.
 &lt;monitor type args&gt; := a colon-delimited list of arguments specific to each monitor type
-&lt;action&gt; := One of five supported actions: SNMP, MAIL, EXEC, FUNC, or FILE.
+&lt;action&gt; := One of six supported actions: SNMP, MAIL, EXEC, FUNC, META or FILE.
 &lt;action args&gt; := a colon-delimited list of arguments specific to each action.
 			</pre>
 		</div>
 
 		<div>
 			<h2>Examples</h2>
-			<pre>
+			
+  <pre>
 target --default--
 &nbsp;&nbsp;&nbsp; mail-pgm = /usr/bin/mailx
 &nbsp;&nbsp;&nbsp; trap-address = 127.0.0.1
 &nbsp;&nbsp;&nbsp; persistent-alarms = true
+
+target network-link-1
 &nbsp;&nbsp;&nbsp; monitor-thresholds =
 &nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 262144 : SNMP,
 &nbsp;&nbsp;&nbsp;&nbsp; ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,
@@ -83,31 +87,57 @@ target --default--
 target pop-2
 &nbsp;&nbsp;&nbsp; persistent-alarms = false
 &nbsp;&nbsp;&nbsp; monitor-thresholds = "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
+
+target router-chassis
+&nbsp;&nbsp;&nbsp; persistent-alarms = false
+&nbsp;&nbsp;&nbsp; monitor-thresholds = "cpu1min : value : n : 60 : META : router-cpu : yellow,
+&nbsp;&nbsp;&nbsp;&nbsp; cpu1min : value : n : 90 : META : router-cpu : red,
+&nbsp;&nbsp;&nbsp;&nbsp; mem5minUsed : quotient : &gt;60pct : : processorRam: META"
 			</pre>
-			<p>
-				The first target, presumably a network link, has three
-				monitor thresholds. The first generates a SNMP trap whenever
-				the bandwidth exceeds 2 Mbps. Assuming a polling interval of
-				300 seconds, the second monitor threshold checks to see if
-				the current ifInOctets value is within 10% of the value
-				recorded for the last interval (300 seconds ago). It
-				computes abs(ifInOctets_now -
-				ifInOctets_then)/ifInOctets_then and compares this with 10%
-				(0.1). If traffic levels have increased more than 10% over
-				the interval, it invokes mailx to send a mail message to
-				me@mydomain.com (note the escaped backslash and escaped
-				'@'). The third monitor threshold checks to see if input
-				errors exceed 0.1% of input packets. If errors exceed this
-				threshold, Cricket generates a SNMP trap.
-			</p>
-			<p>
-				The second target, pop-2, has a single monitor threshold.
-				Cricket will append an entry to the file
-				/var/log/cricket-alerts when a non-zero number of users are
-				on pop-2 yet pop-1 has not reached 40 users. Once pop-1
-				reaches 40 users, or&nbsp; pop-2 returns to a zero user
-				count, the entry will be cleared from the file.
-			</p>
+			
+  <p> Let's take a closer look at what these monitor thresholds mean. The first 
+    target, <i>network-link-1</i>, has three monitor thresholds. The first generates 
+    a SNMP trap whenever the bandwidth exceeds 2 Mbps. Assuming a polling interval 
+    of 300 seconds, the second monitor threshold checks to see if the current 
+    ifInOctets value is within 10% of the value recorded for the last interval 
+    (300 seconds ago). It computes abs(ifInOctets_now - ifInOctets_then)/ifInOctets_then 
+    and compares this with 10% (0.1). If traffic levels have increased more than 
+    10% over the interval, it invokes mailx to send a mail message to me@mydomain.com 
+    (note the escaped backslash and escaped '@'). The third monitor threshold 
+    checks to see if input errors exceed 0.1% of input packets. If errors exceed 
+    this threshold, Cricket generates a SNMP trap. </p>
+	
+   <pre>
+target pop-2
+&nbsp;&nbsp;&nbsp; persistent-alarms = false
+&nbsp;&nbsp;&nbsp; monitor-thresholds = "users : hunt : 40 : pop-1 : users : FILE : /var/log/cricket-alerts"
+   </pre>
+   
+  <p> The second target, pop-2, has a single monitor threshold. Cricket will append 
+    an entry to the file /var/log/cricket-alerts when a non-zero number of users 
+    are on pop-2 yet pop-1 has not reached 40 users. Once pop-1 reaches 40 users, 
+    or&nbsp; pop-2 returns to a zero user count, the entry will be cleared from 
+    the file. </p>
+	
+   
+   <pre>
+target router-chassis
+&nbsp;&nbsp;&nbsp; persistent-alarms = false
+&nbsp;&nbsp;&nbsp; monitor-thresholds = "cpu1min : value : n : 60 : META : router-cpu : yellow,
+&nbsp;&nbsp;&nbsp;&nbsp; cpu1min : value : n : 90 : META : router-cpu : red,
+&nbsp;&nbsp;&nbsp;&nbsp; mem5minUsed : quotient : &gt;60pct : : processorRam: META"
+   </pre>
+   
+  <p> The third target, router-chassis, has a three monitor thresholds. The first 
+    two make use of the value monitor type to establish thresholds on cpu usage. 
+    More than one identical monitor type can be applied against the same datasource. 
+    In both cases, the META action is called with different arguments. The last 
+    monitor type will calculate mem5minUsed datasource divided by the processorRAM 
+    datasource and if the percentage is greater than 60% it will trigger a META 
+    action. Note that no additional arguments have been added to the META action, 
+    this is by design, read the Actions section for details on how to use this 
+    and other actions. </p>
+   
 		</div>
 
 		<div>
@@ -417,6 +447,28 @@ target pop-2
 				action tag (and sharing your work with the Cricket
 				community).
 			</p>
+			
+  <p> META: This action is meant to be used to shared threshold monitoring event 
+    data with other external systems. This action does nothing. In the sense, 
+    that no external action is initiated. There is no mail sent, no SNMP trap 
+    generated or any other specific action. What it does is let cricket know the 
+    fact that an alarm has been generated or cleared. Cricket stores all active 
+    alarms in an internal format call meta files. These files are stored in the 
+    cricket-data directory along side each target.rrd file that has monitor-thresholds 
+    defined for it. The meta files store alarm data for all Action types.The monitor-threshold 
+    line itself and other data is stored in the meta file. Arguments are arbitrary.</p>
+  <p>Using this action requires customization (you must write the external interface 
+    script). The most common uses for this are for sharing event data with event 
+    management systems such as NetCool, BigBrother and others. Event management 
+    systems often support SNMP, proprietary agents or APIs. This permits a flexible 
+    way of interacting with these systems with something other than an SNMP trap.</p>
+  <p>To provide this, your external script must load the config-tree in memory, 
+    query it for active alarms and configured monitoring thresholds and send messages 
+    in the appropriate format to the event manager. An example script is provided 
+    in the util directory of the Cricket distribution, metaQuery.pl. Note that 
+    this is not to be mistaken with real time monitoring, as you have to wait 
+    for the collector run to be finished before querying the config-tree or else 
+    risk missing a new alarm until the next query.</p>
 		</div>
 
 		<div>
@@ -425,7 +477,7 @@ target pop-2
 				Javier Muniz first implemented Monitor Thresholds in
 				Cricket. Jeff Younker implemented the EXEC and FUNC
 				actions.&nbsp; Adam Meltzer implemented the first cut of
-				the MAIL action.&nbsp; Jeff Jensen and Jeff Allen made
+				the MAIL action.&nbsp; Francois Mikus implemented the META action.&nbsp; Jeff Jensen and Jeff Allen made
 				contributions too numerous to count.
 			</p>
 			<p>
@@ -436,3 +488,4 @@ target pop-2
 		</div>
 	</body>
 </html>
+
