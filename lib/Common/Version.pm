@@ -1,2 +1,2 @@
-$Common::global::gVersion = "Cricket version 0.72 ( Sun Jan 23 23:54:35 PST 2000 )";
+$Common::global::gVersion = "Cricket version $VER ( Wed Feb 23 06:41:13 PST 2000 )";
 1;
