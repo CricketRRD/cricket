@@ -1,3 +1,7 @@
+New features, fixes in version 1.0.2 (18-May-00):
+
+	Fixed bug #104757, $clmxCode/max-color bugs.
+
 New features, fixes in version 1.0.1 (18-May-00):
 
 	Various small bugs fixed, related to mixed case names.
