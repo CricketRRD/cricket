@@ -112,7 +112,7 @@ used by Cricket internally.
 <p>
 OID tags are more limited, to conform with the SNMP spec. A tag in an
 OID dictionary can be made up of numbers and letters. Dashes are not
-alowed.
+allowed.
 
 <p>
 Target names should consist of letters, numbers, dashes and
@@ -123,7 +123,7 @@ as parts of filenames.
 
 <p>
 Avoid choosing names that begin and end with two dashes (like
-<tt>--default--</tt>). Criecket uses some names like this internally,
+<tt>--default--</tt>). Cricket uses some names like this internally,
 and future additions will make use of these names.
 
 <p>
@@ -379,7 +379,7 @@ against itself at a previous time (e.g. compare the traffic on a
 router interface to the traffic a week ago on that same interface), to
 compare against the same target for a different datasource
 (e.g. compare the packet rate on a router to the error rate), or to
-compare a target against a completely seperate target (e.g. compare
+compare a target against a completely  target (e.g. compare
 the traffic on router-1 to the traffic on router-2 to be sure that
 they are load balancing correctly).  Arguments for relation monitors
 are as follows:
@@ -435,7 +435,7 @@ than one line with the same color).  It enforces only one AREA graph--it
 will convert the others into LINE2 in order to ensure they can be seen.
 It does not currently support vector instances.  Other than that, the syntax
 matches that for "targets".  This tag can also be used in connection with
-the mtargets-ops flag to perform Arithematic operations.  <p>
+the mtargets-ops flag to perform arithmetic operations.  <p>
 
 <i>Note:</i> This tag will not work with vector instances at this
 time. If you absolutely need it to work, you'll need to use multiple
@@ -447,14 +447,14 @@ the <tt>mtargets</tt> tag to graph each of the scalar targets.
 <dd>Default-value: <i>none</i><p>
 
 This tag is used in connection with the "mtargets" tag.  This tag lets
-you perform arithematic operations on multiple targets.  For example,
+you perform arithmetic operations on multiple targets.  For example,
 this lets you add multiple targets together and graph the results.
 This tag must either be set to an RPN notation, or to a short-hand
 form, like "sum()".
 <p>
 
 If set to an RPN expression, it should be defined as a
-comma seperated list of operations, such
+comma separated list of operations, such
 as "+","-","*","/".  This is used as a RPN calculator, operating on the
 targets listed in the <tt>mtargets</tt> definition.
 So, if you list three targets
@@ -463,7 +463,7 @@ in your mtargets definition, you could define
 result would be a graph of the three targets added together.
 <p>
 
-If this tag is set to "sum()", the correct number of plusses
+If this tag is set to "sum()", the correct number of pluses
 will be substituted to make a valid RPN expression to sum each
 of the targets in the <tt>mtargets</tt> tag.
 <p>
@@ -488,7 +488,17 @@ The order tag is used to control the order that targets are
 <i>polled</i>. (Though it might work like that someday.) When the
 display is laid out by the CGI application, it sorts the targets from
 the highest order to the lowest order.  Targets which have the same
-order are sorted alphanumerically within their order.  <p>
+order are sorted alpha-numerically within their order.  <p>
+
+<dt><tt>persistent-alarms</tt><p>
+<dd>Default value: <i>false</i><P>
+This tag tells the Monitor agent that if it receives an alarm to send traps
+every time it detects an alarm condition. The default behavior is to only send
+an Alarm/Clear trap. This can be useful for sending many SNMP traps into an
+application which can tally the amount of failures, or to have it execute a
+program multiple times. Setting this tag to 'true' turns persistent alarming
+on.
+<p>
 
 <dt><tt>rrd-datafile</tt><p>
 <dd>Default value: <i>none</i><p>
@@ -568,6 +578,15 @@ When using instance mapping, the <tt>snmp</tt> tag is used directly,
 so it must be present, even if you are using another convention to get
 the data into the ds-source tags.  <p>
 
+<dt><tt>summary-loc</tt><p>
+<dd>Default value: <i>top</i><p>
+
+This tag controls where the "Summary" box appears on the page. There
+may be instances where you want it on the bottom instead of the top.
+This could be useful for aggregate pages where you only care about the graphs 
+and not so much the content. To have it display on the bottom, change the tag
+to 'bottom'.
+
 <dt><tt>targets</tt><p>
 <dd>Default value: <i>none</i><p>
 
@@ -575,7 +594,7 @@ If this tag exists, then this target is considered by Cricket to be a
 multi-target. To the collector, this means that it simply doesn't need
 to collect anything, and can skip the target. To the grapher, it means
 this target will aggregate the data from several different targets all
-onto one report.  The syntax is a semi-colon deliminated list of targets.
+onto one report.  The syntax is a semi-colon delimited list of targets.
 The target definition can either by fully-qualified, which would look
 like "/router-interfaces/Datacenter1/ds3-1", or unqualified, in which case
 they are assumed to be in the current directory.  <p>
@@ -763,7 +782,7 @@ Here's a detailed description of each scheme.
 	(i.e. "pages swapped out")
 	to go in to Cricket. As of version 0.64, Cricket ignores everything
 	after the first space or tab. It will attempt to interpret the
-	first sequence of non-space charaters on the line as a floating
+	first sequence of non-space characters on the line as a floating
 	point number. Since an integer is a degenerate form of a floating
 	point number, they are acceptable. This behavior holds for all
 	ds-sources, actually, but it is most useful for the EXEC type.
@@ -1151,7 +1170,7 @@ Without the <tt>bytes</tt> tag, the value would be reported at
 1.04 Mbit/sec, which is slightly misleading. When measuring
 very large numbers of bytes, the difference can be significant.
 <p>
-The numbers on the veritcal axis of a graph are scaled
+The numbers on the vertical axis of a graph are scaled
 by powers of 2 if the bytes tag is set to true for any of the
 datasources on the graph.
 <p>
@@ -1242,7 +1261,7 @@ into bits per second for human use.
 
 This controls the amount of summary data shown on the top of graphs.
 If set to true, Cricket makes an extra call to RRD Tool to fetch the
-average and the maximum for the crurrent day of data. If set to false, only
+average and the maximum for the current day of data. If set to false, only
 the current reading is shown.
 <p>
 
@@ -1410,7 +1429,7 @@ to use on this page. It is normally referenced in the
 <dd>Default value: <i>none</i><p>
  
 This tag is incorporated into the HTML body tag. This is
-the perfect place to set a bacground color. It's not
+the perfect place to set a background color. It's not
 useful for much else, unless you want your graphs to play
 a MIDI file in the background.
 <p>
@@ -1494,7 +1513,7 @@ The color of the event. This should be the name of a color in the
 <dt><tt>date</tt><p>
 <dd>
 
-The time the event happened, which controls where on a grpah the
+The time the event happened, which controls where on a graph the
 vertical rule appears.
 <p>
 
