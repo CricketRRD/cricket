@@ -1,11 +1,12 @@
 # Subtree for monitoring collection times for collect-subtree runs. The
 # syntax for the targets file is: 'target <name-of-subtree>'.
 # 
-# Originally written by Ethan Toretta <email-unavailable>. Currently being
-# maintained by Adam Meltzer <ameltzer@microsoft.com>.
+# Originally written by Ethan Toretta <ethantor@corp.webtv.net>. Currently 
+# being maintained by Adam Meltzer <ameltzer@microsoft.com>.
 #
 # To utilize this tree, uncomment the line '# $subtreeTimes = 1' in the 
-# collect-subtrees script.
+# collect-subtrees script - this is turned off by default since it leaves
+# extra cruft which is unnecessary if you don't use this.
 #
 
 Target		--default--
