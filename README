@@ -20,12 +20,27 @@ Installing
 If you are a brand new Cricket user, you should read and
 closely follow the directions in doc/beginner.html.
 
-If you are a more advanced user, simply read the CHANGES
-to see what's new with this version and then install
-this version. Run the collector by hand once to make certain
-it's still working, then cutover to the new version by
-swapping the $HOME/cricket softlink to the new version.
-(You _are_ using the softlink, aren't you?)
+Upgrading
+----------
+
+(1) Read the CHANGES file to see what's new with this version.
+(2) Install this version to a separate directory from your
+existing version.
+(3) Copy subtree-sets and cricket-conf.pl from the existing
+version to this installation. Alternativel, rename this version 
+cricket-conf.pl.sample to cricket-conf.pl and edit the file
+to match your settings from the cricket-conf.pl existing version.
+(4) Other potential pitfalls: If you use subtree timing info, you
+will need to edit collect-subtrees to set $subtreeTimes = 1. If
+you have placed custom images in cricket/images, you will need to
+copy these files from the existing version to this installation.
+(5) Cutover to this installation from your existing one by swapping
+the $HOME/cricket softlink to this version.
+(6) Recompile your config tree.
+(7) Run the collector or collect-subtrees by hand once to make certain
+it's still working.
+(8) Now you are ready to start experimenting with the new features
+described in the CHANGES file.
 
 Documentation
 -------------

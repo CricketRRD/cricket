@@ -156,3 +156,10 @@ contributed ideas, patches, and/or debugging info:
 		a prototype of SMRTG that crystalized our ideas
 			about the config tree
 		the contributors site
+
+	Francois Mikus
+		Monitoring enhancements
+
+	Terje Bless
+		Website updates
+		Patch review and integration for 1.0.4
