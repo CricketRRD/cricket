@@ -25,32 +25,55 @@
 
 use strict;
 use Getopt::Long;
+use Net::SMTP;
+use Net::DNS;
 
-my $result	= "";
-my %opts	= ();
-my @output	= ();
+my $result      = "";
+my @output      = ();
 
-$result = GetOptions(\%opts, "mail|m=s", "subtree|s=s");
+my $doSubtree;
 
-if (! $result) {
-	die "Error handling options.\n";
+# Define your default email address here if you don't want to use -m
+my $doMail = 'smrtg@corp.webtv.net';
+
+# Define your SMTP host here
+my $mx = 'smtplocal-2001-2.private.lawson.webtv.net';
+
+$result = GetOptions(   "mail|m=s" => \$doMail,
+                        "subtree|s=s" => \$doSubtree,
+                    );
+
+if (!$result) {
+        die "Error handling options.\n";
+}
+if (!defined($doSubtree)) {
+        die "Must provide a subtree to run.\n";
 }
 
-if (! defined($opts{"mail"})) {
-	$opts{"mail"} = 'smrtg@corp.webtv.net';
-}
-
-if (! defined($opts{"subtree"})) {
-	die "Must provide a subtree to run.\n";
-}
-
-@output = `$ENV{"HOME"}/cricket/collect-subtrees $opts{"subtree"} 2>&1`;
+@output = `perl c:/crickethome/cricket/collect-subtrees $doSubtree 2>&1`;
 
 if ($#output > 0) {
-	my $subject = "output from subtree " . $opts{"subtree"};
+        my $res = Net::DNS::Resolver->new;
+	# Define nameservers here if you don't have a libresolv (like on
+	# Windows systems)
+	#$res->nameservers('127.0.0.1');
 
-	open(MAIL, "|/bin/mailx -s \"$subject\" $opts{mail}") ||
-		die "Couldn't run /bin/mailx to send subtree output: $!\n";
-	print MAIL @output;
-	close(MAIL);
+        my ($eUser, $eDomain) = split(/\@/, $doMail);
+        my @mx = mx($res, $eDomain);
+        my $subject = "output from subtree " . $doSubtree;
+
+	# Comment the $mx[0]->{'exchange'} line and uncomment the ($mx) line
+	# if you don't want DNS to figure out the exchanger. It may not be
+	# able to talk to the DNS-determined relay if you're behind a firewall.
+	#my $smtp = Net::SMTP->new($mx[0]->{'exchange'});
+	my $smtp = Net::SMTP->new($mx);
+
+	$smtp->mail($doMail);
+        $smtp->to($doMail);
+        $smtp->data();
+        $smtp->datasend("Subject: $subject");
+        $smtp->datasend(@output);
+        $smtp->dataend();
+        $smtp->quit;
 }
+
