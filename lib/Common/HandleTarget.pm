@@ -130,6 +130,8 @@ sub checkTargetInstance {
         return;
     }
 
+    my $rrdpollinterval = $target->{'rrd-poll-interval'};
+    my $time = time();
     # Convert backslashed commas to \0's ;
     my $ThresholdString = $target->{'monitor-thresholds'};
     $ThresholdString =~ s/\\,/\0/g ;
@@ -152,7 +154,15 @@ sub checkTargetInstance {
     foreach $Threshold (@ThresholdStrings) {
         # restore escaped commas
         $Threshold =~ s/\0/,/g ;
+        my($span) = 0;
+        my($spanlength);
+
         my($ds,$type,$args) = split(/\s*:\s*/, $Threshold, 3);
+        ($args, $spanlength) = split(/:SPAN:/, $args, 2) if ($args =~ /SPAN/);
+        if (defined ($spanlength) && $spanlength =~ /\d+/ ){
+            $span = 1;
+        }
+
         # hide escaped colons
         $args =~ s/\\:/\0/g ;
         # default action type is SNMP
@@ -197,13 +207,30 @@ sub checkTargetInstance {
                 }
             } else {
                 my($metaRef) = $rrd->getMeta();
-                LogMonitor("$name - $Threshold failed.");
-                if ($persistent eq "true" || !defined($metaRef->{$Threshold})) {
+                my ($x, $mt, $mevent, $rest);
+                ($x,$mt, $event, $rest) = split (/\s+/, $metaRef->{$Threshold},4) 
+                                                 unless (!defined($metaRef->{$Threshold}));
+                $mt = $time if !defined($mt);
+                LogMonitor("$name -  $mt - $Threshold failed.");
+                my($spanfail) = 0;
+
+                if ($span && $mt < ($time - ($spanlength * $rrdpollinterval) - 90)) {
+                        $spanfail = 1;
+                }
+                if ((!$span || $span && $spanfail) && 
+                    ($persistent eq "true" || !defined($metaRef->{$Threshold})) ) {
+
                     LogMonitor("Triggering alarm for $Threshold.");
                     $m->Alarm($target,$name,$ds,$type,$Threshold,$actionType,\@actionArgs,$val);
-                    $metaRef->{$Threshold} = 'Failed on ' . $val;
+                    $metaRef->{$Threshold} = ' '. $mt .' failure value '. $val;
                     $rrd->setMeta($metaRef);
-                }
+                } elsif ($span && (!defined($mevent)) || (($mevent ne 'failure') && $spanfail))  {
+                    LogMonitor("Triggering a span event for $Threshold.");
+                    my($event) = ($spanfail) ? 'failure' : 'spanevent';
+                    $m->Alarm($target,$name,$ds,$type,$Threshold,$actionType,\@actionArgs,$val) if ($spanfail);
+                    $metaRef->{$Threshold} = ' '. $mt . ' ' . $event . ' value '. $val;
+                    $rrd->setMeta($metaRef);
+               }
             }
         } else {
             Warn("No monitor handler defined for monitor type $type");
