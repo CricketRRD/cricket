@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <title>copy-to SQL</title>
+  </head>
+<body>
+
+<h1>Using copy-to for Data Warehousing</h1>
+<p>
+This document assumes the following: you have some knowledge about setting up
+databases, you have a database available, and have some sort of administrative
+access on it.
+<p>
+<h3>Introduction</h3>
+<p>
+Until now there has been no good means for data warehousing data from Cricket.
+RRD provides a great means for graphing data but sometimes there is a need to
+have the numeric values in a more accessible form. That's where the SQL
+method for copy-to comes in.
+<p>
+<h3>Set-Up</h3>
+<p>
+This is still in it's early stages of development and has only been tested
+under SQLServer 7.0. This should definitely work with other versions of
+SQLServer, and maybe Sybase. 
+<p>
+You need to create a database called 'cricket'. In this database, set up a
+table called 'CricketData'. There is a file in the docs directory called
+<a href="cricket.sql">cricket.sql</a> which can be used either to create the
+table, or as a reference to manually create the tables if it won't work with 
+your database.
+<p>
+<h3>Using</h3>
+<p>
+In a target definition create a copy-to:
+<p>
+<tt>target myImportantDatasource<br>
+	copy-to = "sql:dbi:Sybase:NMSDB,mylogin,mypassword"
+</tt>
+<p>
+As you can see, it's pretty simple to define a copy-to. The
+<tt>dbi:Sybase:NMSDB</tt> can be customized to use whatever special definitions
+your DBI driver requires. This is designed to be as flexible as possible to
+allow for working with all DBI drivers.
+<p>
+When the collection happens, it inserts into the database whatever numbers 
+were retrieved from the target.
+<p>
+That's it! You now have a crude form of data warehousing set up for Cricket
+data.
+<p>
+<h3>Caveats</h3>
+<p>
+Yes, there are many.
+<p>
+<li><b>This isn't guaranteed to work with all DBI platforms</b>. While it's 
+designed to be as flexible and generic as possible, it may not work with your 
+platform. If it doesn't, we're accepting patches. :)
+<li><b>Cooked numbers aren't inserted</b>. This inserts every number into the
+database as-is. This means that all of the cool things rrd can do like 
+averaging, interpolation, and computations are gone. This copy-to happens
+before anything is done with RRD.
+<li><b>Datasources aren't named</b>. This is a big limitation right now. It
+means that the user has to figure out what datasource number co-responds to
+which counter. Luckily, it goes in the order collected in the Defaults file 
+for the particular target. Until Cricket can name datasources, it can't insert
+named datasources into the database.
+<li><b>Cricket doesn't supply any tools for using these numbers</b>. It's up
+to you to provide tools for extracting and using the data once it goes to a
+database. Cricket is simply an agent for passing the numbers over.
+<li><b>Still in early stages of development</b>. Don't expect perfection. As
+more people use this, we'll see greater improvements, though.
+<p>
+<a href="http://cricket.sourceforge.net">Cricket</a>
+version !!VERSION!!, released !!RELDATE!!.
+
+<p>
+Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+the <a href="gpl.html">GNU General Public License</a>.
+
+</body>
+</html>
