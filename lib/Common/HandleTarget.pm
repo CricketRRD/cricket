@@ -169,8 +169,9 @@ sub checkTargetInstance {
             @actionArgs = split(/\s*:\s*/, $action_args);
             # restore escaped colons in the action args field
             map { $_ =~ s/\0/:/g } @actionArgs;
-        } elsif ( $args =~ /^(.*)\s*:\s*SNMP\s*$/ ) {
+        } elsif ( $args =~ /^(.*)\s*:\s*(SNMP|META)\s*$/ ) {
             $args = $1 ;
+            $actionType = $2 ;
             # restore escaped colons
             $args =~ s/\0/:/g ;
         }
