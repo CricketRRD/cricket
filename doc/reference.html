@@ -317,6 +317,13 @@ into the rrd-datafile tag. In fact, it's critical to add
 <tt>%inst%</tt> to some part of the rrd-datafile tag, or else the data
 will all be stored on top of one another in the same datafile.<p>
 
+<p>
+<font color=red>Note</font>: To protect the instance against
+interpretation, use the perl quote operator:
+<br><tt>inst = qw(%InstanceName%)</tt>
+<br>This is required if instances look like floating point numbers to
+Perl, for example if you have an instance like 4.10.
+
 <dt><tt>inst-names</tt><p>
 <dd>Default value: <i>none</i><p>
 
