@@ -94,7 +94,7 @@ sub setArch {
 
 		return 1;
 
-     } elsif ($archname =~ /^aix|i.86/i) {
+     } elsif ($archname =~ /^aix|i.?86/i) {
         # Matija.Grabnar@arnes.si says that these formats           
         # work for Solaris x86 too. And Patrick Myers <pjm@mcc.ac.uk>
 		# says it works for i386-freebsd. Cool. And John Banner
