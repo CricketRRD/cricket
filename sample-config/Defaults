@@ -42,11 +42,10 @@ OID	ifOutQLen      		1.3.6.1.2.1.2.2.1.21
 OID ifAlias             1.3.6.1.2.1.31.1.1.1.18
 
 dataSource --default--
-	rrd-ds-type		=   DERIVE
+	rrd-ds-type		=   COUNTER
 	# if no updates are received for 30 minutes, consider the datasource
 	# unknown -- i.e. dead
 	rrd-heartbeat	=	1800
-	rrd-min		=	0
 
 dataSource  ifInOctets
 	ds-source		=   snmp://%snmp%/ifInOctets.%inst%
@@ -68,7 +67,7 @@ dataSource  ifOutOctets
 # dictionary.
 
 # one point per 5 minutes, spanning 50 hours
-rra		5minAve	    AVERAGE:0.5:1:600	   
+rra		5minAve	        AVERAGE:0.5:1:600	   
 # one point per 30 minutes, spanning 12 days
 rra		30minAve	AVERAGE:0.5:6:600     
 # one point every 2 hours, spanning 50 days
@@ -78,9 +77,17 @@ rra		2hrMax		MAX:0.5:24:600
 rra		1dayAve		AVERAGE:0.5:288:600 
 rra		1dayMax		MAX:0.5:288:600
 
+# New aberrant behavior detection
+rra		hwpredict	HWPREDICT:1440:0.28:0.0024:288
+# These shouldn't be defined if hwpredict is defined.
+#rra		seasonal	SEASONAL:288:0.1:2
+#rra		devpredict	DEVPREDICT:1440:5
+#rra		devseasonal	DEVSEASONAL:288:0.1:2
+#rra		failures	FAILURES:288:7:9:5
+
 # we will add datasources to each specific target-type later
 targetType	--default--
-	rra	=	"5minAve, 30minAve, 2hrAve, 2hrMax, 1dayAve, 1dayMax"
+	rra	=	"5minAve, 30minAve, 2hrAve, 2hrMax, 1dayAve, 1dayMax, hwpredict"
 
 # The HTML dict has bits and pieces of HTML that gets used
 # by the grapher.
