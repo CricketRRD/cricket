@@ -130,7 +130,7 @@ sub setArch {
 		$self->{'rraPtr'} = "L";
 		$self->{'element'} = "d";
 
-	} elsif ( $archname eq 'PA-RISC1.1' or $archname eq 'powerpc-linux') {
+	} elsif ( $archname =~ 'PA-RISC' or $archname eq 'powerpc-linux') {
 		$self->{'statHead'} = "a4 a5 x7 d L L L x4 x80"; 
 		$self->{'dsDef'} = "a20 a20 L x4 d d x56"; 
 		$self->{'rraDef'} = "a20 L L x4 d x72"; 
