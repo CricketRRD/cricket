@@ -115,7 +115,11 @@ foreach $s (@ARGV) {
 	# so that cron sends them to the admin.
 
 	if (open(L, "<$logfile")) {
-		open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!";
+		# Uncomment '$subtreeTimes' line to collect time-based statistics 
+		# stored in .time logs in the cricket-logs directory.
+
+		#$subtreeTimes = 1;
+		(open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!") unless (!$subtreeTimes == 1);
 		while (<L>) {
 			# keep 5 lines of history
 			push @hist, $_;
@@ -140,8 +144,10 @@ foreach $s (@ARGV) {
 			}
 		}
 		close(L);
-		print TL $hist[$#hist];
-		close(TL);
+		if ($subtreeTimes == 1) {
+			print TL $hist[$#hist];
+			close(TL);
+		}
 	} else {
 		warn("Could not scan logfile $logfile for errors: $!\n");
 	}
