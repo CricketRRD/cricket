@@ -45,7 +45,7 @@ New features, fixes in version 1.0.4
 
 	Minor fixes to Monitor.pm: detection of NaN/nan, LogToFile
 	duplicate line detection, and new SNMP VarBind (9) to send
-	value in trap. [patch #592165, #592163] 
+	value in trap. [patch #592165, #592163]
 
 	An experimental new feature allows you to use the Cricket
 	target name as the rrd datasource name. Some caveats apply:
@@ -54,7 +54,7 @@ New features, fixes in version 1.0.4
 	   match the new reality. Do not switch on long ds names
 	   unless you're prepared to do this! In particular, users
 	   of the NT perfmon tree should not yet enable this.
-	 - RRD ds names are limited to 19 characters. Cricket datasource
+	 - RRD ds names are limited to 19 characters. Cricket datasource
 	   names longer than 15 characters are edited automatically to
 	   ensure the RRD ds name remains unique. You can use the
 	   Common::Util::mungeDsName routine in your own code to generate
