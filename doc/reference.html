@@ -694,6 +694,77 @@ Here's a detailed description of each scheme.
 	dictionary.
 	<p>
 
+<<<<<<< reference.html
+  <dt> PERFMON <font color=red>(warning: still in development)</font>
+  <dd> This ds-source is used to extract perflib information from Win32 hosts
+  which don't use SNMP (or where counters aren't available through SNMP).<P>
+  Setting up perflib counters in Cricket is not a trivial process, and requires
+  the following: RRDtool 1.1.x, comfort with RPN, and ActiveState perl. This
+  module will not under any circumstances work under any non-Windows OS. 
+  <P>
+  Perflib counter procedures are documented more in depth in the 
+  <a href=perfmon.html>perfmon reference</a> document.
+  <P>
+  The syntax for a perfmon datasource is:
+  <P>
+  <tt>perfmon:hostname:counter group:counter name:instance:special</tt>
+  <p>
+  Instance is optional, and only required for instantatiated counters. Unlike
+  the perfmon.exe application in NT. Special is optional as well and is
+  documented in the <a href=perfmon.html>perfmon reference</a> document.
+  <p>
+  If you're collecting an "instant" perfmon counter, collection is much like
+  getting something from SNMP. Here is an example.
+  <p>
+  <tt>perfmon:%auto-host-name%:System:Processes</tt>
+  <p>
+  Many perfmon counters return averages which need to be computed against a 
+  timebase. This makes collection challenging because you need to first collect
+  several DERIVE-based datasources, and then tie them together with a COMPUTE
+  datasource. The sample-config directory has a large amount of examples with
+  common counters to help, and there is the <a href=perfmon.html>perfmon
+  reference</a> document.
+  <p>
+  Please note that this piece of Cricket is still not complete and hasn't been
+  tested very well. Please let the developers know if you find any major bugs
+  or have any enhancement suggestions.
+  <P>
+
+  <dt> SQL <font color=red>(warning: still in development)</font>
+  <dd> This ds-source is used to for extracting counters from a database
+  server. It's still in development and not very robust. 
+  <P>
+  Here is the syntax:
+  <P>
+  <tt>sql:login:password:query:col:DRIVER</tt>
+  <P>
+  <tt>col</tt> is used to get a particular column of data returned from the
+  first returned row. Currently any other rows returned get discarded.
+  <tt>DRIVER</tt> can have colons in it. Cricket's parser will not treat it
+  like seperate arguments to the ds itself. 
+  <p>
+  Here is an example:
+  <tt>sql:anonymous::select top 1 samplevalue from samplednumericdata where idsamplednumericdatasource = 'C04E3055-B282-4EE9-9F5D-CB46DC45C988' order by timesampled desc:1:dbi:Sybase:NMSDB</tt>
+  <P>
+
+  <dt> WBEM <font color=red>(warning: still in development)</font>
+  <dd> This ds-source is used to extract WBem information from Win32 hosts.
+  Currently this requires ActiveState Perl and will not run under any non-
+  Windows OS. It has not been tested for compatibility against a UNIX WBem
+  data provider.
+  <p>
+  The syntax for a WBEM ds-source syntax:
+  <P>
+  <tt>wbem:%auto-target-name%:wbem-namespace:wbem-object:counter:instance</tt>
+  <P>
+  Here is an example to get the same counter as noted in the PERFMON provider
+  example.
+  <tt>wbem:%auto-target-name%:root\\cimv2:Win32_PerfFormattedData_PerfOS_System:Processes</tt>
+  <p>
+  The WBem provider does not support authentication, so security settings may
+  not allow this to work properly.
+  <P>
+
   <dt> PERFMON
   <dd> This ds-source is used to extract perfmon information from Win32 hosts
   which don't use SNMP (or where counters aren't available through SNMP).
@@ -791,6 +862,20 @@ Here's a detailed description of each scheme.
 	would be a flat line at 235.
 	<p>
 
+  <dt> FIELD
+  <dd> This datasource is based on the FILE library. It is used to extract
+  specific fields from a file. It is analog to a cricket version of cut(1).
+  <P>
+  FIELD ds-source look like:
+  <tt>field:filename:key:valuef:keyf:delim</tt>
+  <P>
+  <tt>key</tt> is the field to grab.<BR>
+  <tt>valuef</tt> is which key section from to grab (defaults to 2).<BR>
+  <tt>keyf</tt>is which key to grab based on the delimiter (defaults to 1).<BR>
+  <tt>delim</tt>is the delimiter (defaults to :).
+  <P>
+
+
   <dt> FUNC
   <dd> This ds-source uses a Perl function to fetch the result. It
 		is not enabled by default, since it requires extra code
@@ -810,11 +895,6 @@ Here's a detailed description of each scheme.
 		someday, if many extensions to Cricket use this interface.
 		<p>
 
-  <dt> WBEM 
-  <dd> This ds-source uses a Win32 COM object to fetch WMI Counters.
-	   For details, please see <a href="win2kwmi.html">Installing Cricket
-	   on Win2K to Monitor WMI Counters</a>.
-	   <p>
 </dl>
 </blockquote>
 <p>
