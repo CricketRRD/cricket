@@ -83,7 +83,8 @@ target --default--
 
 target network-link-1
 &nbsp;&nbsp;&nbsp; monitor-thresholds =
-&nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 262144 : SNMP,
+&nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 250000 : SNMP,
+&nbsp;&nbsp;&nbsp; ifInOctets : quotient : >80pct : : %rrd-max-octets% : SNMP,
 &nbsp;&nbsp;&nbsp;&nbsp; ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,
 &nbsp;&nbsp;&nbsp;&nbsp; ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"
 
@@ -105,6 +106,7 @@ target router-chassis
   <pre>target network-link-1
 &nbsp;&nbsp;&nbsp; monitor-thresholds =
 &nbsp;&nbsp;&nbsp; "ifInOctets : value : n : 250000 : SNMP,
+&nbsp;&nbsp;&nbsp; ifInOctets : quotient : >80pct : : %rrd-max-octets% : SNMP,
 &nbsp;&nbsp;&nbsp;&nbsp; ifInOctets : relation : &lt;10 pct : : : 300 : MAIL :&nbsp; %mail-pgm% : me\\\@mydomain.com,
 &nbsp;&nbsp;&nbsp;&nbsp; ifInErrors : quotient : 0.1 pct : : ifInUcastPackets : SNMP"</pre>
   <p> The first target, <i>network-link-1</i>, has three monitor thresholds.</p>
@@ -118,7 +120,13 @@ target router-chassis
       when the action will be executed.</div>
   </li>
   <li> 
-    <div>The second monitor threshold, checks to see if the current bandwidth, 
+    <div>The second generates an SNMP trap whenever the utilized bandwidth, ifInOctets, 
+      exceeds 80% of it's maximum capacity, %rrd-max-octets%. %rrd-max-octets% is
+      a cricket variable that is replaced at runtime with it's real value. 
+      </div>
+  </li>
+  <li> 
+    <div>The third monitor threshold, checks to see if the current bandwidth, 
       ifInOctets, has a value that is within 10% of the value recorded for the 
       last interval (300 seconds ago; assuming an rrd-poll-interval of 300 seconds). 
       It computes abs(ifInOctets_now - ifInOctets_then)/ifInOctets then and compares 
@@ -128,7 +136,7 @@ target router-chassis
       everytime the threshold is crossed due to the inherited persistent-alarms.</div>
   </li>
   <li> 
-    <div>The third monitor threshold checks to see if input errors, ifInErrors, 
+    <div>The fourth monitor threshold checks to see if input errors, ifInErrors, 
       exceed 0.1% of input packets, ifInUcastPackets. If errors exceed this threshold, 
       Cricket generates an SNMP trap. </div>
   </li>
@@ -266,9 +274,12 @@ target router-chassis
       share the same path with the first target or be fully-qualified. This argument 
       is optional and if omitted the first target is also taken as the comparison 
       target. </li>
-    <li> The name of the comparison data source. This data source must belong 
-      to the comparison target. This argument is optional and if omitted the monitor 
+    <li> The name of the comparison data source, variable, integer or floating point value. 
+      In the case of a data source it must belong to the comparison target. 
+      This argument is optional and if omitted the monitor 
       threshold data source name is also taken as the comparison data source name. 
+      Integer and floating point values can be signed or unsigned. 
+      ie: -1.05, 5, 10.1, +5
     </li>
     <li> The temporal offset in seconds to go back in the RRD file that is being 
       fetched from for comparison. Note that a data source value must exist in 
@@ -294,18 +305,19 @@ target router-chassis
           threshold, is evaluated.
         </li>
         <li>
-          The name of the comparison target. The comparison
-          target must either share the same path with the
+          The name of the comparison target. 
+          The comparison target must either share the same path with the
           first target or be fully-qualified. This argument is
           optional and if omitted the first target is also
-          taken as the comparison target.
+          taken as the comparison targete.
         </li>
         <li>
-          The name of the comparison data source. This data
-          source must belong to the comparison target. This
-          argument is optional and if omitted the monitor
-          threshold data source name is also taken as the
-          comparison data source name.
+          The name of the comparison data source, variable, integer
+          or floating point value.  This data source must belong
+          to the comparison target. This argument is optional
+          and if omitted the monitor threshold data source name
+          is also taken as the comparison data source name. 
+          ie: -1.05, 5, 10.1, +5
         </li>
         <li>
           The temporal offset in seconds to go back in the RRD
