@@ -30,11 +30,11 @@ New features, fixes in version 1.0.3
 	skip a device that is down or otherwise doesn't respond.
 	After two successive timeouts from the same host in one
 	collector run, that host is considered down and subsequent
-	targets on that device will be marked 'U' without checking. 
+	targets on that device will be marked 'U' without checking.
 	This avoids the syndrome where one device with a lot of
 	targets can significantly slow down your collection
 	process. If you need, you can increase MAXTRIES in
-	lib/snmpUtils.pm .
+	lib/snmpUtils.pm. [patch #402839]
 
 	The top level Defaults now sets rrd-min to 0 rather than
 	undef. The default rrd-ds-type now is DERIVE instead of
@@ -42,7 +42,7 @@ New features, fixes in version 1.0.3
 	intrepid, Cricket can now monitor snmp-uptime in conjunction
 	with using COUNTER (usage of snmp-uptime is not recommended
 	unless you understand all possible causes of SNMP counter
-	rollover; not all agent resets can be detected).
+	rollover; not all agent resets can be detected). [bug #209530]
 
 	squid-proxy subtree Defaults file has changed. One
 	more variable is being polled now (CurrentLRUExpiration)
@@ -61,6 +61,23 @@ New features, fixes in version 1.0.1 (18-May-00):
 	Documentation split into smaller files and reviewed.
 
 	First release from Sourceforge's CVS server.
+
+	Assorted bugs and patches that were also integrated:
+
+	bug 212204 compile: add config-dir name to output
+	bug 202221 Fix for display of scaled values in mtargets
+	bug 202262 Summary should show up at bottom (optionally)  [feature]
+	bug 202266 mtargets and targets and multi-target2  [doc clarification]
+	bug 202455 need to quote url passed to test-url
+	bug 205504 collect-subtrees / subtree-times  [feature]
+	bug 205559 integrate functions of run-subtree into collector
+	bug 205560 collector log rolling for .time files
+	bug 205595 Collector optimizations
+	bug 206305 Persistent monitoring toggle
+	patch 400218 cricket-0.72-current_path.patch
+	patch 400282 cricket-0.72-showmax.patch (docs changes)
+	patch 400431 lib/RRD/Format.pm had incorrect regex for supported
+		archname (similar to bug 206166, and a couple of others)
 
 New features, fixes in version 0.72 (23-Jan-00):
 
@@ -118,14 +135,14 @@ New features, fixes in version 0.70 (11-Aug-99):
 	and higher. Cricket now defaults to making PNG pictures,
 	if you are using a 4.0 browser or better. If you really
 	want GIFs (which are big and slow, now that GD has been
-	lobotomized by Dr. Unisys), then you need to investigate 
+	lobotomized by Dr. Unisys), then you need to investigate
 	the graph-format tag in the graph dictionary.
 
 	Frobbed the quoting magic some. I think it was broken before.
 	I think it is less broken now. If you see odd behavior, suspect
 	quoting problems.
 
-	Integrated a patch from Shannon Reis <sreis@fastlane.net> 
+	Integrated a patch from Shannon Reis <sreis@fastlane.net>
 	that adds avg/max display in. This adds an additional
 	call to RRDs::graph. If you want it the old way, check
 	out the tag named show-avg-max in the graph dict.
@@ -148,7 +165,7 @@ New features, fixes in version 0.70 (11-Aug-99):
 	and if necessary, the instance will be mapped. This
 	could cause warnings in the grapher, but they can be
 	ignored.
-	
+
 New features, fixes in version 0.69 (16-Jul-99):
 
 	A bunch of namespace fixes:
@@ -159,8 +176,8 @@ New features, fixes in version 0.69 (16-Jul-99):
 	Please read the description of the tag named
 	'monitor-thresholds' and discuss this stuff on the
 	mailing list. Javier Muniz, who wrote it, will be available
-	to hel pus learn about it in the coming weeks.
-	
+	to help us learn about it in the coming weeks.
+
 	The new unknown-is-zero tag in the targets dictionary
 	makes it possible to add together graphs which have unknown
 	regions and not have the unknown regions blot out the entire
@@ -296,7 +313,7 @@ New features, fixes in version 0.64 (18-May-99):
 	from CPAN. (See doc/beginner.txt for more info on
 	CPAN.) You can check to see if you have it by executing:
 
-		perl -MDB_File -e 'print $DB_File::VERSION, "\n"' 
+		perl -MDB_File -e 'print $DB_File::VERSION, "\n"'
 
 	New feature: Cricket operates off of a compiled
 	form of the config tree, which is stored in a file
@@ -487,7 +504,7 @@ New features, fixes in version 0.60 (05-Mar-99):
 	removed unused call to localtime from grapher.cgi
 
 	listInterfaces no longer lets colons creep into target
-	names. 
+	names.
 
 	rrd-dump truncates C strings correctly now.
 
