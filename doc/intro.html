@@ -168,7 +168,7 @@ packets. This is where the <tt>--default--</tt>
 dictionaries come in. To make the complete working dictionary for this
 part of the config tree, Cricket traverses all the nodes from the root
 down to the current node, gathering together the <tt>--default--</tt>
-dictionaries. Items lower in the config tree override items higer
+dictionaries. Items lower in the config tree override items higher
 up.
 
 <p>
@@ -188,7 +188,7 @@ data on the engineering-router is
 <tt>snmp://public@engineering-router:161/cpu1min</tt>. But you've
 probably already noticed that the only thing the fetcher seems to have
 to go on is the <tt>ds-source</tt> tag, which has a <tt>%snmp%</tt>
-where we exptected to find the community string, hostname and port.
+where we expected to find the community string, hostname and port.
 
 <p>
 How does Cricket manufacture the whole SNMP URL for this target?
@@ -232,7 +232,7 @@ asked to monitor a new piece of network hardware which had a slightly
 different community string, you could put a <tt>snmp-community</tt>
 tag in the target's dictionary and override the one normally inherited
 from above. Alternatively, if you need to change the community string
-on 1000 devices simultaenously, you could do so by simply changing it
+on 1000 devices simultaneously, you could do so by simply changing it
 at the root, then allowing the change to filter down to each of the
 1000 targets in your config tree.
 

@@ -17,7 +17,7 @@ the script once and can execute it a number of times.
 As of version 0.68, Cricket can run under <tt>mod_perl</tt>.
 Typically, no special code needs to be added to scripts to make
 them work in the mod_perl environment, but Cricket's
-lazy use of namespaces required some fixup work. Mea culpa.
+lazy use of namespaces required some fix up work. Mea culpa.
 That work has been done now, and going forward, I intend
 to make sure Cricket works under mod_perl.
 
@@ -43,7 +43,7 @@ you need to add lines like the following to your httpd.conf file:
 
 <p>
 These lines tell your webserver that whenever it sees
-a file ending in .cgi, it should let the embeded Perl interpreter
+a file ending in .cgi, it should let the embedded Perl interpreter
 run it. This, of course, is problematic if you have some .cgi
 files on your webserver that cannot be run by Perl. In that
 case, you should use a more restrictive specification
@@ -62,7 +62,7 @@ the Apache webserver.
 
 <p>
 If you are going to be editing the library files (i.e. to add a new
-feature), you'll want to definately add the "PerlInitHandler
+feature), you'll want to definitely add the "PerlInitHandler
 Apache::StatINC" directive to your config file. This will make mod_perl
 check library timestamps and reload/reparse them when necessary.
 You should not run a production server with this enabled, since it
