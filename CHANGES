@@ -26,6 +26,9 @@ New features, fixes in version 1.0.6 (TBD)
   have now been exorcized in favor of $gSubtreeSets and $gMailer, respectively,
   in cricket-conf.pl. [Bug #847413]
 
+  Added support for using a UNIX domain socket as the target of a "FILE"
+  datasource. [Patch #1083977]
+
 New features, fixes in version 1.0.5
 
 	Cricket 1.0.5 is essentially a minor bugfix release.
