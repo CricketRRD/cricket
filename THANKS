@@ -13,6 +13,11 @@ WebTV gets new stuff for free in return. So I am indebted to these
 contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
+
+	James Grinter
+		many contributions, including championing the self_url
+		issues and lots of work on the mailing lists
+
 	Mike Fisher
 		contributed the dead device detection
 
@@ -80,6 +85,7 @@ contributed ideas, patches, and/or debugging info:
 
 	David Koski <dkoski@noc.ns.itd.umich.edu>
 		auto-configuration via listInterfaces 
+		SNMP v2 support
 
 	Javier Muniz <jmuniz@corp.webtv.net>
 		Monitoring
