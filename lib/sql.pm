@@ -21,6 +21,7 @@
 use Common::Log;
 use Common::Util;
 use DBI;
+use sqlUtils;
 use strict;
 
 $main::gDSFetch{'sql'} = \&sqlFetch;
