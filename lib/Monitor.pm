@@ -275,6 +275,14 @@ sub Alarm {
 	if($alarmType eq 'EXEC') {
 		system($alarmArgs->[0]);
 		Info("Triggered event with shell command '".$alarmArgs->[0]."' .");
+	} elsif($alarmType eq 'MAIL') {
+		$self->sendEmail(
+				'alarm',
+				$target->{'email-address'},
+				$type,
+				$threshold,
+				$name,
+				$ds);
 	} elsif($alarmType eq 'FUNC') {
 		if(defined $main::gMonFuncEnabled)
 		{
@@ -302,9 +310,18 @@ sub Alarm {
 sub Clear {
 	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs) = @_;
 
-	 if($alarmType eq 'EXEC') {
+	if($alarmType eq 'EXEC') {
                 system($alarmArgs->[1]) ;
 		Info("Cleared event with shell command '".$alarmArgs->[1]."' .");
+	} elsif($alarmType eq 'MAIL') {
+		$self->sendEmail(
+				'clear',
+				$target->{'email-address'},
+				$type,
+				$threshold,
+				$name,
+				$ds);
+		}
         } elsif($alarmType eq 'FUNC') {
                 if(defined $main::gMonFuncEnabled)
                 {
@@ -349,4 +366,23 @@ sub sendMonitorTrap {
 	snmpUtils::trap2($to,$spec,@VarBinds);
 }
 
+sub sendEmail {
+	my($self, $spec, $to, $type, $threshold, $target, $ds) = @_;
+
+	if(!defined($to)) {
+		Warn("No destination address defined for $target, couldn't send email.");
+	}
+	Debug ("made it to sendEmail\n");
+
+	my @Message;
+	push @Message, "type:\t\t$type";
+	push @Message, "threshold:\t$threshold";
+	push @Message, "target:\t\t$target";
+	push @Message, "ds:\t\t$ds";
+
+	Info("Email sent to: $to\n" . join(' -- ', @Message));
+	open(MAIL, "|$target->{'email-program'} -s 'Cricket $spec: $target' $to\n");
+	print (MAIL join ("\n", @Message));
+	close(MAIL);
+}
 1;
