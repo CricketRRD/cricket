@@ -270,29 +270,61 @@ sub getDSNum {
 # Action to send an alarm, you can change this to do whatever you need
 # Default is to send a trap
 sub Alarm {
-	my($self,$target,$name,$ds,$type,$threshold) = @_;
-	my($Specific_Trap_Type) = 4; # Violation Trap
-	$self->sendMonitorTrap(
-				$target->{'trap-address'},
-				$Specific_Trap_Type,
-				$type,
-				$threshold,
-				$name,
-				$ds );
+	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs) = @_;
+
+	if($alarmType eq 'EXEC') {
+		system($alarmArgs->[0]);
+		Info("Triggered event with shell command '".$alarmArgs->[0]."' .");
+	} elsif($alarmType eq 'FUNC') {
+		if(defined $main::gMonFuncEnabled)
+		{
+			eval($alarmArgs->[0]);
+			Info("Triggered event with FUNC '".$alarmArgs->[0]."' .");
+		} else {
+			Warn("Exec monitor $threshold triggered, but executable alarms are not enabled.");
+		}
+	} elsif($alarmType eq 'SNMP') {
+		my($Specific_Trap_Type) = 4; # Violation Trap
+		$self->sendMonitorTrap(
+					$target->{'trap-address'},
+					$Specific_Trap_Type,
+					$type,
+					$threshold,
+					$name,
+					$ds );
+	} else {
+		Warn("Alarm Type $alarmType is not known.");
+	}
 }
 
 # Action to clear an alarm, you can change this to do whatever you need
 # Default is to send a trap
 sub Clear {
-	my($self,$target,$name,$ds,$type,$threshold) = @_;
-	my($Specific_Trap_Type) = 5; # Clear Trap
-	$self->sendMonitorTrap(
-				$target->{'trap-address'},
-				$Specific_Trap_Type,
-				$type,
-				$threshold,
-				$name,
-				$ds );
+	my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs) = @_;
+
+	 if($alarmType eq 'EXEC') {
+                system($alarmArgs->[1]) ;
+		Info("Cleared event with shell command '".$alarmArgs->[1]."' .");
+        } elsif($alarmType eq 'FUNC') {
+                if(defined $main::gMonFuncEnabled)
+                {
+                        eval($alarmArgs->[1]);
+			Info("Cleared event with FUNC '".$alarmArgs->[1]."' .");
+                } else {
+                        Warn("Exec monitor $threshold triggered, but executable alarms are not enabled."); 
+                }
+        } elsif($alarmType eq 'SNMP') {
+	 	my($Specific_Trap_Type) = 5; # Clear Trap
+		$self->sendMonitorTrap(
+					$target->{'trap-address'},
+					$Specific_Trap_Type,
+					$type,
+					$threshold,
+					$name,
+					$ds );
+	} else {
+		Warn("Alarm Type $alarmType is not known.");
+	}
 }
 
 # Attempt to send an alarm trap for a given target

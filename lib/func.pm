@@ -20,6 +20,9 @@
 
 use Common::Log;
 
+# Uncomment the following line if you want to enable 'FUNC' alarm triggers.
+# $main::gMonFuncEnabled = 1 ;
+
 $main::gDSFetch{'func'} = \&funcFetch; 
 
 sub funcFetch { 

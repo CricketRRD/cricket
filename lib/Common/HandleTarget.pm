@@ -114,11 +114,32 @@ sub checkTargetInstance {
 		return;
 	}
 
-	my(@ThresholdStrings) = split(/\s*,\s*/, $target->{'monitor-thresholds'});
-
+	# Convert backslashed commas to \0's ; 
+	my $ThresholdString = $target->{'monitor-thresholds'};
+	$ThresholdString =~ s/\\,/\0/g ;
+	my(@ThresholdStrings) = split(/\s*,\s*/, $ThresholdString );
+	 
 	my($Threshold);
 	foreach $Threshold (@ThresholdStrings) {
+		$Threshold =~ s/\0/,/g ;
 		my($ds,$type,$args) = split(/\s*:\s*/, $Threshold, 3);
+		$args =~ s/\\:/\0/g ;
+		my($alarmType) = 'SNMP' ;
+		my($alarmArgs) ;
+		if( $args =~ /^(.*)\s*:\s*(FUNC|EXEC)\s*:\s*([^:]*)\s*:\s*([^:]*)$/ ) {
+			$args = $1 ;
+			$alarmType = $2 ;
+			my $alarmCommand = $3 ;
+			my $clearCommand = $4 ;
+			$args =~ s/\0/:/g ;
+			$alarmCommand =~ s/\0/:/g ;
+			$clearCommand =~ s/\0/:/g ;
+			$alarmArgs->[0] = $alarmCommand ;
+			$alarmArgs->[1] = $clearCommand ;
+		} elsif( $args =~ /^(.*)\s*:\s*SNMP\s*$/ ) {
+			$args = $1 ;
+			$args =~ s/\0/:/g ;
+		}				
 		if(defined($Common::global::gMonitorTable{"$type"})) {
 			if(&{$Common::global::gMonitorTable{"$type"}}
 				($m, $target, $ds, $type, $args)) {
@@ -129,7 +150,7 @@ sub checkTargetInstance {
 				my($metaRef) = $rrd->getMeta();
 				if(defined($metaRef->{$Threshold})) {
 					LogMonitor("Triggering recovery for $Threshold.");
-					$m->Clear($target,$name,$ds,$type,$Threshold);
+					$m->Clear($target,$name,$ds,$type,$Threshold,$alarmType,$alarmArgs);
 					delete($metaRef->{$Threshold});
 					$rrd->setMeta($metaRef);
 				}
@@ -138,7 +159,7 @@ sub checkTargetInstance {
 				LogMonitor("$name - $Threshold failed.");
 				if(!defined($metaRef->{$Threshold})) {
 					LogMonitor("Triggering alarm for $Threshold.");
-					$m->Alarm($target,$name,$ds,$type,$Threshold);
+					$m->Alarm($target,$name,$ds,$type,$Threshold,$alarmType,$alarmArgs);
 					$metaRef->{$Threshold} = 'Failed';
 					$rrd->setMeta($metaRef);
 				}
