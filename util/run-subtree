@@ -1,0 +1,36 @@
+#!/usr/local/bin/perl -w
+#
+# run a cricket subtree and send any output to the provided email addresses
+#
+
+use strict;
+use Getopt::Long;
+
+my $result	= "";
+my %opts	= ();
+my @output	= ();
+
+$result = GetOptions(\%opts, "mail|m=s", "subtree|s=s");
+
+if (! $result) {
+	die "Error handling options.\n";
+}
+
+if (! defined($opts{"mail"})) {
+	$opts{"mail"} = 'smrtg@corp.webtv.net';
+}
+
+if (! defined($opts{"subtree"})) {
+	die "Must provide a subtree to run.\n";
+}
+
+@output = `$ENV{"HOME"}/cricket/collect-subtrees $opts{"subtree"} 2>&1`;
+
+if ($#output > 0) {
+	my $subject = "output from subtree " . $opts{"subtree"};
+
+	open(MAIL, "|/bin/mailx -s \"$subject\" $opts{mail}") ||
+		die "Couldn't run /bin/mailx to send subtree output: $!\n";
+	print MAIL @output;
+	close(MAIL);
+}
