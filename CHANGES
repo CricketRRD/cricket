@@ -1,5 +1,7 @@
 New features, fixes in version 1.0.6 (TBD)
 
+  Added a target's "short-desc" string to the page title. [Bug #213706]
+
   Added new "image-cache-interval" tag to the target dictionary to allow
   explicitly setting how long graph images should be cached. The new algorithm
   uses image-cache-interval, rrd-poll-interval, or 5 minutes (in that order).

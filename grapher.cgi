@@ -265,6 +265,11 @@ sub doHTMLPage {
                 $title = "Graphs for $tname";
             }
 
+            # Append the short-desc for the target if set.
+            if (defined $targRef->{'short-desc'}) {
+                $title .= ": $targRef->{'short-desc'}";
+            }
+
             if ($chosenInst) {
                 my($in) = $gQ->param('instname');
                 if ($in) {
