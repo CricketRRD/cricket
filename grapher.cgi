@@ -2005,17 +2005,18 @@ sub byFirstVal {
 sub fixHome {
 
 	# brute force:
-	# $gCricketHome = '/path/to/cricket/home';
+	# $Common::global::gCricketHome = '/path/to/cricket/home';
 	# return;
 
-	return if defined($gCricketHome);
+	return if $Common::global::gCricketHome =~ /\//;
 
 	my($sname) = $gQ->script_name();
 	if ($sname =~ /\/~([^\/]*)\//) {
 		my($username) = $1;
 		my($home) = (getpwnam($username))[7];
 		if ($home) {
-			$gCricketHome = $home;
+			$Common::global::gCricketHome = $home;
+			return;
 		} else {
 			Warn("Could not find a home directory for user $username." .
 				"gCricketHome is probably not set right.");
@@ -2024,6 +2025,9 @@ sub fixHome {
 		Warn("Could not find a username in SCRIPT_NAME. " .
 			"gCricketHome is probably not set right.");
 	}
+	# Last ditch effort... If all else fails, assume Cricket's home
+	# is one directory up from grapher.cgi.
+	$Common::global::gCricketHome ||= $Common::global::gInstallRoot . "/..";
 }
 
 sub isnan {
