@@ -60,8 +60,9 @@ $gLogFullPath=0;
 #       this adds a small search box to the bottom of the grapher
 #       window, which can be used to do a recursive search on
 #       values contained in the chassis target. It is currently
-#       limited to searching for a value in the snmp-host and display-name tags.
-$gEnableSearch=1;
+#       limited to searching for a value in the snmp-host and display-name
+#	tags.
+$gEnableSearch=0;
 
 # For users of monitoring thresholds. This variable defines how to treat
 # conditions where a threshold is tested against an unavailable value or
