@@ -1,5 +1,10 @@
 New features, fixes in version 1.0.6 (TBD)
 
+  Added new "image-cache-interval" tag to the target dictionary to allow
+  explicitly setting how long graph images should be cached. The new algorithm
+  uses image-cache-interval, rrd-poll-interval, or 5 minutes (in that order).
+  Based on [Patch #400217] from Tom Honermann.
+
   The configuration variables $subtreeSets and $gMailer from collect-subtrees
   have now been exorcized in favor of $gSubtreeSets and $gMailer, respectively,
   in cricket-conf.pl. [Bug #847413]

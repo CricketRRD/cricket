@@ -295,6 +295,20 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
               standalone components to show only the summarized graph.
             </p>
           </dd>
+          <dt><tt>image-cache-interval</tt></dt>
+          <dd>Default value: <i>not set</i>
+            <p>
+              Specifies the amount of time, in seconds, to cache graph images.
+            </p>
+            <p>
+              When the grapher.cgi decides whether to output an image from
+              its cache or to have rrdtool regenerate it, it initially
+              looks at the rrd-poll-interval for the target (with a fallback
+              to the default 5 minutes if not available for some reason). This
+              tag allows you to explicitly override the cache time should you
+              need to.
+            </p>
+          </dd>
           <dt><tt>inst</tt></dt>
           <dd>Default value: <i>none</i>
             <p>

@@ -1303,6 +1303,23 @@ sub rangeType {
 sub doGraph {
     my($type) = $gQ->param('type');
     my($imageName) = generateImageName($gQ, $type);
+    my($name) = urlTarget($gQ);
+
+    Die("No target given.")
+      unless defined $name;
+
+    my $targRef = $gCT->configHash($name, 'target', undef, 1);
+    my $tname   = $targRef->{'auto-target-name'};
+
+    # Set polling interval (cache time) to rrd-polling-interval if set.
+    if (defined $targRef->{'rrd-poll-interval'}) {
+        $gPollingInterval = $targRef->{'rrd-poll-interval'};
+    }
+
+    # Override with image-cache-time if that has been set.
+    if (defined $targRef->{'image-cache-time'}) {
+        $gPollingInterval = $targRef->{'image-cache-time'};
+    }
 
     # check the image's existance (i.e. no error from stat()) and age
     my($mtime);
@@ -1327,15 +1344,6 @@ sub doGraph {
         sprayPic($imageName);
         return;
     }
-
-    my($name) = urlTarget($gQ);
-
-    if (! defined($name)) {
-        Die("No target given.");
-    }
-
-    my($targRef) = $gCT->configHash($name, 'target', undef, 1);
-    my($tname) = $targRef->{'auto-target-name'};
 
     my(@mtargets);
     my($isMTarget) = 0;
