@@ -44,7 +44,7 @@ sub new {
 sub init {
 	my($self) = @_;
 
-	my($file) = $self->Base() . "/config.db";
+	my($file) = $self->{"Base"} . "/config.db";
 	my ($dbh);
 
 	my ($useSlurp) = 0;
@@ -70,12 +70,12 @@ sub init {
 
 sub nodeExists {
 	my($self, $node) = @_;
-	return defined($self->DbRef()->{'p:' . $node});
+	return defined($self->{"DbRef"}->{'p:' . $node});
 }
 
 sub visitLeafs {
 	my($self, $parent, $cb, @args) = @_;
-	my($dbref) = $self->DbRef();
+	my($dbref) = $self->{"DbRef"};
 
 	my($children) = $dbref->{'c:' . $parent};
 	if ($children) {
@@ -94,7 +94,7 @@ sub visitLeafs {
 
 sub configHash {
 	my($self, $node, $dict, $name, $exp) = @_;
-	my($dbRef) = $self->DbRef();
+	my($dbRef) = $self->{"DbRef"};
 
 	# if they ask for a part of the config tree that does not
 	# exist, return an error immediately.
@@ -154,11 +154,11 @@ sub configHash {
 	# auto-expand, if the caller asked us to
 	if (defined($exp)) {
 		if (ref($exp) eq 'HASH') {
-			expandHash($hash, $exp, $self->Warn());
+			expandHash($hash, $exp, $self->{"Warn"});
 		} else {
 			# they want us to setup a target hash for them...
-			addAutoVariables($node, $hash, $self->Base());
-			expandHash($hash, $hash, $self->Warn());
+			addAutoVariables($node, $hash, $self->{"Base"});
+			expandHash($hash, $hash, $self->{"Warn"});
 		}
 	}
 
@@ -184,7 +184,7 @@ sub addAutoVariables {
 sub getChildren {
 	my($self, $name) = @_;
 
-	my($c) = $self->DbRef()->{"c:$name"};
+	my($c) = $self->{"DbRef"}->{"c:$name"};
 	if (defined($c)) {
 		return split(/,/, $c);
 	}
@@ -193,7 +193,7 @@ sub getChildren {
 
 sub isDir {
 	my($self, $name) = @_;
-	if (defined($self->DbRef()->{"r:$name"})) {
+	if (defined($self->{"DbRef"}->{"r:$name"})) {
 		return 1;
 	} else {
 		return 0;
@@ -209,7 +209,7 @@ sub isLeaf {
 sub needsRecompile {
 	my($self) = @_;
 
-	my($db) = $self->DbRef();
+	my($db) = $self->{"DbRef"};
 	my($files) = $db->{"F:"};
 	if (defined($files)) {
 		my($file);
