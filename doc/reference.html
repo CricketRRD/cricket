@@ -871,12 +871,31 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
                   <tt>field:filename:key:valuef:keyf:delim</tt>
                 </p>
                 <p>
-                  <tt>key</tt> is the field to grab. <tt>valuef</tt> is
-                  which key section from to grab (defaults to 2).
-                  <tt>keyf</tt>is which key to grab based on the delimiter
-                  (defaults to 1). <tt>delim</tt>is the delimiter (defaults
-                  to :).
+                  <tt>key</tt> is the key value to match. <tt>valuef</tt> is
+                  which number of the field that should be returned (defaults 
+		  to 2).
+                  <tt>keyf</tt> is the number of the field that should be 
+		  searched for the key.
+                  (defaults to 1). <tt>delim</tt> is the field delimiter 
+		  (defaults to ':').  For example, if the file /tmp/box 
+		  contains the following lines with fields seperated by 
+		  spaces:
+ 
                 </p>
+                <pre>
+thing_1 red 111
+thing_2 blue 222
+                </pre>
+                <p>
+		  then this datasource will fetch  "222" from the file:
+                </p>
+                <p><tt>field:/tmp/box:thing_2:3:1:" "</tt></p>
+                <p>
+		  There is a single space inside the quotes above.
+		  As with FILE above, it's assumed that some other process is
+		  updating the data in the file.  Please note that field 
+		  numbers start at 1, not 0.
+		</p>
               </dd>
               <dt>FUNC</dt>
               <dd>
