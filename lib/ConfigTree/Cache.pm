@@ -45,8 +45,14 @@ sub init {
 	my($self) = @_;
 
 	my($file) = $self->Base() . "/config.db";
-	my($dbh) = tie %db, 'DB_File', $file, O_RDONLY, 0644, $DB_HASH;
-
+	# By feeding the tied hash for the database into memory, a huge amount of costly
+	# disk I/O is eliminated. If you are using a machine with low memory, this should
+	# not be used. Comment out the two lines after this comment, and uncomment the line
+	# below to go back to the old way.
+	# my $dbh = tie %db, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
+	#
+	my($dbh) = tie %db2, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
+	%db = %db2;
 	$self->DbRef(\%db);
 	$self->Dbh($dbh);
 
