@@ -606,7 +606,7 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
               to be a multi-target. To the collector, this means that it
               simply doesn't need to collect anything, and can skip the
               target. To the grapher, it means this target will aggregate
-              the data from several different targets all onto one report. 
+              the data from several different targets all onto one report.
               The syntax is a semi-colon delimited list of targets. The
               target definition can either by fully-qualified, which would
               look like "/router-interfaces/Datacenter1/ds3-1", or
@@ -657,7 +657,7 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
           <dd>Default value: <i>none</i>
             <p>
               This tag sets the target type for this target. It must be one
-              of the target type names from the targetType dictionary. 
+              of the target type names from the targetType dictionary.
               Cricket uses the targetType to decide which variables to
               fetch, and how much data to store in the RRD.
             </p>
@@ -1063,7 +1063,7 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
                 </p>
                 <p>
                   The distributed Defaults file sets rrd-min to zero.
-                  If your GAUGE target can support negative values, set 
+                  If your GAUGE target can support negative values, set
                   rrd-min to "undef", or to the actual minimum value.
                 </p>
               </dd>
@@ -1301,6 +1301,11 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
               <dd>
                 Draws a filled-in shape representing the value of the
                 datasource over time.
+              </dd>
+              <dt><tt>STACK</tt></dt>
+              <dd>
+                Like AREA, but the data values are stacked. Note that the
+                first datasource must be drawn as an AREA.
               </dd>
               <dt><tt>LINE1</tt></dt><dd>Uses a thin line.</dd>
               <dt><tt>LINE2</tt></dt><dd>Uses a medium line.</dd>
@@ -1653,8 +1658,9 @@ elements = "ifInOctects, ifOutOctets"
               Setting <tt>paint-nan</tt> to true for a view will shade the
               background of the graph with a pinkish hue for any time period
               in which one of the datasources included in the view has missing
-              (NaN) data. This option should not be used for views containing 
-              datasources with the graph key <tt>draw-as=AREA</tt>.
+              (NaN) data. This option should not be used for views containing
+              datasources with the graph key <tt>draw-as=AREA</tt> or
+              <tt>STACK</tt>.
             </p>
           </dd>
           <dt><tt>rrd-graph-args</tt></dt>
