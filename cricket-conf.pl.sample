@@ -28,8 +28,15 @@ $gInstallRoot = "$gCricketHome/cricket";
 #$gCacheDir = "/tmp/cricket-cache";
 #	It is strongly recommended that you *not* set a global logLevel.
 #	Use the CRICKET_LOG_LEVEL environment variable or the
-#	-logLevel option instead.
+#	-logLevel <level> option instead.
 #$gLogLevel = "info"
+
+#	It is strongly recommended that you *not* set a global logFormat.
+#	Use the CRICKET_LOG_FORMAT environment variable or the
+#	-logFormat <format> option instead.
+#	Three formats are supported by Log.pm. Minimal, standard and extended.
+#   Consult the documentation. Default format is standard.
+#$gLogFormat = "standard"
 
 #	Pick the style of URL you want Cricket to use when generating
 #	self-referencing URLs (either URL's to targets, or URL's to

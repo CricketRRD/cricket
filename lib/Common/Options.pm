@@ -26,16 +26,23 @@ use Common::Log;
 sub commonOptions {
     # default to 'info' unless there's a environment variable
     # or a commandline arg
-    my($logLevel, $base);
+    my($logLevel, $logFormat, $base);
     $logLevel = $Common::global::gLogLevel if $Common::global::gLogLevel;
     $logLevel = $ENV{'CRICKET_LOG_LEVEL'} if $ENV{'CRICKET_LOG_LEVEL'};
     $logLevel ||= "info";
 
+    # default to 'standard' unless there's a environment variable
+    $logFormat = $Common::global::gLogFormat if $Common::global::gLogFormat;
+    $logFormat = $ENV{'CRICKET_LOG_FORMAT'} if $ENV{'CRICKET_LOG_FORMAT'};
+    $logFormat ||= "standard";
+
     GetOptions( "loglevel:s" => \$logLevel,
+                "logformat:s" => \$logFormat,
                 "base:s" => \$base, @_);
 
     $Common::global::gConfigRoot = $base if $base;
     Common::Log::setLevel($logLevel);
+    Common::Log::setFormat($logFormat);
 }
 
 1;

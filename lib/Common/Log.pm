@@ -20,7 +20,6 @@
 
 package Common::Log;
 require Exporter;
-
 @ISA = qw(Exporter);
 
 @EXPORT = qw(Debug Warn Info Die Error LogMonitor isDebug);
@@ -39,22 +38,47 @@ $gCurLogLevel = $kLogWarn;
                 'warn' => $kLogWarn,
                 'error' => $kLogError
                 );
+%kLogNameReverseMap = (
+                $kLogDebug   => 'debug',
+                $kLogMonitor => 'monitor',
+                $kLogInfo    => 'info',
+                $kLogWarn    => 'warn',
+                $kLogError   => 'error'
+                );
 
+$kLogMinimal   = 1;
+$kLogStandard  = 2;
+$kLogExtended  = 3;
+$gCurLogFormat = $kLogStandard;
+
+%kLogFormatMap = (
+                'minimal'     => $kLogMinimal,
+                'standard'    => $kLogStandard,
+                'extended'    => $kLogExtended
+                );
 sub Log {
     my($level, @msg) = @_;
     my($msg) = join('', @msg);
 
+    return unless ($level <= $gCurLogLevel);
+
     my($severity) = ' ';
     $severity = '*' if (($level == $kLogWarn) || ($level == $kLogError));
 
-    if ($level <= $gCurLogLevel) {
-        my($time) = timeStr(time());
-        my($stuff) = $time . $severity;
-	if(defined($main::th)) {
-	       	print STDERR "[$stuff] ($main::th) $msg\n";
-	} else {
-	       	print STDERR "[$stuff] $msg\n";
-	}	
+    if ($gCurLogFormat == 2) {
+        my($stuff) = timeStr(time()) . $severity;
+        if(defined($main::th)) {
+               print STDERR "[$stuff] ($main::th) $msg\n";
+        } else {
+               print STDERR "[$stuff] $msg\n";
+        }
+    } elsif ($gCurLogFormat == 3) {
+        my($stuff) = timeStr(time()) . $severity;
+        my($levelname) = ucfirst($kLogNameReverseMap{$level});
+        printf STDERR ("[$stuff] %-5s $msg\n", $levelname);
+    } else {
+        my($levelname) = ucfirst($kLogNameReverseMap{$level});
+        printf STDERR ("[%-5s%1s] $msg\n", $levelname, $severity);
     }
 }
 
@@ -104,11 +128,21 @@ sub setLevel {
         $gCurLogLevel = $kLogNameMap{lc($level)};
     } else {
         Common::Log::Warn("Log level name $level unknown. " .
-                          "Defaulting to 'info.'");
+                          "Defaulting to 'info'.");
         $gCurLogLevel = $kLogNameMap{lc('info')};
     }
 }
+sub setFormat {
+    my($format) = @_;
 
+    if (defined($kLogFormatMap{lc($format)})) {
+        $gCurLogFormat = $kLogFormatMap{lc($format)};
+    } else {
+        Common::Log::Warn("Log format name $format unknown. " .
+                          "Defaulting to 'standard'.");
+        $gCurLogFormat = $kLogFormatMap{lc('standard')};
+    }
+}
 1;
 
 # Local Variables:
