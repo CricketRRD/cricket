@@ -1565,10 +1565,26 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
 				<dt><tt>show-max</tt></dt>
 				<dd>Default value: <i>false</i>
 					<p>
-						This controls whether or not the maximums
-						stored for a data source are drawn on the
-						graph.
+						This controls whether or not the maximums stored for
+						a data source are drawn on the graph.
 					</p>
+					<p>
+			            Data collected by Cricket is consolidated in RRD
+			            databases in several ways, so as time passes, you
+			            lose high-resolution data points, as they are
+			            replaced by summary data.  The most common
+			            consolidation function is AVERAGE, which shows you
+			            the average of the data points which were
+			            consolidated. But there are also MIN and MAX, for
+			            example, and this data is calculated and stored by
+			            default. show-max turns on display of the MAX
+			            consolidated data.
+                    </p>
+                    <p>
+                        This is useful for seeing what the peak levels were
+                        at some point in the past, since this information is
+                        lost by AVERAGE.
+                    </p>
 				</dd>
 				<dt><tt>si-units</tt></dt>
 				<dd>Default value: <i>true</i>
