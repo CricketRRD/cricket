@@ -83,6 +83,11 @@ how to move them elsewhere, or use a dedicated user for Cricket
 so that the directories won't bug you.
 
 <p>
+Do <b>not</b> run Cricket as the <tt>root</tt> user.  Superuser privileges are
+not necessary to run Cricket, and granting them would very probably create
+a security hole on your system.
+
+<p>
 If you use a dedicated user for Cricket make certain that mail sent to
 that user ends up in your mailbox. Some of Cricket's runtime errors
 get reported (with cron's help) via e-mail.
@@ -275,7 +280,7 @@ this to save some work:
 
 <p>
 You should check the automatically generated interfaces file and
-make certain it only lists interfaces you are interested in. 
+make certain it only lists interfaces you are interested in.
 
 <p>
 By adding this file, you've just changed the config tree. Remember,
