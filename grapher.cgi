@@ -1303,7 +1303,7 @@ sub doGraph {
 			$ds = lc($ds);
 	
 			my($legend, $color, $colorCode, $drawAs, $scale,
-				$colormax, $clmxCode);
+				$colormax, $clmxCode, $drmxAs);
 	
 			my($gRef) = $gCT->configHash($name, 'graph', $ds, $targRef);
 
@@ -1319,6 +1319,9 @@ sub doGraph {
 			$drawAs = graphParam($gRef, 'draw-as', 'LINE2');
 			$drawAs = uc($drawAs);
 
+			$drmxAs = graphParam($gRef, 'draw-max-as', 'LINE2');
+			$drmxAs = uc($drmxAs);
+
 			# if stack first must be area 
 			if ($drawAs eq "STACK") { 
 				if (!$usedStack)  { 
@@ -1331,6 +1334,13 @@ sub doGraph {
 			if ($drawAs eq "AREA")  {
 				if ($usedArea)  {
 					$drawAs = 'LINE2';
+				}  else  {
+					$usedArea = 1;
+				}
+			}
+			if ($drmxAs eq "AREA")  {
+				if ($usedArea)  {
+					$drmxAs = 'LINE2';
 				}  else  {
 					$usedArea = 1;
 				}
@@ -1399,26 +1409,26 @@ sub doGraph {
 					push @cdefs, "CDEF:sds$ct=ds$ct,$scale";
 					if ($isMTargetsOps) {
 						if (!$linePushed[$mod])  {
-							push @lines, "$drawAs:totmx$mod#$clmxCode:" .
+							push @lines, "$drmxAs:totmx$mod#$clmxCode:" .
 											"Max $legend" if ($mx);
 							push @lines, "$drawAs:tot$mod#$colorCode:$legend";
 							$linePushed[$mod] = 1;
 						}
 					}  else  {
-						push @lines, "$drawAs:smx$ct#$clmxCode:" .
+						push @lines, "$drmxAs:smx$ct#$clmxCode:" .
 										"Max $legend" if ($mx);
 						push @lines, "$drawAs:sds$ct#$colorCode:$legend";
 					}
 				} else {
 					if ($isMTargetsOps)  {
 						if (!$linePushed[$mod])  {
-							push @lines, "$drawAs:totmx$mod#$clmxCode:" .
+							push @lines, "$drmxAs:totmx$mod#$clmxCode:" .
 											"Max $legend" if ($mx);
 							push @lines, "$drawAs:tot$mod#$colorCode:$legend";
 							$linePushed[$mod] = 1;
 						}
 					}  else  {
-						push @lines, "$drawAs:mx$ct#$clmxCode:" .
+						push @lines, "$drmxAs:mx$ct#$clmxCode:" .
 										"Max $legend" if ($mx);
 						push @lines, "$drawAs:ds$ct#$colorCode:$legend";
 					}

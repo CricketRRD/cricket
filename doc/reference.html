@@ -1212,6 +1212,13 @@ are as follows:
 	</dl>
 	</blockquote>
 
+<dt><tt>draw-max-as</tt><p> 
+<dd>Default value: <i>LINE2</i><p>
+
+Same as <tt>draw-as</tt> but for maximums enabled with <tt>show-max</tt>.
+<p>
+
+
 <dt><tt>legend</tt><p>
 <dd>Default value: <i>datasource name</i><p>
 
@@ -1219,6 +1226,12 @@ Using <tt>legend</tt> allows you to customize the datasource name which is
 displayed on the graph's legend, and in the HTML summary. If you don't
 use a <tt>legend</tt> tag, the name of the datasource (as specified
 by the <tt>ds</tt> tag in the targetType dictionary) will be used.
+<p>
+
+<dt><tt>max-color</tt><p>
+<dd>Default value: <i>none</i><p>
+
+Same as <tt>color</tt> but for maximums enabled with <tt>show-max</tt>.
 <p>
 
 <dt><tt>precision</tt><p>
@@ -1265,6 +1278,13 @@ average and the maximum for the current day of data. If set to false, only
 the current reading is shown.
 <p>
 
+<dt><tt>show-max</tt><p>
+<dd>Default value: <i>false</i><p>
+
+This controls whether or not the maximums stored for a data source are drawn
+on the graph.
+<p>
+ 
 <dt><tt>si-units</tt><p>
 <dd>Default value: <i>true</i><p>
 
