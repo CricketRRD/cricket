@@ -1304,6 +1304,7 @@ sub doGraph {
     my($usedStack) = 1;
     my(@linePushed);
     my(%scaled);
+    my(@target_pass_args);
 
     # prepare a dsmap, using the target and targettype dicts
     # we do this outside the loop to keep the DS map from expanding
@@ -1396,6 +1397,14 @@ sub doGraph {
                 $scaled{$ds} = 1;
             } else {
                 $scaled{$ds} = 0;
+            }
+
+            # This is not 100% kosher, because the graph args are not
+            # target specific, but view specific. However, not doing
+            # this at all violates the rule of least astonishment.
+            my $pass = graphParam($gRef, 'rrd-graph-args', undef);
+            if (defined($pass)) {
+                push(@target_pass_args, $pass);
             }
 
             # this way, we only take the _first_ yaxis that
@@ -1650,6 +1659,9 @@ sub doGraph {
     # handle passthrough arguments
     my($pass) = graphParam($gRefDef, 'rrd-graph-args', undef);
     my(@pass) = ();
+    if ($#target_pass_args >= 0) {
+        push(@pass, @target_pass_args);
+    }
     if (defined($pass)) {
         @pass = split(/\s+/, $pass);
     }
