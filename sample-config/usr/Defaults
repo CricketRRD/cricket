@@ -3,35 +3,35 @@
 # monitoring script by Jeff Jensen <jpj@corp.webtv.net>
 
 target --default--
-	modem		=	%auto-target-name%
-	short-desc	=	""
-	# You'll need to set your domain
-	domain		=	yournetwork.net
-	# you'll probably want to change this... unless you
-	# have Cricket in ~/cricket and your config tree in ~/config
-	util-dir	=	%auto-base%/../cricket/util
-	#snmp-community	=	private
-	snmp-host	=	"%modem%.%domain%"
-	usrGetUsage	= 	"%auto-base%/../cricket/util/usrModemUsage"
-	usrGet		=	"%usrGetUsage% %modem% %snmp-community%"
-	target-type	=	USRModem
+    modem       =   %auto-target-name%
+    short-desc  =   ""
+    # You'll need to set your domain
+    domain      =   yournetwork.net
+    # you'll probably want to change this... unless you
+    # have Cricket in ~/cricket and your config tree in ~/config
+    util-dir    =   %auto-base%/../cricket/util
+    #snmp-community =   private
+    snmp-host   =   "%modem%.%domain%"
+    usrGetUsage =   "%auto-base%/../cricket/util/usrModemUsage"
+    usrGet      =   "%usrGetUsage% %modem% %snmp-community%"
+    target-type =   USRModem
 
 datasource      --default--
-        rrd-ds-type             =       GAUGE
-        rrd-heartbeat   	=       1800
-        rrd-min                 =       undef
-        rrd-max                 =       undef
+    rrd-ds-type       =       GAUGE
+    rrd-heartbeat     =       1800
+    rrd-min           =       undef
+    rrd-max           =       undef
 
-datasource      linesup         ds-source       =       EXEC:0:%usrGet%
+datasource    linesup   ds-source       =       EXEC:0:%usrGet%
 
-targetType	USRModem
-	ds	=	"linesup"
-	view	=	"LinesUP: linesup"
+targetType  USRModem
+    ds  =   "linesup"
+    view    =   "LinesUP: linesup"
 
-html short-desc                 USRModems
+html short-desc       USRModems
 
 graph   --default--
-    precision       =       integer
+    precision   =       integer
 
 graph   linesup
     color   =   dark-green

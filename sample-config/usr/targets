@@ -1,15 +1,15 @@
 target usr1
-	target-type=USRModem
-	short-desc	=	"Bank 1 of the modems"
+    target-type=USRModem
+    short-desc  =   "Bank 1 of the modems"
 
 target usr2
-	target-type=USRModem
-	short-desc	=	"Bank 2 of the modems"
+    target-type=USRModem
+    short-desc  =   "Bank 2 of the modems"
 
 target usr3
-	target-type=USRModem
-	short-desc	=	"Bank 3 of the modems"
+    target-type=USRModem
+    short-desc  =   "Bank 3 of the modems"
 
 target usr4
-	target-type=USRModem
-	short-desc	=	"Bank 4 of the modems"
+    target-type=USRModem
+    short-desc  =   "Bank 4 of the modems"

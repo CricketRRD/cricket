@@ -1,16 +1,16 @@
-target	dial0
-	target-type=Portmaster3
-	short-desc	=	"Portmaster3 0"
+target  dial0
+    target-type=Portmaster3
+    short-desc  =   "Portmaster3 0"
 
-target	dial1
-	target-type=Portmaster3
-	short-desc	=	"Portmaster3 1"
+target  dial1
+    target-type=Portmaster3
+    short-desc  =   "Portmaster3 1"
 
-target	dial2
-	target-type=Portmaster3
-	short-desc	=	"Portmaster3 0"
+target  dial2
+    target-type=Portmaster3
+    short-desc  =   "Portmaster3 0"
 
-target	dial3
-	target-type=Portmaster3
-	short-desc	=	"Portmaster3 1"
+target  dial3
+    target-type=Portmaster3
+    short-desc  =   "Portmaster3 1"
 

@@ -4,54 +4,54 @@
 # If you manage to optimize or improve this, please return it to
 # canau@eunet.pt or to the Cricket developers
 
-Target	--default--
-	portmaster		= %auto-target-name%
-	# fill in your domain name here
-	domain			= ""
-	snmp-host		= %portmaster%.%domain%
-	pm3lineUsage	= "%auto-base%/../cricket/util/pmlines.pl"
-	pm3lines		= "%pm3lineUsage% %snmp-community%@%snmp-host%"
-	# you could set a router-specific community string here:
-	# snmp-community	= not-public
-	#
-	# Provide no default type, since each portmaster will be different,
-	# and if we want to specify each model explicitly, or
-	# get a warning.
-	target-type		= undef
+Target  --default--
+    portmaster       = %auto-target-name%
+    # fill in your domain name here
+    domain           = ""
+    snmp-host        = %portmaster%.%domain%
+    pm3lineUsage     = "%auto-base%/../cricket/util/pmlines.pl"
+    pm3lines         = "%pm3lineUsage% %snmp-community%@%snmp-host%"
+    # you could set a router-specific community string here:
+    # snmp-community   = not-public
+    #
+    # Provide no default type, since each portmaster will be different,
+    # and if we want to specify each model explicitly, or
+    # get a warning.
+    target-type     = undef
 
-datasource	--default--
-	rrd-ds-type		=	GAUGE
-	rrd-heartbeat	=	1800
-	rrd-min			=	undef
-	rrd-max			=	undef
+datasource  --default--
+    rrd-ds-type     =   GAUGE
+    rrd-heartbeat   =   1800
+    rrd-min         =   undef
+    rrd-max         =   undef
 
-datasource	linesup		ds-source	=	EXEC:0:%pm3lines%
-datasource	modems		ds-source	=	EXEC:1:%pm3lines%
-datasource	isdn		ds-source	=	EXEC:2:%pm3lines%
+datasource  linesup     ds-source   =   EXEC:0:%pm3lines%
+datasource  modems      ds-source   =   EXEC:1:%pm3lines%
+datasource  isdn        ds-source   =   EXEC:2:%pm3lines%
 
-## targetType	Portmaster2
-##	ds	=	linesup
-##	view	=	"LinesUP: linesup"
+## targetType   Portmaster2
+##  ds  =   linesup
+##  view    =   "LinesUP: linesup"
 ## # this probably should be made some other way like getting all the
 ## # interfaces and subtrating one (scale = 1,-) but even then it wouldn't
 ## # count for the terminal connections like UUCP.
 ## # I no longer use PM2 for dialup access... good luck!
 
-targetType	Portmaster3
-	ds 	=	"linesup, modems, isdn"
-	view	=	"LinesUP: linesup modems isdn"
+targetType  Portmaster3
+    ds  =   "linesup, modems, isdn"
+    view    =   "LinesUP: linesup modems isdn"
 
-targetType	Portmaster4
-	ds 	=	"linesup, modems, isdn"
-	view	=	"LinesUP: linesup modems isdn"
+targetType  Portmaster4
+    ds  =   "linesup, modems, isdn"
+    view    =   "LinesUP: linesup modems isdn"
 
 # Portmaster4 should work like Portmaster3. In principle, %pm3lines% is
 # compatible with PM4. But you better check it.
 
 html short-desc                 Portmaster
 
-graph	--default--
-	precision	=	integer
+graph   --default--
+    precision   =   integer
 
 graph   linesup
     color   =   dark-green

@@ -7,16 +7,15 @@
 # sample-config/routers for an example.
 
 target --default--
-	# cisco 1900's have 25 ports, plus an A and B port
-	inst=(1..27)
+    # cisco 1900's have 25 ports, plus an A and B port
+    inst=(1..27)
 
-target	cisco-1900-1
-target	cisco-1900-2
-target	cisco-1900-3
-target	cisco-1900-4
-target	cisco-1900-5
+target  cisco-1900-1
+target  cisco-1900-2
+target  cisco-1900-3
+target  cisco-1900-4
+target  cisco-1900-5
 
 # here's an isolated instance of a beefy switch with lots of ports
-target	cisco-5500-1
-	inst=(1..70)
-
+target  cisco-5500-1
+    inst=(1..70)

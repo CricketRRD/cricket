@@ -7,16 +7,16 @@
 # these are from the neighbor statements in the BGP router section.
 #
 target internet-router-1
-	domain		= "foo.com"
-	short-desc	= "Primary Internet Router"
-	inst		= "('172.16.1.1','172.18.1.1')"
-	inst-names	= "('Peer 16','Peer 18')"
+    domain      = "foo.com"
+    short-desc  = "Primary Internet Router"
+    inst        = "('172.16.1.1','172.18.1.1')"
+    inst-names  = "('Peer 16','Peer 18')"
 
 #
 # You can also look at both of these on the same HTML page
 #
 target all-peers
-	domain		= ""
-	short-desc	= "All BGP Peers"
-	targets		= "internet-router-1:'172.16.1.1';
-			   internet-router-1:'172.18.1.1'"
+    domain      = ""
+    short-desc  = "All BGP Peers"
+    targets     = "internet-router-1:'172.16.1.1';
+               internet-router-1:'172.18.1.1'"
