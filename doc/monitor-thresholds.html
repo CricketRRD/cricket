@@ -41,8 +41,8 @@ are purely a construct of the Cricket grapher).
 <p>&lt;monitor-threshold> := &lt;data source>:&lt;monitor type>:&lt;monitor
 type args>:&lt;action>:&lt;action args>
 <p>&lt;data source> := a data source defined for the target
-<br>&lt;monitor type> := One of the five supported types: value, relation,
-hunt, quotient, or failures.
+<br>&lt;monitor type> := One of the six supported types: exact, value,
+relation, hunt, quotient, or failures.
 <br>&lt;monitor type args> := a colon-delimited list of arguments specific
 to each monitor type
 <br>&lt;action> := One of five supported actions: SNMP, MAIL, EXEC, FUNC,
@@ -108,7 +108,18 @@ set to true, monitor threshold behavior is like a bell. It keeps ringing
 until the problem stops.
 <p><b>Monitor Types</b>
 <p>The monitor type determines the criteria used to check a monitor threshold.
-<p>value : The simplest monitor type, value monitor thresholds take two
+<p>Exact monitors are the simplest to use and configure, and allow you to
+monitor a datasource for an exact match.  This is useful in cases
+where an enumerated (or boolean) SNMP object instruments a condition
+where a transition to a specific state requires attention.  For
+example, a datasource might return either true(1) or false(2),
+depending on whether or not a power supply has failed.  The exact
+monitor expects one argument; the value on which the monitor will
+trigger.  For example, <tt>monitor-thresholds =
+"dsPowerFail:exact:1"</tt> would cause Cricket to send a trap when the
+last value of the "dsPowerFail" datasource in the RRD file for this
+target is 1.
+<p>value : The next simplest monitor type, value monitor thresholds take two
 arguments, a minimum and maximum value. If the data source strays outside
 of this interval, the monitor threshold criteria fails. To omit the minimum
 or maximum value, use the character "n".
