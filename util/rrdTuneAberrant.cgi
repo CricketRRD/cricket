@@ -75,7 +75,7 @@ if (!defined($targetRef)) {
 ConfigTree::Cache::addAutoVariables($name, $targetRef, $Common::global::gConfigRoot);
 
 my($ttRef) = $gCT->configHash($name, 'targettype',
-                              $targetRef->{'target-type'});
+                              lc($targetRef->{'target-type'}));
 
 if (! defined($ttRef)) {
     print "Invalid or missing target-type for $name";
