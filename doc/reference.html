@@ -655,7 +655,9 @@ and "162", respectively.
 
 When this tag is set and the target is part of a multitarget
 which has mtargets-ops set, then data which is unknown
-will be treated as a 0. This is very useful when trying to create
+will be treated as a 0, unless <b>all</b> targets of the multitarget are
+unknown (in which case the value is still unknown).
+This is very useful when trying to create
 aggregate graphs that sum a set of targets that span different time
 ranges. By default, places where one target is
 unknown and the others are known
