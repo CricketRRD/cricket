@@ -14,6 +14,14 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	Nils Ketelsen and Raffael D'Albenzio
+		were instrumental in squashing the mtargets/mtargets-ops
+		bugs relating to mixed case targets and directories
+
+	Greg Whitlock
+		finally convinced Bert that there was a bug in the
+		treatment of "bytes=false"
+
 	Taso Devetzis
 		monitor type "exact"
 

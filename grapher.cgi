@@ -1411,7 +1411,7 @@ sub doGraph {
             # pick up the value for bytes, if we have not already
             # found it.
             if (! $bytes) {
-                $bytes = graphParam($gRef, 'bytes', 0);
+                $bytes = isTrue(graphParam($gRef, 'bytes', 0));
             }
 
             $colorCode = colorToCode($colorRef, $color);
