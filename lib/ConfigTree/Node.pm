@@ -237,10 +237,10 @@ sub compileNode {
 			$dbRef->{"t:$node:$dict:$name"} = join(',', @tags);
 			push @names, $name;
 		}
-		$dbRef->{"n:$node:$dict"} = join(',', @names);
+		#$dbRef->{"n:$node:$dict"} = join(',', @names);
 		push @dicts, $dict;
 	}
-	$dbRef->{"D:$node"} = join(',', @dicts);
+	#$dbRef->{"D:$node"} = join(',', @dicts);
 
 	# put a comma-separated list of the relative names of the children
 	# into a "c:" key in the db.
