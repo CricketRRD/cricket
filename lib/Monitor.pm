@@ -84,7 +84,7 @@ sub monValue {
 sub monHunt {
 	my($self,$target,$ds,$type,$args) = @_;
 
-	my($roll, $cmp_name, $cmp_ds) = split(/:/, $args);
+	my($roll, $cmp_name, $cmp_ds) = split(/\s*:\s*/, $args);
 
 	if(!defined($roll)) {
 		Warn("Skipping: Missing rollover value in hunt threshold.");
@@ -142,7 +142,7 @@ sub monHunt {
 sub monRelation {
 	my($self, $target, $ds, $type, $args) = @_;
 
-	my($thresh, $cmp_name, $cmp_ds, $cmp_time) = split(/:/, $args);
+	my($thresh, $cmp_name, $cmp_ds, $cmp_time) = split(/\s*:\s*/, $args);
 	my($pct) = ($thresh =~ s/\s*pct\s*//i);
 	$cmp_time = 0 unless(defined($cmp_time));
 
@@ -266,7 +266,7 @@ sub monFailures {
 sub monQuotient {
     my($self, $target, $ds, $type, $args) = @_;
 
-    my($thresh, $cmp_name, $cmp_ds, $cmp_time) = split(/:/, $args);
+    my($thresh, $cmp_name, $cmp_ds, $cmp_time) = split(/\s*:\s*/, $args);
     my($pct) = ($thresh =~ s/\s*pct\s*//i);
     $cmp_time = 0 unless(defined($cmp_time));
     Info("Use of quotient monitors without percent threshold is deprecated")
