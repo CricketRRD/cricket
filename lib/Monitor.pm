@@ -22,6 +22,7 @@ use strict;
 use snmpUtils;
 use RRD::File;
 use Common::Log;
+use Common::Util;
 
 # Registered monitors
 $Common::global::gMonitorTable{'value'} = \&monValue;
