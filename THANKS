@@ -14,6 +14,9 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	Lars Hansson
+		Spotted a bug in mungeDsName
+
 	John Woolner
 		Made getFormat.c portable to DEC Alpha
 
