@@ -576,7 +576,7 @@ sub doHTMLPage {
                 print "</dl>\n";
             }
 
-            if($targRef->{'summary-loc'} eq "bottom") {
+            if ($targRef->{'summary-loc'} && $targRef->{'summary-loc'} eq "bottom") {
                 print htmlCurrentPath($ct, $targRef, $name);
                 print "<table width=100% cellpadding=5 padding=3 border>\n";
                 print "<tr><td width=70%>\n";
