@@ -30,22 +30,32 @@
 # to tell collect-subtrees where to find it.
 
 BEGIN {
-    $gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+   $Common::global::gInstallRoot = (($0 =~ m:^(.*/):)[0] || "./") . ".";
 }
 
 use Getopt::Long;
+use strict;
 
-$gCF = "$gInstallRoot/subtree-sets";
-GetOptions( "cf=s" => \$gCF );
+my $gMailTo;
+my $gSubtree;
+my $gCF = "$Common::global::gInstallRoot/subtree-sets";
 
-$gLogDir = "$ENV{'HOME'}/log";
-$gBase = "$ENV{'HOME'}/config";
-$gKeepLogs = 20;
-$gUser = getlogin || getpwuid($<);	# idiom from perlfunc manpage
+GetOptions( "cf=s" => \$gCF,
+			"mail|m=s" => \$gMailTo,
+		);
 
-# Uncomment '$subtreeTimes' line to collect time-based statistics 
-# stored in .time logs in the cricket-logs directory.
-#my $subtreeTimes = 1;
+my $gLogDir = "$ENV{'HOME'}/log";
+my $gBase = "$ENV{'HOME'}/config";
+my $gKeepLogs = 20;
+my $gUser = getlogin || getpwuid($<);	# idiom from perlfunc manpage
+my $gCurSet;
+my ($gSets, %gSets, @gSets);
+
+# Change this to = 1 if you want to get collection length statistics.
+my $subtreeTimes = 0;
+
+# Change this to your local mailer if you don't have /bin/mailx!
+my $gMailer = '/bin/mailx';
 
 open(S, "<$gCF") ||
 	die("Could not read $gCF file.\n");
@@ -73,6 +83,7 @@ while (<S>) {
 	} else {
 		my($subtree) = $_;
 		$subtree =~ s/^\s*//;
+		$gSubtree = $subtree;
 		if (! defined($gCurSet)) {
 			warn("No set lines found. Ignoring subtree $subtree.\n");
 		} else {
@@ -87,8 +98,9 @@ if ($#ARGV == -1) {
 	@ARGV = sort(keys(%gSets));
 }
 
-foreach $s (@ARGV) {
+foreach my $s (@ARGV) {
 	my($subtreeRef) = $gSets{$s};
+	my(@output) = ();
 	if (! defined($subtreeRef)) {
 		print STDERR "$0: unknown subtree name: $s\n";
 		next;
@@ -107,13 +119,14 @@ foreach $s (@ARGV) {
 	system("touch $lockfile");
 
 	rollLogs($s);
-	$logfile = "$gLogDir/$s.0";
-	$timelogfile = "$gLogDir/$s.times";
+	my $logfile = "$gLogDir/$s.0";
+	my $timelogfile = "$gLogDir/$s.times";
 	if(-f $timelogfile && -s $timelogfile >=  50000 && $subtreeTimes == 1) {
 		rename $timelogfile, "$timelogfile.old"
 	}
-	$args = "-base $gBase " . join(" ", @{$subtreeRef});
-	system("$gInstallRoot/collector $args > $logfile 2>&1");
+	my $args = "-base $gBase " . join(" ", @{$subtreeRef});
+
+	system("$Common::global::gInstallRoot/collector $args > $logfile 2>&1");
 
 	# unlock it
 	unlink($lockfile);
@@ -123,6 +136,13 @@ foreach $s (@ARGV) {
 
 	if (open(L, "<$logfile")) {
 		(open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!") unless (!$subtreeTimes == 1);
+		my $lastWasError;
+		my $skipLine;
+		my $mOut = 0; $mOut = 1 if(defined($gMailTo));
+
+		my (@hist, @mHist) = ();
+
+
 		while (<L>) {
 			# keep 5 lines of history
 			push @hist, $_;
@@ -130,26 +150,45 @@ foreach $s (@ARGV) {
 
 			# errors are marked with a * after the date:
 			# 	[21-Dec-1998 15:57:54*] RRD error ...
+
 			if (/\*\] /) {
 				if ($lastWasError) {
-					print STDERR $_;
+					if($mOut == 1) {
+						push @mHist, $_;
+					} else {
+						print STDERR $_;
+					}
 				} else {
-					print STDERR "\nError and the lines leading up to it:\n";
-					print STDERR @hist;
+					if($mOut == 1) {
+						push @mHist, "\nError and the lines leading up to it:\n";
+						push @mHist, @hist;
+					} else {
+						print STDERR "\nError and the lines leading up to it:\n";
+						print STDERR @hist;
+					}
 				}
 				$lastWasError = 1;
 			} else {
 				if ($skipLine) {
-					print STDERR "\n";
+					if($mOut == 1) {
+						push @mHist, "\n";
+					} else {
+						print STDERR "\n";
+					}
 					$skipLine = 0;
 				}
 				$lastWasError = 0;
 			}
 		}
 		close(L);
+
 		if ($subtreeTimes == 1) {
 			print TL $hist[$#hist];
 			close(TL);
+		}
+
+		if(defined($mOut)) {
+			mailHist(@mHist);
 		}
 	} else {
 		warn("Could not scan logfile $logfile for errors: $!\n");
@@ -187,4 +226,16 @@ sub isWin32 {
     return ($^O eq 'MSWin32');
 }
 
+sub mailHist {
+	my @output = @_;
+
+	if($#output > 0) {
+		my $subject = "output from subtree " . $gSubtree;
+
+		open(MAIL, "|$gMailer -s \"$subject\"" . $gSubtree . " $gMailTo") ||
+			die "Couldn't run $gMailer to send subtree output: $!\n";
+		print MAIL @output;
+		close(MAIL);
+	}
+}
 exit 0;
