@@ -171,7 +171,7 @@ sub compile {
     unlink($file);
 
     my(%db);
-    my($dbh) = tie %db, 'DB_File', $file, O_CREAT|O_RDWR, 0644, $DB_HASH;
+    my($dbh) = tie %db, 'DB_File', $file, O_CREAT|O_RDWR, 0644, $DB_BTREE;
 
 	my($ct) = $self->compileTree(\%db);
 
