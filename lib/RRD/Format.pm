@@ -83,6 +83,7 @@ sub setArch {
     $self->{'LAST_DS_LEN'} = 30;    # Tobias says, "DO NOT CHANGE THIS" :)
 
     $archname =~ s/-multi-thread//g;
+    $archname =~ s/-thread-multi//g;
     $archname =~ s/-thread//g;
 
     if ($archname eq "sun4-solaris" ||
