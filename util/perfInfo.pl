@@ -65,7 +65,7 @@ foreach my $k (keys %{$counter}) {
 }
 
 
-my $pl = new Win32::PerfLib($server);	
+my $pl = new Win32::PerfLib($server);
 $pl->GetObjectList($rcounter{$object}, $pr) || die "Can't get counters from $server because of: $!\n";
 $pl->Close();
 
@@ -75,7 +75,7 @@ foreach my $level2 (keys %{$pr->{'Objects'}}) {
 	if($pr->{'Objects'}->{$level2}->{'NumInstances'} > 0) {
 		if(defined($instance)) {
 			print "\t* Traversing multiple counters for $cname\n";
-		
+
 			foreach my $level4 (keys %{$pr->{'Objects'}->{$level2}->{'Instances'}}) {
 				my $ir = $pr->{'Objects'}->{$level2}->{'Instances'}->{$level4};
 				foreach my $level5 (keys %{$ir->{'Counters'}}) {
@@ -115,11 +115,11 @@ sub getFormula {
 	my ($cdef) = @_;
 	print <<EOF;
 
-Formulas are from MSDN - subject to change. Author of this program takes no 
+Formulas are from MSDN - subject to change. Author of this program takes no
 responsibilities for inaccurate information!
 
 Symbols:
-TB   Time base. If TB is not used in the calculation, then it indicates the 
+TB   Time base. If TB is not used in the calculation, then it indicates the
      units of the raw data.
 B    The base value used for calculating performance data types that require
      base.
@@ -197,7 +197,7 @@ $cdef
 $desc
 
 Element        Value
-X              @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<	
+X              @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $x
 Y              @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $y

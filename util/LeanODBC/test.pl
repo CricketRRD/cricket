@@ -41,7 +41,7 @@ my $hstmt = $ret[1];
 # select bogus string in case the Northwind db changes records in the future
 # remember, we are testing the API not the DB
 @ret = SQLExecDirect($hstmt,
-       'SELECT \'dummy1\' as "Last Name", NULL as "First Name"' . 
+       'SELECT \'dummy1\' as "Last Name", NULL as "First Name"' .
        ' FROM Employees', SQL_NTS);
 print (($ret[0] == SQL_SUCCESS) ? "ok 6\n" : "not ok 6\n");
 if ($ret[0] != SQL_SUCCESS)
