@@ -37,6 +37,8 @@ BEGIN {
 	$Common::global::gInstallRoot ||= $programdir;
 }
 
+use lib "$Common::global::gInstallRoot/lib";
+
 use Getopt::Long;
 use Common::global;
 use strict;
