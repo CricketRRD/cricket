@@ -27,7 +27,7 @@ $main::gDSFetch{'sql'} = \&sqlFetch;
 
 my %sqlFetches;
 
-sub perfmonFetch {
+sub sqlFetch {
 	my($dsList, $name, $target) = @_;
 	my(@results);
 
@@ -47,15 +47,15 @@ sub perfmonFetch {
 		$col        = shift(@components) || 1;
 		$dbdriver   = shift(@components) || missing("db driver", $line);
 		
-		$sqlFetches{$index} = "$login:$password:$$query:$col:$dbdriver";
+		$sqlFetches{$index} = "$login:$password:$query:$col:$dbdriver";
 	}
 
 	DSLOOP: while(my ($index, $ilRef) = each %sqlFetches) {
-		my($login, $password, $sqldb, $query, $col, $dbdriver) = split(/:/, $ilRef, 6);
+		my($login, $password, $query, $col, $dbdriver) = split(/:/, $ilRef, 5);
 		my $matches;
 		my $value;
 
-		my $dbh = DBI->connect($dbdriver, $login, $password, $query) || Error();
+		my $dbh = DBI->connect($dbdriver, $login, $password) || Error();
 		my $sth = $dbh->prepare($query);
 
 		if($sth->errstr) {
@@ -69,7 +69,7 @@ sub perfmonFetch {
 		}
 
 		my @row = $sth->fetchrow_array();
-		$value = $row[$col+1];
+		$value = $row[$col-1];
 		$matches++;
 		
 		if($sth->fetchrow_array()) {
@@ -88,10 +88,3 @@ sub perfmonFetch {
 } 
 
 1;
-
-# Local Variables: 
-# mode: perl 
-# indent-tabs-mode: nil 
-# tab-width: 4 
-# perl-indent-level: 4 
-# End: 
