@@ -123,10 +123,11 @@ sub configHash {
 
 	my(@path, $curnode);
 	$curnode = $node;
-	while ($curnode = $dbRef->{'p:' . $curnode}) {
+	while (length($curnode) > 0) {
 		unshift @path, $curnode;
+		last unless ($curnode =~ s/\/[^\/]+$//);
 	}
-	push @path, $node;
+	unshift @path, "/";
 
 	# now that we have a path from the root down, compile all the
 	# data into a hash to hand back to the caller.
