@@ -30,12 +30,11 @@ BEGIN {
 }
 
 use lib "$Common::global::gInstallRoot/lib";
+use Common::globals;
 
 # You need to update this to point to the URL
 # you use to access Cricket.
-$gBaseURL = "http://localhost/~cricket/grapher.cgi";
-
-use lib "$gInstallRoot/../lib";
+$gBaseURL = "http://localhost/~cricket/cricket/grapher.cgi";
 
 use File::Basename;
 use LWP::UserAgent;
