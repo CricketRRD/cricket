@@ -108,6 +108,9 @@ html    body-options    bgcolor=white
 html    page-header
     <!-- you could put your company logo on every page here: -->
     <!-- <img src="images/company-logo.gif" align=left> -->
+    <!-- Uncomment this to have the browser refresh every 5 minutes: -->
+    <!-- META HTTP-EQUIV="Refresh" CONTENT="300"-->
+    <!-- META HTTP-EQUIV="Pragma" CONTENT="no-cache"-->
     <h1>%auto-title%</h1>
     <br clear=left>
 
