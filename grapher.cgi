@@ -2114,7 +2114,7 @@ sub generateImageName {
     $md5 = new Digest::MD5;
 
     # make sure to munge $target correctly if $gUrlStyle = pathinfo
-    $md5->add($param, urlTarget($q));
+    $md5->add(urlTarget($q));
 
     foreach $param ($q->param()) {
         next if ($param eq 'rand');
