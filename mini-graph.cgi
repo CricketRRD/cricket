@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w 
+#!/usr/local/bin/perl -w
 # -*- perl -*-
 
 # Cricket: a configuration, polling and data display wrapper for RRD files
@@ -20,14 +20,14 @@
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 BEGIN {
-	# This magic attempts to guess the install directory based
-	# on how the script was called. If it fails for you, just
-	# hardcode it.
-	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
-	eval "require '$programdir/cricket-conf.pl'";
-	eval "require '/usr/local/etc/cricket-conf.pl'"
-					unless $Common::global::gInstallRoot;
-	$Common::global::gInstallRoot ||= $programdir;
+    # This magic attempts to guess the install directory based
+    # on how the script was called. If it fails for you, just
+    # hardcode it.
+    my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+    eval "require '$programdir/cricket-conf.pl'";
+    eval "require '/usr/local/etc/cricket-conf.pl'"
+        unless $Common::global::gInstallRoot;
+    $Common::global::gInstallRoot ||= $programdir;
 }
 
 use lib "$Common::global::gInstallRoot/lib";
@@ -49,80 +49,86 @@ $main::gQ = new CGI;
 doGraph();
 
 sub doGraph {
-	my($imageName) = generateImageName($main::gQ);
+    my($imageName) = generateImageName($main::gQ);
 
-	# check the image's existance (i.e. no error from stat()) and age
+    # check the image's existance (i.e. no error from stat()) and age
 
-	my($mtime);
-	if (defined($imageName)) {
-		$mtime = (stat($imageName))[9];
-	}
+    my($mtime);
+    if (defined($imageName)) {
+        $mtime = (stat($imageName))[9];
+    }
 
-	if (!defined($mtime) || ((time() - $mtime) > $main::gPollingInterval)) {
-		# this request is actually going to need work... pass it on
-		if (Common::Util::isWin32()) {
-		   exec("perl $Common::global::gInstallRoot/grapher.cgi");
-		} else {
-		   exec("$Common::global::gInstallRoot/grapher.cgi");
-		}
-	} else {
-		Debug("Cached image exists. Using that.");
-		sprayGif($imageName);
-	}
+    if (!defined($mtime) || ((time() - $mtime) > $main::gPollingInterval)) {
+        # this request is actually going to need work... pass it on
+        if (Common::Util::isWin32()) {
+            exec("perl $Common::global::gInstallRoot/grapher.cgi");
+        } else {
+            exec("$Common::global::gInstallRoot/grapher.cgi");
+        }
+    } else {
+        Debug("Cached image exists. Using that.");
+        sprayPng($imageName);
+    }
 }
 
-sub tryGif {
-	my($gif) = @_;
-	
-	# we need to make certain there are no buffering problems here.
-	local($|) = 1;
-	
-	if (! open(GIF, "<$gif")) { 
-		return;
-	} else { 
-		my($stuff, $len); 
-		binmode(GIF);
-		while ($len = read(GIF, $stuff, 8192)) { 
-			print $stuff; 
-		} 
-		close(GIF); 
-	}
-	return 1;
+sub tryPng {
+    my($png) = @_;
+
+    # we need to make certain there are no buffering problems here.
+    local($|) = 1;
+
+    if (! open(PNG, "<$png")) {
+        return;
+    } else {
+        my($stuff, $len);
+        binmode(PNG);
+        while ($len = read(PNG, $stuff, 8192)) {
+            print $stuff;
+        }
+        close(PNG);
+    }
+    return 1;
 }
 
-sub sprayGif {
-	my($gif) = @_;
+sub sprayPng {
+    my($png) = @_;
 
-	print $main::gQ->header('image/gif');
+    print $main::gQ->header('image/png');
 
-	if (! tryGif($gif)) {
-		Warn("Could not open $gif: $!");
-		if (! tryGif("images/failed.gif")) {
-			Warn("Could not send failure gif: $!");
-			return;
-		}
-	}
+    if (! tryPng($png)) {
+        Warn("Could not open $png: $!");
+        if (! tryPng("images/failed.png")) {
+            Warn("Could not send failure png: $!");
+            return;
+        }
+    }
 
-	return 1;
+    return 1;
 }
 
 sub generateImageName {
-	my($q) = @_;
-	my($param, $md5);
+    my($q) = @_;
+    my($param, $md5);
 
-	$md5 = new Digest::MD5;
+    $md5 = new Digest::MD5;
 
-	foreach $param ($q->param()) {
-		next if ($param eq 'rand');
+    foreach $param ($q->param()) {
+        next if ($param eq 'rand');
         if ($param eq 'cache') {
             if (lc($q->param($param)) eq 'no') {
                 return;
             }
         }
-		$md5->add($param, $q->param($param));
-	}
-	my($hash) = unpack("H8", $md5->digest());
+        $md5->add($param, $q->param($param));
+    }
+    my($hash) = unpack("H8", $md5->digest());
 
-	return "$Common::global::gCacheDir/cricket-$hash.gif";
+    return "$Common::global::gCacheDir/cricket-$hash.png";
 }
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
