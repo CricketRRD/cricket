@@ -652,9 +652,9 @@ sub doHTMLPage {
 				
 				if (defined($targs->{$item}->{'targets'}))  {
 					$gQ->param('ranges', 'd');
-					$itemName .= " (multi-target)";
+					$itemName .= " (multiple targets)";
 				} elsif (defined($targs->{$item}->{'mtargets'}))  {
-					$itemName .= " (multi-target2)";
+					$itemName .= " (aggregated targets)";
 					$gQ->param('ranges', 'd:w');
 				} else  {
 					my($name) = $targs->{$item}->{'--name--'};
