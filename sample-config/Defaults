@@ -42,10 +42,11 @@ OID	ifOutQLen      		1.3.6.1.2.1.2.2.1.21
 OID ifAlias             1.3.6.1.2.1.31.1.1.1.18
 
 dataSource --default--
-	rrd-ds-type		=   COUNTER
+	rrd-ds-type		=   DERIVE
 	# if no updates are received for 30 minutes, consider the datasource
 	# unknown -- i.e. dead
 	rrd-heartbeat	=	1800
+	rrd-min		=	0
 
 dataSource  ifInOctets
 	ds-source		=   snmp://%snmp%/ifInOctets.%inst%
