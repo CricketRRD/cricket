@@ -642,7 +642,9 @@ sub sendMonitorTrap {
 }
 
 sub LogToFile {
-    my ($self, $filePath, $action, $targetName, $dataSourceName) = @_;
+    my ($self, $alarmArgs, $action, $targetName, $dataSourceName) = @_;
+
+    my $filePath = $alarmArgs->[0];
     my @lines = ();
     my $targetLine;
 
