@@ -1061,6 +1061,11 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
                   type of measurement include readings from thermometers,
                   percent disk space free, etc.
                 </p>
+                <p>
+                  The distributed Defaults file sets rrd-min to zero.
+                  If your GAUGE target can support negative values, set 
+                  rrd-min to "undef", or to the actual minimum value.
+                </p>
               </dd>
               <dt>COUNTER</dt>
               <dd>
