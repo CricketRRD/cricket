@@ -88,3 +88,10 @@ sub sqlFetch {
 }
 
 1;
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
