@@ -6,9 +6,11 @@
 
 Target	--default--
 	portmaster		= %auto-target-name%
+	# fill in your domain name here
+	domain			= ""
 	snmp-host		= %portmaster%.%domain%
 	pm3lineUsage	= "%auto-base%/../cricket/util/pmlines.pl"
-	pm3lines		= "%pm3lineUsage% %portmaster% %snmp-community%"
+	pm3lines		= "%pm3lineUsage% %snmp-community%@%snmp-host%"
 	# you could set a router-specific community string here:
 	# snmp-community	= not-public
 	#
