@@ -29,6 +29,7 @@ OID     MemUsage                        1.3.6.1.4.1.3495.1.3.1.4
 OID     CpuUsage                        1.3.6.1.4.1.3495.1.3.1.5 
 OID     MaxResSize                      1.3.6.1.4.1.3495.1.3.1.6 
 OID     NumObjCount                     1.3.6.1.4.1.3495.1.3.1.7 
+OID     CurrentLRUExpiration            1.3.6.1.4.1.3495.1.3.1.8 
 OID     CurrentUnlinkRequests           1.3.6.1.4.1.3495.1.3.1.9 
 OID     CurrentUnusedFileDescrCount     1.3.6.1.4.1.3495.1.3.1.10 
 OID     CurrentReservedFileDescrCount   1.3.6.1.4.1.3495.1.3.1.11 
@@ -48,9 +49,9 @@ OID     IcpReplySvcTimeHourly           1.3.6.1.4.1.3495.1.3.2.2.1.7.60
 OID     DnsSvcTimeHourly                1.3.6.1.4.1.3495.1.3.2.2.1.8.60 
 
 datasource	--default--
-	rrd-ds-type		=	COUNTER
+	rrd-ds-type		=	DERIVE
 	rrd-heartbeat	=	1800
-	rrd-min			=	undef
+	rrd-min			=	0
 	rrd-max			=	undef
 	
 datasource      ClientHttpRequests
@@ -186,6 +187,14 @@ datasource      DnsSvcTimeHourly
 	ds-source = snmp://%snmp%/DnsSvcTimeHourly
 	rrd-ds-type = GAUGE
 
+graph           CurrentLRUExpiration 
+  rrd-graph-args = --logarithmic 
+  color = dark-green 
+  si-units = false 
+  scale = 100,/,3600,/,24,/ 
+  legend = "Current LRU expiration (logarithmic scale)" 
+  y-axis "days" 
+
 targetType	squid-proxy
 	ds   = "ClientHttpRequests, HttpHits, HttpErrors, HttpInKb,
 		HttpOutKb, ICPpktsSent, ICPpktsRecv, ICPkbSent,
@@ -200,7 +209,7 @@ targetType	squid-proxy
 		HttpAllSvcTimeHourly, HttpMissSvcTimeHourly,
 		HttpNmSvcTimeHourly, HttpHitSvcTimeHourly,
 		IcpQuerySvcTimeHourly, IcpReplySvcTimeHourly,
-		DnsSvcTimeHourly"
+		DnsSvcTimeHourly, CurrentLRUExpiration"
 	view = "Traffic: ServerInKb ServerOutKb,
 		ICPTraffic: ICPkbSent ICPkbRecv,
 		ClientRequests: ServerRequests ServerErrors,
@@ -219,4 +228,6 @@ targetType	squid-proxy
 		IcpSvcFiveMin: IcpQuerySvcTimeFiveMin IcpReplySvcTimeFiveMin,
 		SvcHourly: HttpAllSvcTimeHourly HttpMissSvcTimeHourly
 			HttpNmSvcTimeHourly HttpHitSvcTimeHourly DnsSvcTimeHourly,
-		IcpSvcHourly: IcpQuerySvcTimeHourly IcpReplySvcTimeHourly"
+		IcpSvcHourly: IcpQuerySvcTimeHourly IcpReplySvcTimeHourly,
+		NumObjCount: NumObjCount,
+		CurrentLRUExpiration: CurrentLRUExpiration"
