@@ -44,10 +44,10 @@ $gCT->warn(\&Common::Log::Warn);
 $gCT->debug(\&Common::Log::Debug);
 $gCT->Base($Common::global::gConfigRoot);
 
-$gCT->init();
 if (&check_and_set_lock) {
 	exit;
 }
+$gCT->init();
 $gCT->processTree();
 
 ($nodeCt, $fileCt) = $gCT->compile();
