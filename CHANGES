@@ -82,6 +82,8 @@ New features, fixes in version 1.0.4
 
 	Updated getFormat.c from John Woolner. Patch #454472.
 
+        Documented the "show-path" target option [Bug #667179].
+
 New features, fixes in version 1.0.3
 
 	The many disk accesses to the config database that collector
