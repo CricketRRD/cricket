@@ -66,6 +66,10 @@ BEGIN {
         $gCacheDir ||= "/tmp/cricket-cache";
     }
 
+    $hasPersistantGlobals ||= 0;
+    $hasPersistantGlobals = 1 if $ENV{'MOD_PERL'};
+    $hasPersistantGlobals = 1 if $CGI::SpeedyCGI::i_am_speedy;
+
     if (!defined($isGrapher)) {
         $isGrapher = 0;
     }
