@@ -542,6 +542,10 @@ sub sendMonitorTrap {
 	{
 		push(@VarBinds, "${OID_Prefix}.6", 'string', $target->{'inst'});
 	}
+	if (defined($target->{'inst-name'}))
+	{
+		push(@VarBinds, "${OID_Prefix}.7", 'string', $target->{'inst-name'});
+	}
 
 	Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
 	snmpUtils::trap2($to,$spec,@VarBinds);

@@ -55,10 +55,22 @@ sub handleTarget {
     } else {
         @inst = ();
     }
- 
+    
     if ($#inst+1 > 1) {
+        my $instnames;
+        my(@instnames) = ();
+        my $hasInstNames = 0;
+        if (defined($target->{'inst-names'})) {
+           $instnames = $target->{'inst-names'};
+           $instnames = ConfigTree::Cache::expandString($instnames,$target,\&Warn);
+           $instnames = quoteString($instnames);
+           @instnames = Eval($instnames);
+           $hasInstNames = 1;
+        }
+
         my($inst);
         foreach $inst (@inst) {
+            $instnames = shift @instnames if $hasInstNames;
             # copy the current target to a temp target we can play
             # with -- i.e. set the inst to a scalar, then expand
  
@@ -69,6 +81,9 @@ sub handleTarget {
             }
  
             $tmpTarg->{'inst'} = $inst;
+            # use inst-name instead of inst-names here because
+            # I have no idea if inst-names is used later in the code
+            $tmpTarg->{'inst-name'} = $instnames if $hasInstNames;
  
             Debug("Processing target $tname, instance $inst.");
 			&{$instHandler}($name, $tmpTarg, $cb);
