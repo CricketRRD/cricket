@@ -37,6 +37,9 @@ sub commonOptions {
 
 	Common::Log::setLevel($logLevel);
 	$Common::global::gConfigRoot = $base;
+	if (!defined($Common::global::isCollector)) {
+		$Common::global::isCollector = 0;
+	}
 }
 
 1;
