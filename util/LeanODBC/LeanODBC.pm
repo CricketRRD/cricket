@@ -164,7 +164,7 @@ In some cases, [Input] parameters are also omitted. This is because the wrapper 
 The list of functions exposed through the wrapper follows. The parameter names listed match those of the ODBC API documentation and have the same meaning.
 
 =over 4
-  
+
 =item SQLAllocHandle(HandleType, InputHandle)
 
 Returns an array: (SQLRETURN, OutputHandle). The wrapper will automatically set the ODBC environment to SQL_OV_ODBC3 when an environment handle is allocated.
@@ -177,7 +177,7 @@ Returns an array: (SQLRETURN, OutputHandle). The wrapper will automatically set 
 
 =item SQLDriverConnect(ConnectionHandle,InConnectString,StringLength)
 
-SQL_NTS constant may be substituted for StringLength. Returns an array: (SQLRETURN, OutConnectionString, StringLength). Note that the driver completion/ dialog window options are not available.        
+SQL_NTS constant may be substituted for StringLength. Returns an array: (SQLRETURN, OutConnectionString, StringLength). Note that the driver completion/ dialog window options are not available.
 
 =item SQLExecDirect(StatementHandle, StatementText, TextLength)
 
@@ -187,7 +187,7 @@ SQL_NTS constant may be substituted for TextLength.
 
 =item SQLFreeHandle(HandleType, Handle)
 
-=item SQLGetData(StatementHandle, ColumnNumber) 
+=item SQLGetData(StatementHandle, ColumnNumber)
 
 Returns an array: (SQLRETURN, TargetValue, StrLen_or_Ind). The wrapper always fetches data as SQL_C_CHAR, so TargetValue is a string and StrLen_or_Ind is the number of characters. Note that ODBC Drivers are required to support conversion from any data type to SQL_C_CHAR, so data  conversion issues should not be a problem. If the data value is NULL, TargetValue is the null string and StrLen_or_Ind is SQL_NULL_DATA.
 
