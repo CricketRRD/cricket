@@ -82,7 +82,8 @@ initConst();
 initOS();
 $gColorInit = 0;
 
-$gCT = new ConfigTree::Cache;
+$Common::global::gCT = new ConfigTree::Cache;
+$gCT = $Common::global::gCT;
 $gCT->Base($Common::global::gConfigRoot);
 $gCT->Warn(\&Warn);
 
