@@ -455,6 +455,7 @@ sub dispatchAlarm {
         FUNC => \&alarmFunc,
         MAIL => \&alarmMail,
         SNMP => \&alarmSnmp,
+        META => \&alarmMeta,
     );
 
     my $alarm = $dispatch{$alarmType};
@@ -559,6 +560,15 @@ sub alarmSnmp {
     my $Specific_Trap_Type = $action eq 'ADD' ? 4 : 5;
     $self->sendMonitorTrap( $target, $Specific_Trap_Type, $type,
                             $threshold, $name, $ds, $val );
+    return;
+};
+
+sub alarmMeta {
+    my ($args, $action)    = @_;
+
+    # No action is required.
+    # Alarm data is already stored in the Cricket meta files by HandleTarget.pm
+    # The meta data is stored in $CRICKET/cricket-data/ directories.
     return;
 };
 

@@ -138,13 +138,17 @@ sub checkTargetInstance {
     my($Threshold);
     # General monitor threshold format:
     # datasource:monitor type:monitor args:action:action args
-    # Current supported actions: FUNC, EXEC, FILE, MAIL, SNMP
+    # Current supported actions: FUNC, EXEC, FILE, MAIL, SNMP, META
     # Action args are colon (:) delimited.
     # Monitor args are colon (:) delimited, but must not collide with
     # any of the action tags.
     # SNMP is the exception; it has no action args and instead uses
     # the target variable trap-address. This exception is maintained for
     # backwards compatibility.
+    # META only stores an alarm in the *.meta files; It can have any number of
+    # action arguments which can serve to group alarms
+    # for classification or to identify a priority priority level. Arguments
+    # are not interpreted or processed in any way by Monitor.pm.
     foreach $Threshold (@ThresholdStrings) {
         # restore escaped commas
         $Threshold =~ s/\0/,/g ;
@@ -155,7 +159,7 @@ sub checkTargetInstance {
         my($actionType) = 'SNMP' ;
         my(@actionArgs);
         # search for an action tag
-        if ( $args =~ /^(.*)\s*:\s*(FUNC|EXEC|FILE|MAIL)\s*:\s*(.*)$/ ) {
+        if ( $args =~ /^(.*)\s*:\s*(FUNC|EXEC|FILE|MAIL|META)\s*:\s*(.*)$/ ) {
             $args = $1 ;
             $actionType = $2 ;
             # restore escaped colons in the monitor args field
