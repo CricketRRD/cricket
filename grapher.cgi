@@ -299,7 +299,7 @@ sub doHTMLPage {
 			if (defined($targRef->{'targets'})) {
 				my($path) = $targRef->{'auto-target-path'};
 				my($target);
-				foreach $target (split(/\s*;\s*/, lc($targRef->{'targets'}))) {
+				foreach $target (split(/\s*;\s*/, ($targRef->{'targets'}))) {
 
 					# this allows local targets to use shorter names
 					$target = "$path/$target" unless ($target =~ /^\//);
@@ -796,7 +796,7 @@ sub doHTMLSummary {
 		my($path) = $targRef->{'auto-target-path'};
 
 		my($m);
-		foreach $m (split(/\s*;\s*/, lc($targRef->{'mtargets'}))) {
+		foreach $m (split(/\s*;\s*/, ($targRef->{'mtargets'}))) {
 			$m = "$path/$m" unless ($m =~ /^\//);
 			push @mtargets, $m;
 		}
@@ -1228,7 +1228,7 @@ sub doGraph {
 
 	if (defined($targRef->{'mtargets'}))  {
 		$isMTarget = 1;
-		@mtargets = split(/\s*;\s*/, lc($targRef->{'mtargets'}));
+		@mtargets = split(/\s*;\s*/, ($targRef->{'mtargets'}));
 	}  else  {
 		@mtargets = ( $tname );
 	}
