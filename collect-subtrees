@@ -36,6 +36,7 @@ BEGIN {
 use Getopt::Long;
 use strict;
 
+my @mHist;
 my $gMailTo;
 my $gDebug = 1;
 my $gCF = "$Common::global::gInstallRoot/subtree-sets";
@@ -50,10 +51,11 @@ my $gBase = "$ENV{'HOME'}/config";
 my $gKeepLogs = 20;
 my $gUser = getlogin || getpwuid($<);	# idiom from perlfunc manpage
 my $gCurSet;
+my $mOut = 0; $mOut = 1 if(defined($gMailTo));
 my ($gSets, %gSets, @gSets);
 
 # Change this to = 1 if you want to get collection length statistics.
-my $subtreeTimes = 0;
+my $subtreeTimes = 1;
 
 # Change this to your local mailer if you don't have /bin/mailx!
 my $gMailer = '/bin/mailx';
@@ -103,16 +105,26 @@ foreach my $s (@ARGV) {
 	my(@output) = ();
 	my($debugFlag) = "";
 	if (! defined($subtreeRef)) {
-		print STDERR "$0: unknown subtree name: $s\n";
+		if($mOut == 1) {
+			push @mHist, "$0: unknown subtree name: $s\n";
+		} else {
+			print STDERR "$0: unknown subtree name: $s\n";
+		}
 		next;
 	}
 
 	my($lockfile) = "/tmp/$gUser-subtree-$s";
 
 	if (-f $lockfile) {
-		print STDERR "Subtree $s is currently being processed." .
-						" If this is a mistake,\n";
-		print STDERR "use \"rm $lockfile\" to unlock it.\n";
+		if($mOut == 1) {
+			push @mHist, "Subtree $s is currently being processed." .
+							" If this is a mistake,\n";
+			push @mHist, "use \"rm $lockfile\" to unlock it.\n";
+		} else {
+			print STDERR "Subtree $s is currently being processed." .
+							" If this is a mistake,\n";
+			print STDERR "use \"rm $lockfile\" to unlock it.\n";
+		}
 		next;
 	}
 
@@ -141,7 +153,6 @@ foreach my $s (@ARGV) {
 		(open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!") unless (!$subtreeTimes == 1);
 		my $lastWasError;
 		my $skipLine;
-		my $mOut = 0; $mOut = 1 if(defined($gMailTo));
 
 		my (@hist, @mHist) = ();
 
