@@ -287,7 +287,7 @@ sub expandHash {
     my($k);
     foreach $k (keys(%{$hash})) {
         $hash->{$k} = expandString($hash->{$k}, $wrt, $w);
-        $hash->{$k} = evalString($hash->{$k}, $wrt, $w);
+        $hash->{$k} = evalString($hash->{$k}, $w);
     }
 }
 
