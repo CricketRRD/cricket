@@ -39,6 +39,7 @@ use CGI qw(fatalsToBrowser);
 use MD5;
 
 use Common::Log;
+use Common::Util;
 Common::Log::setLevel('warn');
 
 # cache cleaning params
@@ -81,7 +82,11 @@ sub doGraph {
 
 	if (!defined($mtime) || ((time() - $mtime) > $main::gPollingInterval)) {
 		# this request is actually going to need work... pass it on
-		exec("$gInstallRoot/grapher.cgi");
+		if (Common::Util::isWin32()) {
+		   exec("perl $gInstallRoot/grapher.cgi");
+		} else {
+		   exec("$gInstallRoot/grapher.cgi");
+		}
 	} else {
 		Debug("Cached image exists. Using that.");
 		sprayGif($imageName);

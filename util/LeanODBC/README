@@ -1,0 +1,70 @@
+README for LEANODBC
+===================
+
+Version 0.9 03-01-2001
+
+This extension is a thin wrapper to a restricted subset of the ODBC 3.x API. 
+It is not object-oriented and the functions share the same names as their 
+ODBC 3.x counterparts. The restricted subset of the API only includes Core 
+Interface functions for read-only operations.
+
+Compiling
+---------
+
+This Perl extension includes a DLL which must be compiled using same version
+of Perl with which it will run. This means that a version compiled with
+ActiveState 5xx builds (Perl 5.00x) will not run with ActiveState 6xx builds 
+(Perl 5.6).
+
+To compile you must have the Microsoft Visual C++ command line tools
+(compiler, linker, etc) installed and configured (i.e. run VCVARS32.BAT
+included with the Visual C++ distribution) and the libraries odbc32.lib
+and kernel32.lib included with Visual C++ 5.0 or greater.
+
+Edit the file Makefile.PL and change the line:
+    'LIBS'	=> ['-lc:\vc98\lib\odbc32.lib -lc:\vc98\lib\kernel32.lib'],
+to match the paths of these libraries on your system.
+
+Run:
+   perl Makefile.PL
+   nmake 
+
+
+Installing
+----------
+
+Once the extension has compiled successfully, to install run:
+   nmake install
+
+This installs to the local machine. To install remotely, you can make an
+ActiveState Perl Package and then use ppm. Follow the directions at
+http://velocity.activestate.com/docs/ActivePerl/faq/ActivePerl-faq2.html.
+
+Documentation
+-------------
+
+To make HTML documentation, run:
+   pod2html LeanODBC.pm > LeanODBC.html
+
+Testing
+-------
+
+Before running the test, you need to configure an ODBC Data Source to
+point to the Northwind sample database included with Microsoft Office. Use
+the ODBC Control Panel applet (under Administrative Tools on Windows 2000
+by default). Create a data source named 'NORTHWIND' pointing to the Access
+*.mdb file.
+
+To run the test, use:
+   nmake test
+
+If you don't have Microsoft Office installed and you are familiar with
+ODBC and SQL, you can modify the test.pl file to use an ODBC Data Source
+in your environment.
+
+License
+-------
+
+Cricket license terms apply to this package, LeanODBC.
+
+LeanODBC is Copyright (c) 2001 by Jake Brutlag

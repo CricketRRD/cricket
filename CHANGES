@@ -1,5 +1,8 @@
 New features, fixes in version 1.1.x (?):
 
+	Support for Windows Management Instrumentation on the Windows
+	2000 Platform. Refer to doc/win2kwmi.html.
+
 	The SNMP code now has intelligence built in to quickly
 	skip a device that is down or otherwise doesn't respond.
 	After two successive timeouts from the same host in one

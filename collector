@@ -41,6 +41,9 @@ use snmp;
 use exec;
 use file;
 use field;
+if (Common::Util::isWin32()) {
+   eval "use wbemodbc";
+}
 
 # See the documentation on ds-source FUNC for why this defaults
 # to commented out.
@@ -67,7 +70,8 @@ my($recomp, $why) = $gCT->needsRecompile();
 if ($recomp) {
 	Warn("Config tree needs to be recompiled: $why");
 
-	system("$Common::global::gInstallRoot/compile " .
+	system( (Common::Util::isWin32() ? 'perl ' : '') . 
+		    "$Common::global::gInstallRoot/compile " .
 			"-base $Common::global::gConfigRoot");
 
 	$gCT = new ConfigTree::Cache;
@@ -321,6 +325,12 @@ sub retrieveData {
 			my($dsRef) = $main::gCT->configHash($name, 'datasource',
 							lc($ds), $target);
 			if ($dsRef) {
+				# computed data sources need to be excluded fetch
+				if ($dsRef->{'rrd-ds-type'} eq 'COMPUTE')
+				{
+				   $dsCount--; # don't penalize for missing these DS
+				   next;
+				}
 				$dataSource = $dsRef->{'ds-source'};
 				$dataSource = ConfigTree::Cache::expandString($dataSource,
 								$target, \&Warn);
@@ -524,8 +534,20 @@ sub newRRD {
 				if (defined($target->{'rrd-max'}));
 			$max = 'U' unless (defined($max));
 
-			push @dsDesc, join(":", 'DS', "ds$dsCnt",
-				$dst, $hb, $min, $max);
+			my($cdef) = $d -> {'rrd-cdef'};
+            if ($dst eq 'COMPUTE' && !defined($cdef))
+			{
+			   Warn("Datasource $ds is of type $dst but tag " . 
+					"rrd-cdef is missing.");
+			   return;
+			}
+            if ($dst ne 'COMPUTE') {
+			   push @dsDesc, join(":", 'DS', "ds$dsCnt",
+				   $dst, $hb, $min, $max);
+			} else {
+			   push @dsDesc, join(":", 'DS', "ds$dsCnt",
+				   $dst, $cdef);
+			}
 			$dsCnt++;
 
 		} else {

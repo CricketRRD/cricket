@@ -55,7 +55,7 @@ my $mOut = 0; $mOut = 1 if(defined($gMailTo));
 my ($gSets, %gSets, @gSets);
 
 # Change this to = 1 if you want to get collection length statistics.
-my $subtreeTimes = 1;
+my $subtreeTimes = 0;
 
 # Change this to your local mailer if you don't have /bin/mailx!
 my $gMailer = '/bin/mailx';
@@ -115,6 +115,8 @@ foreach my $s (@ARGV) {
 
 	my($lockfile) = "/tmp/$gUser-subtree-$s";
 
+	# file locking relies on touch, which is not available on Win32
+	if (!isWin32()) {
 	if (-f $lockfile) {
 		if($mOut == 1) {
 			push @mHist, "Subtree $s is currently being processed." .
@@ -130,6 +132,7 @@ foreach my $s (@ARGV) {
 
 	# lock it
 	system("touch $lockfile");
+	}
 
 	rollLogs($s);
 	my $logfile = "$gLogDir/$s.0";
@@ -141,10 +144,12 @@ foreach my $s (@ARGV) {
 	$debugFlag = "-loglevel debug" if ($gDebug == 1);
 	my $args = "$debugFlag -base $gBase " . join(" ", @{$subtreeRef});
 
-	system("$Common::global::gInstallRoot/collector $args > $logfile 2>&1");
+	# Win32 does not support #! notation
+	system((isWin32() ? "perl " : "") .
+	   "$Common::global::gInstallRoot/collector $args > $logfile 2>&1");
 
 	# unlock it
-	unlink($lockfile);
+	unlink($lockfile) if (!isWin32());
 
 	# scan the logfile for errors and send them to stderr
 	# so that cron sends them to the admin.

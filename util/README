@@ -2,6 +2,11 @@ This directory has contributed goodies and other useful,
 but not critical programs in it. Each is documented, sparingly,
 below.
 
+leanODBC:
+
+		A Perl extension used by the wbemodbc.pm fetch module to
+		invoke the WBEM ODBC Adapter. Only used on Win32 Platform.
+
 usrModemUsage:
 
 		This tool can be run from Cricket via an EXEC datasource
