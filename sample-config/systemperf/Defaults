@@ -31,6 +31,7 @@ target --default--
 OID    hrSystemNumUsers     1.3.6.1.2.1.25.1.5.0
 OID    hrSystemProcesses    1.3.6.1.2.1.25.1.6
 OID    hrStorageName        1.3.6.1.2.1.25.2.3.1.3
+OID    hrStorageSize        1.3.6.1.2.1.25.2.3.1.5
 OID    hrStorageUsed        1.3.6.1.2.1.25.2.3.1.6
 
 # Load averages.
@@ -75,6 +76,9 @@ datasource hrSystemNumUsers
 
 datasource hrSystemProcesses
     ds-source    = snmp://%snmp%/hrSystemProcesses.%inst%
+
+datasource hrStorageSize
+    ds-source    = snmp://%snmp%/hrStorageSize.%inst%
 
 datasource hrStorageUsed
     ds-source    = snmp://%snmp%/hrStorageUsed.%inst%
@@ -163,7 +167,7 @@ targetType    hr_System
     view  = "Processes: hrSystemProcesses, Users: hrSystemNumUsers"
 
 targetType    hr_Storage
-    ds    = "hrStorageUsed"
+    ds    = "hrStorageUsed, hrStorageSize"
     view  = "Storage: hrStorageUsed"
 
 targetType    hr_StoragePct
@@ -204,20 +208,20 @@ graph    ucd_memswapAvail
     legend    = "Available swap space"
     scale    = 1024,*
     bytes    = true
-    units    = "kBytes"
+    units    = "bytes"
     rrd-graph-args = --logarithmic
 
 graph    ucd_memrealAvail
     legend    = "Used RAM"
     scale    = 1024,*
     bytes    = true
-    units    = "kBytes"
+    units    = "bytes"
 
 graph    ucd_memtotalAvail
     legend    = "Available RAM"
     scale    = 1024,*
     bytes    = true
-    units    = "kBytes"
+    units    = "bytes"
 
 graph    ucd_load1min
     legend    = "1 Min Load Av"
