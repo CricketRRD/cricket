@@ -35,7 +35,7 @@ sub snmpFetch {
     # This procedure is passed a REFERENCE to an array of SNMP datasources.
     #
     # Each element consists of a string like:
-    #		index://community@host:port/oid
+    #       index://community@host:port/oid
     # community and port are optional. If they are left out, they
     # will default to public and 161, respectively.
     #
@@ -43,74 +43,80 @@ sub snmpFetch {
     # otherwise it'll get put back into the wrong spot in the RRD.
 
     my($dsList, $name, $target) = @_;
-	my(%oidsPerSnmp) = ();
+    my(%oidsPerSnmp) = ();
 
-	my($dsspec);
-	my($oidMap) = $main::gCT->configHash($name, 'oid');
+    my($dsspec);
+    my($oidMap) = $main::gCT->configHash($name, 'oid');
     foreach $dsspec (@{ $dsList }) {
-		my($index);
+        my($index);
 
-		($index, $dsspec) = split(/:/, $dsspec, 2);
-		$dsspec =~ s#^//##;
-		
-		# This little hack is for people who like to use slashes in their 
-		# community strings.
-		my($comm, $cinfo) = split(/@/, $dsspec, 2);
-		my($snmp, $oid)   = split(/\//, $cinfo, 2);	
-		$snmp = $comm . "@" . $snmp;
+        ($index, $dsspec) = split(/:/, $dsspec, 2);
+        $dsspec =~ s#^//##;
 
-		$oid = mapOid($oidMap, $oid);
-		if (! defined $oid) {
-			Warn("Could not find an OID in $dsspec");
-			return ();
-		}
-		
-		# Debug("SNMP parser: snmp://$snmp/$oid");
-		
-		# we only try to process them if we didn't find a problem
-		# above (hence the check for undef)
-		push(@{ $oidsPerSnmp{$snmp} }, "$index:$oid")
-			if (defined $oid);
+        # This little hack is for people who like to use slashes in their
+        # community strings.
+        my($comm, $cinfo) = split(/@/, $dsspec, 2);
+        my($snmp, $oid)   = split(/\//, $cinfo, 2);
+        $snmp = $comm . "@" . $snmp;
+
+        $oid = mapOid($oidMap, $oid);
+        if (! defined $oid) {
+            Warn("Could not find an OID in $dsspec");
+            return ();
+        }
+
+        # Debug("SNMP parser: snmp://$snmp/$oid");
+
+        # we only try to process them if we didn't find a problem
+        # above (hence the check for undef)
+        push(@{ $oidsPerSnmp{$snmp} }, "$index:$oid")
+            if (defined $oid);
     }
-	
+
     my(@results) = ();
-	
-    while (my($snmp, $snmpDSRef) = each %oidsPerSnmp) {
-		my(@oidsToQuery) = ();
-		
-		if ($#{ $snmpDSRef } >= 0) {
-			my(@oidsToQuery) = my(@indices) = ();
-			my($line);
-			while ($line = shift @{ $snmpDSRef }) {
-				my($index, $oid) = split(/:/, $line);
-				push(@indices, $index); push(@oidsToQuery, $oid);
-			}
 
-			Debug("Getting from $snmp ", join(" ", @oidsToQuery));
-			my(@hostResults) = snmpUtils::get($snmp, @oidsToQuery);
-			Debug("Got: ", join(" ", @hostResults));
-			
-			# it tells us everything went to hell by returning
-			# scalar -1. Unfortunately, we interpret that as the first
-			# result. So, make it undef so that we fix it later.
-			# hopefully, we don't need to fetch a -1 all the time...
-			
-			if (defined($hostResults[0]) && $hostResults[0] == -1) {
-				$hostResults[0] = undef;
-			}
-			
-			# turn undefs into "U"'s to make RRD happy
-			my($ctr);
-			for $ctr ( 0..$#indices ) {
-				my($res) = $hostResults[$ctr];
-				$res = "U" if (! defined($res));
-				push(@results, "$indices[$ctr]:" . Common::Util::fixNum($res));
-			}
-		}
+    while (my($snmp, $snmpDSRef) = each %oidsPerSnmp) {
+        my(@oidsToQuery) = ();
+
+        if ($#{ $snmpDSRef } >= 0) {
+            my(@oidsToQuery) = my(@indices) = ();
+            my($line);
+            while ($line = shift @{ $snmpDSRef }) {
+                my($index, $oid) = split(/:/, $line);
+                push(@indices, $index); push(@oidsToQuery, $oid);
+            }
+
+            Debug("Getting from $snmp ", join(" ", @oidsToQuery));
+            my(@hostResults) = snmpUtils::get($snmp, @oidsToQuery);
+            Debug("Got: ", join(" ", @hostResults));
+
+            # it tells us everything went to hell by returning
+            # scalar -1. Unfortunately, we interpret that as the first
+            # result. So, make it undef so that we fix it later.
+            # hopefully, we don't need to fetch a -1 all the time...
+
+            if (defined($hostResults[0]) && $hostResults[0] == -1) {
+                $hostResults[0] = undef;
+            }
+
+            # turn undefs into "U"'s to make RRD happy
+            my($ctr);
+            for $ctr ( 0..$#indices ) {
+                my($res) = $hostResults[$ctr];
+                $res = "U" if (! defined($res));
+                push(@results, "$indices[$ctr]:" . Common::Util::fixNum($res));
+            }
+        }
     }
-	
+
     return @results;
 }
 
 1;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

@@ -23,64 +23,70 @@ use Common::Log;
 $main::gDSFetch{'file'} = \&fileFetch;
 
 sub fileFetch {
-	# This procedure is passed a REFERENCE to an array of file datasources.
-	# The line consists of "index:line-num:shell command"
-	#
-	# There can and will be spaces in the shell command. If line-num
-	# is missing it is assumed to be the first output line.
-	#
-	# VERY IMPORTANT: The index MUST be returned with the corresponding value,
-	# otherwise it'll get put back into the wrong spot in the RRD.
+    # This procedure is passed a REFERENCE to an array of file datasources.
+    # The line consists of "index:line-num:shell command"
+    #
+    # There can and will be spaces in the shell command. If line-num
+    # is missing it is assumed to be the first output line.
+    #
+    # VERY IMPORTANT: The index MUST be returned with the corresponding value,
+    # otherwise it'll get put back into the wrong spot in the RRD.
 
-	my($dsList, $name, $target) = @_;
+    my($dsList, $name, $target) = @_;
 
-	my(@results, %files);
+    my(@results, %files);
 
-	my($line);
-	foreach $line (@{$dsList}) {
-		my(@components) = split(/:/, $line, 3);
-		my($index, $lineno, $file);
+    my($line);
+    foreach $line (@{$dsList}) {
+        my(@components) = split(/:/, $line, 3);
+        my($index, $lineno, $file);
 
-		if ($#components+1 == 3) {
-			($index, $lineno, $file) = @components;
-		} elsif ($#components == 1) {
-			($index, $file) = @components;
-			$lineno = 0;
-		} else {
-			Error("Malformed datasource source: $line.");
-			return ();
-		}
-		push(@{ $files{$file} }, "$index:$lineno");
-	}
+        if ($#components+1 == 3) {
+            ($index, $lineno, $file) = @components;
+        } elsif ($#components == 1) {
+            ($index, $file) = @components;
+            $lineno = 0;
+        } else {
+            Error("Malformed datasource source: $line.");
+            return ();
+        }
+        push(@{ $files{$file} }, "$index:$lineno");
+    }
 
-	my($file, $ilRef, $il);
+    my($file, $ilRef, $il);
 
-	while (($file, $ilRef) = each %files) {
-		Info("Reading data from $file for " .
-							 $target->{'auto-target-name'});
+    while (($file, $ilRef) = each %files) {
+        Info("Reading data from $file for " .
+             $target->{'auto-target-name'});
 
-		if (open(F, "<$file")) {
-			my(@lines);
-			chomp(@lines = <F>);
-			close(F);
+        if (open(F, "<$file")) {
+            my(@lines);
+            chomp(@lines = <F>);
+            close(F);
 
-			while ($il = shift @{ $ilRef } ) {
-				my($index, $lineno) = split(/:/, $il, 2);
-				if (defined($lines[$lineno])) {
-					push @results, "$index:$lines[$lineno]";
-				} else {
-					push @results, "$index:U";
-				}
-			}
-		} else {
-			Error("Could not fetch data for " .
-					$target->{'auto-target-name'} .
-					" from file $file: $!.");
-		}
-	}
+            while ($il = shift @{ $ilRef } ) {
+                my($index, $lineno) = split(/:/, $il, 2);
+                if (defined($lines[$lineno])) {
+                    push @results, "$index:$lines[$lineno]";
+                } else {
+                    push @results, "$index:U";
+                }
+            }
+        } else {
+            Error("Could not fetch data for " .
+                  $target->{'auto-target-name'} .
+                  " from file $file: $!.");
+        }
+    }
 
-	return @results;
+    return @results;
 }
 
 1;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

@@ -23,21 +23,27 @@ use Common::Log;
 # Uncomment the following line if you want to enable 'FUNC' alarm triggers.
 # $main::gMonFuncEnabled = 1 ;
 
-$main::gDSFetch{'func'} = \&funcFetch; 
+$main::gDSFetch{'func'} = \&funcFetch;
 
-sub funcFetch { 
-    my($dsList, $name, $target) = @_; 
-    my(@results); 
-    my($line); 
-    foreach $line (@{$dsList}) { 
-        if ( $line =~ /(\d*):(.*)/) { 
-            my ($res);  
-            $res = eval $2; 
-            push @results, "$1:$res"; 
-        } 
-    } 
-    return @results; 
-} 
- 
-1; 
+sub funcFetch {
+    my($dsList, $name, $target) = @_;
+    my(@results);
+    my($line);
+    foreach $line (@{$dsList}) {
+        if ( $line =~ /(\d*):(.*)/) {
+            my ($res);
+            $res = eval $2;
+            push @results, "$1:$res";
+        }
+    }
+    return @results;
+}
 
+1;
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

@@ -20,23 +20,23 @@
 
 #    This is still very early in development. It's designed to collect Perfmon
 #    counters from Windows NT systems. Perfmon is similiar in many respects to
-#    the way Cricket does things. It keeps a config file resident in memory 
+#    the way Cricket does things. It keeps a config file resident in memory
 #    with all sorts of definitions from counter scaling, to what type of
 #    counter it is. While it makes things convenient, it also requires a whole
 #    bunch of disassembly of it's scheme to effectively put it into Cricket.
 #
 #    The math seems to be very wrong for some counters, which seems odd as all
 #    the formulas were ripped straight from Microsoft's documentation on the
-#    perflib SDK at: 
+#    perflib SDK at:
 #    http://msdn.microsoft.com/library/en-us/perfmon/hh/pdh/perfdata_6di9.asp
 #
 #    I'm continually developing this as we need a good solution in-house for
 #    flexible historical trending of perfmon counters.
 #
-#    I realize how god-awful slow this is, and it's really Perfmon's fault. 
+#    I realize how god-awful slow this is, and it's really Perfmon's fault.
 #    Most counters are durational and require some sort of wait-time to get
 #    two instances loaded to to comparisons/time based calculations. Also,
-#    every time Perfmon is initiated on a system, you're required to get a 
+#    every time Perfmon is initiated on a system, you're required to get a
 #    list of every counter on the system which is very time consuming. Blame
 #    my employer, not me! I'm considering making this application threaded to
 #    boost performance.
@@ -50,11 +50,11 @@
 #         right now and I'm not sure why. I'm using the formulas Microsoft
 #         defined on their web site (100*x/b) and it returns screwy results.
 #       * On the same vein, this breaks the instance checker which Warn()s if
-#         there are more than one matches for a selected counter. 
+#         there are more than one matches for a selected counter.
 #       * That's all I can think of right now. After spending over a week
 #         working on this I think for the most part it works pretty well!
 #
-#    If you find any glaring bugs, omissions, or errors please feel free to 
+#    If you find any glaring bugs, omissions, or errors please feel free to
 #    email me so I can fix it.
 #
 #    Thanks - Adam Meltzer <ameltzer@microsoft.com>
@@ -82,206 +82,212 @@ use strict;
 $main::gDSFetch{'perfmon'} = \&perfmonFetch;
 
 sub perfmonFetch {
-	my($dsList, $name, $target) = @_;
-	my %pmonFetches;
-	my $counter = {};
-	my $rcounter = {};
-	my(@results);
+    my($dsList, $name, $target) = @_;
+    my %pmonFetches;
+    my $counter = {};
+    my $rcounter = {};
+    my(@results);
 
-	foreach my $line (@{$dsList}) {
-		my @components = split(/:/, $line);
-		my ($index, $server, $myobject, $mycounter, $myinstance,$myduration,$myoptions);
-		
-		if($#components+1 < 3) {
-			Error("Malformed datasource line: $line.");
-			return();
-		}
+    foreach my $line (@{$dsList}) {
+        my @components = split(/:/, $line);
+        my ($index, $server, $myobject, $mycounter, $myinstance,$myduration,$myoptions);
 
-		$index      = shift(@components);
-		$server     = shift(@components) || missing("host",$line);
-		$myobject   = shift(@components) || 'System';
-		$mycounter  = shift(@components) || 'System Up Time';
-		$myinstance = shift(@components) || '';
-		$myoptions  = shift(@components) || '';
-		
-		$pmonFetches{$index} = "$server:$myobject:$mycounter:$myinstance:$myoptions";
-	}
+        if($#components+1 < 3) {
+            Error("Malformed datasource line: $line.");
+            return();
+        }
 
-	DSLOOP: while(my ($index, $ilRef) = each %pmonFetches) {
-		my $pr1 = {};
-		my $critical;
-		my ($matches,$noscale) = int(0);
-		my $value;
-		my $fractop;
-		my ($perfTimeOnly,$perfFreqOnly);
+        $index      = shift(@components);
+        $server     = shift(@components) || missing("host",$line);
+        $myobject   = shift(@components) || 'System';
+        $mycounter  = shift(@components) || 'System Up Time';
+        $myinstance = shift(@components) || '';
+        $myoptions  = shift(@components) || '';
 
-		my($server, $myobject, $mycounter, $myinstance, $myoptions) = split(/:/, $ilRef);
+        $pmonFetches{$index} = "$server:$myobject:$mycounter:$myinstance:$myoptions";
+    }
 
-		$myobject =~ s/=/:/g;
-	
-		my @options = split(/,/, $myoptions);
+    DSLOOP: while(my ($index, $ilRef) = each %pmonFetches) {
+        my $pr1 = {};
+        my $critical;
+        my ($matches,$noscale) = int(0);
+        my $value;
+        my $fractop;
+        my ($perfTimeOnly,$perfFreqOnly);
 
-		foreach my $op (@options) {
-			if($op =~ /^noscale$/i) {
-				$noscale = 1;
-			}
+        my($server, $myobject, $mycounter, $myinstance, $myoptions) = split(/:/, $ilRef);
 
-			if($op =~ /^perftime$/i) {
-				$perfTimeOnly = 'normal';
-			}
+        $myobject =~ s/=/:/g;
 
-			if($op =~ /^perftime100ns$/i) {
-				$perfTimeOnly = '100ns';
-			}
-			if($op =~ /^perffreq$/i) {
-				$perfFreqOnly = 1;
-			}
-			if($op =~ /^base$/i) {
-				$fractop = 'base';
-			}
-			if($op =~ /^fraction$/i) {
-				$fractop = 'fraction';
-			}
-		}
-				
-		if(!($counter->{$server})) { 
+        my @options = split(/,/, $myoptions);
 
-			my $tempref = {};
-			Win32::PerfLib::GetCounterNames($server, $tempref) or $critical = $!;
-			$counter->{$server} = $tempref;
-		}
+        foreach my $op (@options) {
+            if($op =~ /^noscale$/i) {
+                $noscale = 1;
+            }
 
-		if( (!$counter->{$server}) || $counter->{$server} == 0) {
-			Error("No counters were retrieved from $server! Not wasting any more time on this ds: $ilRef");
-			push @results, "$index:U";
-			next DSLOOP;
-		}
+            if($op =~ /^perftime$/i) {
+                $perfTimeOnly = 'normal';
+            }
 
-		# Get a list of mappings from CounterName -> id
- 		if(! $rcounter->{$server}) {
-			foreach my $k (sort keys %{$counter->{$server}}) {
-				$rcounter->{$server}->{lc($counter->{$server}->{$k})} = $k;
-			}
-		}
+            if($op =~ /^perftime100ns$/i) {
+                $perfTimeOnly = '100ns';
+            }
+            if($op =~ /^perffreq$/i) {
+                $perfFreqOnly = 1;
+            }
+            if($op =~ /^base$/i) {
+                $fractop = 'base';
+            }
+            if($op =~ /^fraction$/i) {
+                $fractop = 'fraction';
+            }
+        }
 
-		$myobject = lc($myobject);
+        if(!($counter->{$server})) {
 
-		my $perflib = new Win32::PerfLib($server);
-		$perflib->GetObjectList($rcounter->{$server}->{$myobject}, $pr1);
-		$perflib->Close();
+            my $tempref = {};
+            Win32::PerfLib::GetCounterNames($server, $tempref) or $critical = $!;
+            $counter->{$server} = $tempref;
+        }
 
-		if($perfTimeOnly) {
-			if($perfTimeOnly eq 'normal') {
-				Debug("perfTimeOnly is $perfTimeOnly $pr1->{'PerfTime'}");	
-				my $value = Common::Util::fixNum($pr1->{'PerfTime'});
+        if( (!$counter->{$server}) || $counter->{$server} == 0) {
+            Error("No counters were retrieved from $server! Not wasting any more time on this ds: $ilRef");
+            push @results, "$index:U";
+            next DSLOOP;
+        }
 
-				push @results, "$index:$value";
-				next DSLOOP;
-			} elsif ($perfTimeOnly eq '100ns') {
-				Debug("perfTimeOnly is $perfTimeOnly $pr1->{'PerfTime100nSec'}");	
-				my $value = Common::Util::fixNum($pr1->{'PerfTime100nSec'});
-				push @results, "$index:$value";
-				next DSLOOP;
-			}
-		}
+        # Get a list of mappings from CounterName -> id
+        if (! $rcounter->{$server}) {
+            foreach my $k (sort keys %{$counter->{$server}}) {
+                $rcounter->{$server}->{lc($counter->{$server}->{$k})} = $k;
+            }
+        }
 
-		if($perfFreqOnly) {
-			Debug("perfFreqOnly is $perfFreqOnly $pr1->{'PerfFreq'}");	
-			my $value = sprintf("%0.20g", $pr1->{'PerfFreq'});
-			push @results, "$index:$value";
-			next DSLOOP;
-		}	
+        $myobject = lc($myobject);
 
-		foreach my $level2 (sort keys %{$pr1->{'Objects'}}) {
-			my $gDenn = $pr1->{'PerfTime100nSec'};
-			my $gDen  = $pr1->{'PerfTime'};
-			my $gTb   = $pr1->{'PerfFreq'};
-			my $oldvalue;
+        my $perflib = new Win32::PerfLib($server);
+        $perflib->GetObjectList($rcounter->{$server}->{$myobject}, $pr1);
+        $perflib->Close();
 
-			if($pr1->{'Objects'}->{$level2}->{'NumInstances'} > 0) {
-				foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Instances'}}) {
-					my $oldvalue;
-					my $ir1 = $pr1->{'Objects'}->{$level2}->{'Instances'}->{$level4};
-					foreach my $level5 (sort keys %{$ir1->{'Counters'}}) {
-						my $cr1 = $ir1->{'Counters'}->{$level5};
-						my $saneCounterName = $counter->{$server}->{$cr1->{'CounterNameTitleIndex'}};
-						my $saneInstanceName = $ir1->{'Name'};
-						if(lc($saneCounterName) eq lc($mycounter)) {
-							if(lc($saneInstanceName) eq lc($myinstance) || !defined $myinstance) {
-								$value = getCounter($cr1,$index,$ilRef,$noscale,$fractop);
-								if($value ne "skip") {
-									$oldvalue = $value;
-									$matches++;
-								} else {
-									$value = $oldvalue;
-								}
-							}
-						}
-					}
-				}
-			}
-			foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Counters'}}) {
-				my $cr1 = $pr1->{'Objects'}->{$level2}->{'Counters'}->{$level4};
-				my $saneCounterName = $counter->{$server}->{$cr1->{'CounterNameTitleIndex'}};
-				
-				if(lc($saneCounterName) eq lc($mycounter)) {
-					$value = getCounter($cr1,$index,$ilRef,$noscale,$fractop);
-					if($value ne "skip") {
-						$oldvalue = $value;
-						$matches++;
-					} else {
-						$value = $oldvalue;
-					}
-				}
-			}
-		}
+        if($perfTimeOnly) {
+            if($perfTimeOnly eq 'normal') {
+                Debug("perfTimeOnly is $perfTimeOnly $pr1->{'PerfTime'}");
+                my $value = Common::Util::fixNum($pr1->{'PerfTime'});
 
-		if($matches > 1) {
-			Warn("More than one matches for datasource line: $ilRef. Only last instance will be used!");
-		}
-	
-		if($matches < 1) {
-			Error("No matches for datasource line: $ilRef");
-			push @results, "$index:U";
-		} else {
-			push @results, "$index:$value";
-		}
-	} 
-	return @results;
-} 
-	
+                push @results, "$index:$value";
+                next DSLOOP;
+            } elsif ($perfTimeOnly eq '100ns') {
+                Debug("perfTimeOnly is $perfTimeOnly $pr1->{'PerfTime100nSec'}");
+                my $value = Common::Util::fixNum($pr1->{'PerfTime100nSec'});
+                push @results, "$index:$value";
+                next DSLOOP;
+            }
+        }
+
+        if($perfFreqOnly) {
+            Debug("perfFreqOnly is $perfFreqOnly $pr1->{'PerfFreq'}");
+            my $value = sprintf("%0.20g", $pr1->{'PerfFreq'});
+            push @results, "$index:$value";
+            next DSLOOP;
+        }
+
+        foreach my $level2 (sort keys %{$pr1->{'Objects'}}) {
+            my $gDenn = $pr1->{'PerfTime100nSec'};
+            my $gDen  = $pr1->{'PerfTime'};
+            my $gTb   = $pr1->{'PerfFreq'};
+            my $oldvalue;
+
+            if($pr1->{'Objects'}->{$level2}->{'NumInstances'} > 0) {
+                foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Instances'}}) {
+                    my $oldvalue;
+                    my $ir1 = $pr1->{'Objects'}->{$level2}->{'Instances'}->{$level4};
+                    foreach my $level5 (sort keys %{$ir1->{'Counters'}}) {
+                        my $cr1 = $ir1->{'Counters'}->{$level5};
+                        my $saneCounterName = $counter->{$server}->{$cr1->{'CounterNameTitleIndex'}};
+                        my $saneInstanceName = $ir1->{'Name'};
+                        if(lc($saneCounterName) eq lc($mycounter)) {
+                            if(lc($saneInstanceName) eq lc($myinstance) || !defined $myinstance) {
+                                $value = getCounter($cr1,$index,$ilRef,$noscale,$fractop);
+                                if($value ne "skip") {
+                                    $oldvalue = $value;
+                                    $matches++;
+                                } else {
+                                    $value = $oldvalue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            foreach my $level4 (sort keys %{$pr1->{'Objects'}->{$level2}->{'Counters'}}) {
+                my $cr1 = $pr1->{'Objects'}->{$level2}->{'Counters'}->{$level4};
+                my $saneCounterName = $counter->{$server}->{$cr1->{'CounterNameTitleIndex'}};
+
+                if(lc($saneCounterName) eq lc($mycounter)) {
+                    $value = getCounter($cr1,$index,$ilRef,$noscale,$fractop);
+                    if($value ne "skip") {
+                        $oldvalue = $value;
+                        $matches++;
+                    } else {
+                        $value = $oldvalue;
+                    }
+                }
+            }
+        }
+
+        if($matches > 1) {
+            Warn("More than one matches for datasource line: $ilRef. Only last instance will be used!");
+        }
+
+        if($matches < 1) {
+            Error("No matches for datasource line: $ilRef");
+            push @results, "$index:U";
+        } else {
+            push @results, "$index:$value";
+        }
+    }
+    return @results;
+}
+
 sub getCounter {
-	my ($cr1,$index,$ilRef,$noscale,$fractop) = @_;
-	my ($crap,$junk,$cn) = split(/:/, $ilRef);
-	my $scaler = $cr1->{'DefaultScale'};
-	my $ctype = Win32::PerfLib::GetCounterType($cr1->{'CounterType'});
+    my ($cr1,$index,$ilRef,$noscale,$fractop) = @_;
+    my ($crap,$junk,$cn) = split(/:/, $ilRef);
+    my $scaler = $cr1->{'DefaultScale'};
+    my $ctype = Win32::PerfLib::GetCounterType($cr1->{'CounterType'});
 
-	if(defined($fractop)) {
-		return "skip" if($fractop eq "base" && $ctype =~ /FRACTION/);
-		return "skip" if($fractop eq "fraction" && $ctype =~ /BASE/);
-	}
+    if(defined($fractop)) {
+        return "skip" if($fractop eq "base" && $ctype =~ /FRACTION/);
+        return "skip" if($fractop eq "fraction" && $ctype =~ /BASE/);
+    }
 
-	Debug("ds$index COUNTER_TYPE is $ctype");
+    Debug("ds$index COUNTER_TYPE is $ctype");
 
-	if(defined $fractop) {
-		Debug("FractOp is set to: $fractop");
+    if(defined $fractop) {
+        Debug("FractOp is set to: $fractop");
+    }
+    my $value = $cr1->{'Counter'};
 
-	}
-	my $value = $cr1->{'Counter'};
+    if(defined($noscale) && $noscale < 1) {
+        $value = $value * (10**$scaler);
+    }
 
-	if(defined($noscale) && $noscale < 1) {
-		$value = $value * (10**$scaler);
-	}
+    $value = Common::Util::fixNum($value);
 
-	$value = Common::Util::fixNum($value);
-
-	return $value;
+    return $value;
 }
 
 sub missing {
-	my ($missing,$line) = @_;
-	Error("Missing perfmon $missing in datasource: $line");
-	return();
+    my ($missing,$line) = @_;
+    Error("Missing perfmon $missing in datasource: $line");
+    return();
 }
 
 1;
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

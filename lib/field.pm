@@ -19,97 +19,102 @@
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #
-# 	Ripped off lock, stock, and barrel from JRA's file.pm.
-#	- ejt  08/08/1999
+#   Ripped off lock, stock, and barrel from JRA's file.pm.
+#   - ejt  08/08/1999
 
 use Common::Log;
 
 $main::gDSFetch{'field'} = \&fieldFetch;
 
 sub fieldFetch {
-	# This procedure is passed a REFERENCE to an array of file datasources.
-	# Each line consists of "index:filename:key:valuef:keyf:delim"
-	#
-	# There can be spaces in the key, but there probably won't be.
-	# "valuef" defaults to "2" if not specified
-	# "keyf" defaults to "1" if not specified
-	# "delim" defaults to ":" if not specified
-	#
-	# VERY IMPORTANT: The index MUST be returned with the corresponding value,
-	# otherwise it'll get put back into the wrong spot in the RRD.
+    # This procedure is passed a REFERENCE to an array of file datasources.
+    # Each line consists of "index:filename:key:valuef:keyf:delim"
+    #
+    # There can be spaces in the key, but there probably won't be.
+    # "valuef" defaults to "2" if not specified
+    # "keyf" defaults to "1" if not specified
+    # "delim" defaults to ":" if not specified
+    #
+    # VERY IMPORTANT: The index MUST be returned with the corresponding value,
+    # otherwise it'll get put back into the wrong spot in the RRD.
 
-	my($dsList, $name, $target) = @_;
+    my($dsList, $name, $target) = @_;
 
-	my(@results, %files);
+    my(@results, %files);
 
-	my($line);
-	foreach $line (@{$dsList}) {
-		my(@components) = split(/:/, $line, 6);
-		my ($index, $file, $key, $valuef, $keyf, $delim);
+    my($line);
+    foreach $line (@{$dsList}) {
+        my(@components) = split(/:/, $line, 6);
+        my ($index, $file, $key, $valuef, $keyf, $delim);
 
-		if ($#components+1 < 3) {
-			Error("Malformed datasource source: $line.");
-			return ();
-		}
-			
-		$index	= shift(@components);
-		$file	= shift(@components);
-		$key	= shift(@components);
-		$valuef	= shift(@components) || 2;
-		$keyf	= shift(@components) || 1;
-		$delim	= shift(@components) || ":";
+        if ($#components+1 < 3) {
+            Error("Malformed datasource source: $line.");
+            return ();
+        }
 
-		push(@{ $files{$file} }, "$index:$file:$key:$valuef:$keyf:$delim");
-	}
+        $index  = shift(@components);
+        $file   = shift(@components);
+        $key    = shift(@components);
+        $valuef = shift(@components) || 2;
+        $keyf   = shift(@components) || 1;
+        $delim  = shift(@components) || ":";
 
-	my($file, $ilRef, $il);
+        push(@{ $files{$file} }, "$index:$file:$key:$valuef:$keyf:$delim");
+    }
 
-	while (($file, $ilRef) = each %files) {
-		Info("Reading data from $file for " .  $target->{'auto-target-name'});
+    my($file, $ilRef, $il);
 
-		if (open(F, "<$file")) {
-			my(@lines);
-			chomp(@lines = <F>);
-			close(F);
+    while (($file, $ilRef) = each %files) {
+        Info("Reading data from $file for " .  $target->{'auto-target-name'});
 
-			while ($il = shift @{ $ilRef } ) {
-				my($index, $file, $key, 
-					$valuef, $keyf, $delim) = split(/:/, $il, 6);
-				my $matches	= 0;
-				my $match	= 0;
+        if (open(F, "<$file")) {
+            my(@lines);
+            chomp(@lines = <F>);
+            close(F);
 
-				foreach my $line (@lines) {
-					my @bits = split($delim, $line);
+            while ($il = shift @{ $ilRef } ) {
+                my($index, $file, $key,
+                   $valuef, $keyf, $delim) = split(/:/, $il, 6);
+                my $matches = 0;
+                my $match   = 0;
 
-					# just skip lines with too few fields
-					next if (($#bits < $keyf - 1) || 
-								($#bits < $valuef - 1));
+                foreach my $line (@lines) {
+                    my @bits = split($delim, $line);
 
-					if ($bits[$keyf - 1] eq $key) {
-						$matches++;
-						$match = $bits[$valuef - 1];
-					}
-				}
+                    # just skip lines with too few fields
+                    next if (($#bits < $keyf - 1) || ($#bits < $valuef - 1));
 
-				if ($matches > 1) {
-					push @results, "$index:U";
-					Error("Key $key matched $matches times for " .
-							$target->{'auto-target-name'} .
-							" from file $file.");
-				} elsif ($matches == 0) {
-					push @results, "$index:U";
-				} else {
-					push @results, "$index:$match";
-				}
-			}
-		} else {
-			Error("Could not fetch data for " . $target->{'auto-target-name'} .
-					" from file $file: $!.");
-		}
-	}
+                    if ($bits[$keyf - 1] eq $key) {
+                        $matches++;
+                        $match = $bits[$valuef - 1];
+                    }
+                }
 
-	return @results;
+                if ($matches > 1) {
+                    push @results, "$index:U";
+                    Error("Key $key matched $matches times for " .
+                          $target->{'auto-target-name'} .
+                          " from file $file.");
+                } elsif ($matches == 0) {
+                    push @results, "$index:U";
+                } else {
+                    push @results, "$index:$match";
+                }
+            }
+        } else {
+            Error("Could not fetch data for " . $target->{'auto-target-name'} .
+                  " from file $file: $!.");
+        }
+    }
+
+    return @results;
 }
 
 1;
 
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:

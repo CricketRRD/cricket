@@ -520,7 +520,7 @@ sub sendMonitorTrap {
     }
 
     my($OID_Prefix) = '.1.3.6.1.4.1.2595.1.3'; # OID for Cricket Violations
-    
+
     my(@VarBinds);
     push(@VarBinds, "${OID_Prefix}.1", 'string', $type);
     push(@VarBinds, "${OID_Prefix}.2", 'string', $threshold);
