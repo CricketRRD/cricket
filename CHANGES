@@ -1,5 +1,15 @@
 New features, fixes in version 1.0.6 (TBD)
 
+  Removed call to fixNum() in snmp.pm routine snmpFetch. This addresses
+  Bug #974877.
+
+  Added $gCopyConfig flag (see cricket-conf.sample.pl) for Win32 compile
+  and collection run conflicts. Credit goes to Adam Meltzer. 
+
+  Cricket's grapher.cgi will now output real Last-Modified and Expires HTTP
+  header fields instead of futzing around with random numbers in the URL.
+  [Patch #480694]
+
   Added two new HOWTOs, cricket-nt.html and polling-rate.html, which
   explain how to get Cricket running on Windows NT and how to change the
   polling rate, respectively. See the doc/HOWTO/ direectory.

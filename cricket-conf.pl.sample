@@ -70,3 +70,26 @@ $gEnableSearch=0;
 # Set to 1, and it will treat unvailable values (or NaNs) as alarms.
 # Set to 0 or undefined it will not treat NaNs as alarms. 
 $gEnableNoValueAlarms = 0;
+
+#
+# Controls whether statistics are collected for the time it takes collector to
+# process each subtree.
+#$gSubtreeTimes = 0;
+
+#
+# Specifies the executable to use for sending email from collector runs.
+# You would normally not need to set this as it only applies to any error
+# messages generated, and in a typical setup where the collector is run from
+# crond, the cron daemon will take care of emailing any output to the user.
+#$gMailer = '/bin/mailx';
+
+#
+# On the Win32 platform, files cannot be replaced when they pinned (in use)
+# by a running process. This mean that multiple collection runs can make it
+# difficult to recompile config.db. The optimal solution is to stop the
+# collection runs and then recompile, but this flag is another approach.
+# Set it to 1, and every collection will create a copy of config.db with
+# the unique name config.db.$PID~ where $PID is the process id. Warning:
+# enabling this option will create multiple copies of config.db that are
+# not cleaned up automatically.
+$gCopyConfig = 0;

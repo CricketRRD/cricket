@@ -91,6 +91,9 @@ BEGIN {
     if (!defined($gMailer)) {
         $gMailer = '/bin/mailx';
     }
+    if (!defined($gCopyConfig)) {
+        $gCopyConfig = 0;
+    }
 }
 
 1;
