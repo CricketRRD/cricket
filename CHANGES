@@ -1,3 +1,15 @@
+New features, fixes in version 1.0.4
+
+	Added an alternate SNMP interface, using net-snmp. See
+	lib/alternate/snmpUtils.pm. Not recommended in its current
+	incarnation for users of SNMP traps and threshold monitoring.
+
+	Fix mtargets bugs w.r.t. MiXeD CaSe names (hopefully for good)
+	[bug #521367]
+
+	Fix graph scaling with explicit "bytes=false", which was
+	misinterpreted by the graphing code.
+
 New features, fixes in version 1.0.3
 
 	The many disk accesses to the config database that collector
