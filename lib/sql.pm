@@ -28,63 +28,62 @@ $main::gDSFetch{'sql'} = \&sqlFetch;
 my %sqlFetches;
 
 sub sqlFetch {
-	my($dsList, $name, $target) = @_;
-	my(@results);
+    my($dsList, $name, $target) = @_;
+    my(@results);
 
-	foreach my $line (@{$dsList}) {
-		my @components = split(/:/, $line, 6);
-		my ($index, $login, $password, $query, $col, $dbdriver);
-		
-		if($#components+1 < 6) {
-			Error("Malformed datasource line: $line.");
-			return();
-		}
+    foreach my $line (@{$dsList}) {
+        my @components = split(/:/, $line, 6);
+        my ($index, $login, $password, $query, $col, $dbdriver);
 
-		$index      = shift(@components);
-		$login      = shift(@components) || 'anonymous';
-		$password   = shift(@components) || '';
-		$query      = shift(@components) || missing("sql query", $line);
-		$col        = shift(@components) || 1;
-		$dbdriver   = shift(@components) || missing("db driver", $line);
-		
-		$sqlFetches{$index} = "$login:$password:$query:$col:$dbdriver";
-	}
+        if($#components+1 < 6) {
+            Error("Malformed datasource line: $line.");
+            return();
+        }
 
-	DSLOOP: while(my ($index, $ilRef) = each %sqlFetches) {
-		my($login, $password, $query, $col, $dbdriver) = split(/:/, $ilRef, 5);
-		my $matches;
-		my $value;
+        $index      = shift(@components);
+        $login      = shift(@components) || 'anonymous';
+        $password   = shift(@components) || '';
+        $query      = shift(@components) || missing("sql query", $line);
+        $col        = shift(@components) || 1;
+        $dbdriver   = shift(@components) || missing("db driver", $line);
 
-		my $dbh = DBI->connect($dbdriver, $login, $password) || Error();
-		my $sth = $dbh->prepare($query);
+        $sqlFetches{$index} = "$login:$password:$query:$col:$dbdriver";
+    }
 
-		if($sth->errstr) {
-			Error "Bad query: $sth->errstr";
-		}
+    DSLOOP: while(my ($index, $ilRef) = each %sqlFetches) {
+        my($login, $password, $query, $col, $dbdriver) = split(/:/, $ilRef, 5);
+        my $matches;
+        my $value;
 
-		$sth->execute;
+        my $dbh = DBI->connect($dbdriver, $login, $password) || Error();
+        my $sth = $dbh->prepare($query);
 
-		if($sth->errstr) {
-			Error "Bad result: $sth->errstr";
-		}
+        if($sth->errstr) {
+            Error "Bad query: $sth->errstr";
+        }
 
-		my @row = $sth->fetchrow_array();
-		$value = $row[$col-1];
-		$matches++;
-		
-		if($sth->fetchrow_array()) {
-			$matches++;
-		}
+        $sth->execute;
 
-			
-		if($matches < 1) {
-			push @results, "$index:U";
-		} else {
-			push @results, "$index:$value";
-		}
-	} 
+        if($sth->errstr) {
+            Error "Bad result: $sth->errstr";
+        }
 
-	return @results;
-} 
+        my @row = $sth->fetchrow_array();
+        $value = $row[$col-1];
+        $matches++;
+
+        if($sth->fetchrow_array()) {
+            $matches++;
+        }
+
+        if($matches < 1) {
+            push @results, "$index:U";
+        } else {
+            push @results, "$index:$value";
+        }
+    }
+
+    return @results;
+}
 
 1;
