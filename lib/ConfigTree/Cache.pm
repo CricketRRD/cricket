@@ -292,8 +292,13 @@ sub expandHash {
 
     my($k);
     foreach $k (keys(%{$hash})) {
-        $hash->{$k} = expandString($hash->{$k}, $wrt, $w);
-        $hash->{$k} = evalString($hash->{$k}, $w);
+        my $hp = \$hash->{$k};
+        if (index($$hp, "%") >= 0) {
+            $$hp = expandString($$hp, $wrt, $w);
+        }
+        if (index($$hp, "{") >= 0) {
+            $$hp = evalString($$hp, $w);
+        }
     }
 }
 
