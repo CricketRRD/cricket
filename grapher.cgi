@@ -1563,7 +1563,7 @@ sub doGraph {
             }
 
             # push NaN bars on first in background
-            $paintNaN && push @cdefs, "CDEF:unavail$ct:ds$ct,UN,INF,0,IF";
+            $paintNaN && push @cdefs, "CDEF:unavail$ct=ds$ct,UN,INF,0,IF";
             $paintNaN && push @lines, "AREA:unavail$ct#FFCCCC";
 
             my($dsidx) = $dsnamemap{$ds};
