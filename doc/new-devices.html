@@ -1,0 +1,176 @@
+<html>
+	<head>
+		<title>Setting up New Devices in Cricket</title>
+	</head>
+
+<body bgcolor=white>
+
+<h1>Setting up New Devices in Cricket</h1>
+
+Cricket is designed to be flexible enough to be able to monitor
+more than just router interfaces. The sample config tree that comes
+with it will help you learn about its capabilities, but to monitor
+other things, you'll need to write your own branches of the config
+tree.
+
+<p>
+Read this document to learn how to get the most from Cricket, by
+teaching it to gather data from all kinds of sources.
+
+<h2>Creating Custom Target Types</h2>
+
+<p>Cricket gives you complete control over the contents and layout of
+your RRD files. This means that if you are going to be doing any
+serious target-type hacking, you need to understand the following
+concepts: </p>
+	
+<ul>
+<li>
+
+Round Robin Array (RRA)
+
+<p>
+This is where data is stored in an RRD. There is one RRA for each
+scale of data, for example 5 minute samples, 30 minute samples, and 2
+hour samples. The same data is in each RRA, except it is sampled at a
+different rate. If an RRA can hold 12 samples and it is updated every
+5 minutes, then it holds data spanning back one hour. The 13th sample
+will overwrite the 1st sample.  Detailed information about RRD is
+available from
+<a href="http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool/manual/index.html">the
+RRD Tool documentation</a> and from the
+<a href="http://ee-staff.ethz.ch/~oetiker/webtools/rrdtool/tutorial">RRD
+Tool tutorials</a>.
+
+<p>
+<li>
+Data Source
+
+<p>
+A data source is one line on a graph, or
+one column of data if you think of the RRD as a tabular
+listing of data. One RRD can have many datasources in
+it. All up them must be updated with new data at once. Not
+all of them need to be graphed at once (see the information
+about datasource "views" below).
+		
+<p>
+<li>
+Target
+		
+<p>
+A device that we are keeping stats on is a target. There
+one RRD file on disk for every target. You can think of
+each target as a leaf on the config tree.
+
+<p>
+<li>
+Target Type
+
+<p>
+The type of the target determines what kinds of data
+sources and RRA's makes up the target. When Cricket goes to
+update a target, it uses the target type to figure out what
+data to fetch about the target, and how to fetch it.
+
+<p>
+<li>
+Data Source Source (ds-source)
+
+<p>
+This is the rather unfortunate name for the attribute of a data source
+that tells Cricket precisely where to fetch the data from, and which
+data to fetch. Encoded in the ds-source is the retrieval method and a
+description of the data we want.
+
+</ul>
+
+Now, with all those terms under your belt, you'll understand this
+statement: Using the datasource, RRA, and targetType
+dictionaries, you can completely control the kind, source, and
+quantity of data you store. The RRA's in the sample-config reproduce
+<a href="http://www.mrtg.org/">MRTG
+2.x's</a> data format precisely, and that configuration has proven to
+work well for most needs. If you are going to be using Cricket for the
+jobs it comes ready to do, you'll simply need to copy the
+sample-config tree and make minor changes to the targets it specifies.
+<p>
+
+If you need to customize Cricket to talk to other things, then you'll be
+following the following general steps:
+
+<ol>
+<li>
+Create entries in the datasource dictionary that tell
+Cricket how to fetch your new measurement. If you are using
+SNMP, you'll probably want to add an entry to the OID
+dictionary in the same subtree, to make your datasource entry
+readable. For instance, say we wanted to use Cricket to talk via
+SNMP to an agent running on a Unix machine, and fetch the load
+average. We would add the OID for the load average to the OID
+table, then add a new entry (named "load-average") to the
+datasource dictionary that described this new datasource.
+<p>
+
+<li>
+Create a targetType entry to tell Cricket what
+datasources make up your new target-type. Assuming the RRA
+definitions from the <tt>--default--</tt> entry are right, you only
+need to add set the "ds" tag for this entry. For the load average
+example, we'd put "ds=load-average" into a targetType entry
+named "unix-machine".
+<p>
+
+<li>
+Create a new target who's target-type tag is set to
+the targetType you created in the last step. If you are using
+SNMP to talk to the host, you need to make certain the
+variable snmp-host is set (since it contributes to the snmp
+variable, which in turn is required in SNMP ds-sources). You
+could set the snmp-host tag explicitly for every tag, but that
+would be a pain. Instead, you could choose your target names
+to be hostnames, then use the auto-target-name to set
+snmp-host correctly all the time, by adding a line like
+snmp-host = %auto-target-name% to the --default-- entry for
+that sub-tree. If you have a rare case in your system where
+the target name is not the name you want to send SNMP packets
+to, then you could override the default snmp-host by setting
+snmp-host directly for that one target.
+<p>
+
+<li>
+Run the collector on your new subtree, using the
+"-loglevel debug" option. This will tell you exactly what
+Cricket thinks things are set to when it tries to fetch your
+data, as well as what exactly happened when it went to fetch
+the data.
+</ol>
+
+<p> If you come up with an interesting configuration, please share it
+with the Cricket community by subitting it to the
+<a href="http://www.gnac.com/techinfo/cricket_contrib/index.html">Cricket
+contrib site</a> hosted by the nice folks at
+<a href="http://www.gnac.com">GNAC</a>.
+
+<p> If you need to add a new kind of data gathering subroutine, you'll
+want to read the code to <tt>snmp.pm</tt> very carefully and make a
+module like it to collect your data. It's not too hard, but it might
+not be worth the effort -- consider using a simple Perl script to let
+you fetch the data via the <tt>exec</tt> method. See the
+<tt>http-performance</tt> sub-tree for an example of how to do this.
+</p>
+
+
+<p>
+<hr>
+
+<p>
+<a href="http://cricket.sourceforge.net">Cricket</a>
+version !!VERSION!!, released !!RELDATE!!.
+
+<p>
+Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+the <a href="gpl.html">GNU General Public License</a>.
+
+</body>
+</html>

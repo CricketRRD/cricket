@@ -1,0 +1,251 @@
+<html>
+  <head>
+    <title>A Gentle Introduction to Cricket</title>
+  </head>
+<body>
+
+<h1>A Gentle Introduction to Cricket</h1>
+
+<p>
+Cricket was designed to solve several weaknesses WebTV found in MRTG
+when we tried to use it with thousands of targets, and for many
+different purposes. We found that the more we customized the MRTG
+config file, the larger and more unwieldy it got. We found that we
+were making mistakes due to the complexity, and then we wrote scripts
+to write the configs for us, and using these scripts, we made mistakes
+in a faster, more automated manner. Something needed to be done.
+
+<p>
+Cricket uses a hierarchical configuration system, thus a complete set of
+Cricket config files is called a &quot;config tree&quot;. Configuration
+information that will be used again and again can be stored high in
+the tree, and inherited by all the leaves. More specific information
+can be stored closer to where it is used, but still in one place
+(instead of each place it is used). All the way down to the leaves of
+the tree, information from higher up can be overridden. Files are
+grouped into directories and processed in a predictable order within
+those directories. As a directory is processed, the state of the
+system is saved and restored. In this way, changes made to the
+defaults in a sub-tree do not affect a sibling sub-tree.
+
+<h2> Understanding the config tree </h2>
+
+<p>
+Understanding the config tree is critical to understanding how to use
+and modify Cricket. Everything Cricket knows it learns from the config
+tree. That includes things like which variables to fetch for a certain
+type of device, how to fetch those variables, which devices to talk
+to, and what type of device they all are. The inheritance property of
+the config tree applies equally to all types of data, making it
+possible to make a concise description of a large, complicated set of
+monitored devices.
+
+<h3> A guided tour </h3>
+
+<p>
+In this section, we will take a guided tour of the sample config tree
+that ships with Cricket. It would be a very good idea to read this section
+with a window open that you can use to explore the sample config tree.
+
+<p>
+The first thing to notice about the config tree is that every
+directory has a file in it called "Defaults". This file is not strictly
+speaking necessary, but you will find it in nearly every level
+of every config tree. It's purpose is to hold settings that will
+apply to the entire subtree that it sits on top of. Thus, when
+you look at the file named <tt>sample-config/Defaults</tt>, it's
+important to realize that unless those values get overridden
+later, they will be used throughout the entire config tree.
+
+<p>
+When Cricket goes to process a directory, it processes the Defaults
+file first (if it exists), then it processes each ordinary file,
+and finally it processes each of the directories.
+When processing a directory, it saves the current configuration
+before entering it, and restores the configuration after leaving
+the directory. Note that Cricket does not save and restore the
+configuration when processing files; one file could make a change to
+the defaults that another file in the same directory can see.
+For the time being, consider this a feature. It can be useful, as
+long as you are expecting it to behave that way.
+
+<p>
+Scroll through the root Defaults file and take a look at
+the sections. You'll see that each chunk of the file
+begins with a certain word (like "target", or "oid"). After
+that word, they differ somewhat, but generally what a
+chunk does is define some tag/value pairs, and assign them
+to some key name. For instance, the tag <tt>rrd-datafile</tt> gets
+set to "%dataDir%/%auto-target-name%.rrd".
+
+<p>
+That's great, you say, but what are the percent signs
+about? This brings us to expansion.
+Before a dictionary is used, it is expanded. This means
+that variables which are referenced with the "%tag%"
+syntax are replaced with their actual values. If the value
+also has a variable in it, it is also expanded. (There is no
+check for loops so don't accidentally make one!)
+This is a very powerful feature which makes complicated
+configurations boil down to a few simple config lines.
+
+<p>
+For instance, the example I chose above sets the tag
+<tt>rrd-datafile</tt> to a proper filename made
+up of the data directory, the target name, and the
+extension ".rrd". But you'll notice that <tt>dataDir</tt>
+is itself defined in terms of some other tags. As long
+as all the tags eventually map to some text, the expansion
+process turns this mess into a complete pathname. If
+a tag is not defined, but it is referenced via an expansion,
+then Cricket will log a warning, but it will attempt to
+continue to use the partially expanded string.
+
+<p>
+The tags that Cricket uses to get it's configuration are
+listed below in the reference section, one at a time with a
+description. All other tags that appear in the dictionaries in
+a config tree are either in use by expansions, or ignored. For
+instance, nowhere in the reference section will you find <tt>dataDir</tt>
+mentioned. That is simply a tag that exists to make the definition
+<tt>rrd-datafile</tt> easier to read. You can add as many of your own tags
+as you want; it's all up to how you want to setup your config tree.
+
+<p>
+After Cricket expands a string, it scans the string for substrings
+surrounded by curly braces (<tt>{like this}</tt>). These substrings
+are passed to Perl's <tt>eval()</tt> function, which means you
+can do arbitrary math and other nifty trickery between curly braces.
+Some day I'll add more examples for how you might use this, but
+for now all I'm telling you is that it's there. You have to figure out
+how to use it.
+
+<h3>Target types, and datasources</h3>
+
+<p>
+Now, let us take a digression for a second to talk about
+target types, and datasources. A datasource is something you want to
+graph. For instance, "router inlet temperature", or "inbound octets
+per second". Datasources that all relate to the same type of device
+are grouped together into a target type. A target is a distinct device
+from which you will be collecting data. Every target has a target
+type, which is how Cricket knows what data to fetch, and how to fetch
+it. This is all described in much more detail below, but for now, you
+already know enough to get going.  This is because Cricket's sample
+config tree comes with lots of predefined target types that will let
+you look at common things on your network.
+
+<p>
+To see this stuff in action, go into the
+<tt>sample-config/routers</tt> directory and take a look at the
+Defaults file. What this file is doing is setting things up so that if
+you create a target of type "Cisco-7200-Router", Cricket will know
+what data to fetch. As you can see by the different target types
+defined in this file, not all routers are created equal.  Some can
+return temperature, some can't.
+
+<h3> Tacking a Target </h3>
+
+<p>
+Now, let's check out a target definition. Note that we've set a number
+of tags in the root Defaults file and in the subtree Defaults file
+related to the target named <tt>--default--</tt>. This special target
+is never used to fetch data. Instead, it is used as kind of a skeleton
+for all future targets that are created in the subtree below that
+point. Take a look inside the file named <tt>Targets</tt>. This file
+defines some real targets. The sample config tree comes with two,
+<tt>engineering-router</tt> and <tt>main-router</tt>.  These two
+dictionaries are added onto the bottom of the config tree, and are
+sometimes referred to as leaves. A leaf is where some work happens.
+
+<p>
+When Cricket comes to process the <tt>engineering-router</tt> leaf
+node, the first step is to build a working copy of the
+dictionary. Clearly the information in the leaf node is not enough to
+collect any data from the router. For one thing, we don't know what
+the hostname of the router is, so we don't know where to send the SNMP
+packets. This is where the <tt>--default--</tt>
+dictionaries come in. To make the complete working dictionary for this
+part of the config tree, Cricket traverses all the nodes from the root
+down to the current node, gathering together the <tt>--default--</tt>
+dictionaries. Items lower in the config tree override items higer
+up.
+
+<p>
+Cricket uses the <tt>target-type</tt> tag to decide what method to use
+to fetch the data. If does this by finding a <tt>targetType</tt>
+dictionary that matches the <tt>target-type</tt> tag for the current
+target. This targetType dictionary has a tag named <tt>ds</tt>, which
+is a list of the datasources we expect to fetch from this router.
+Each datasource is fetched in the same way, and there Cricket
+discovers that it will be talking SNMP to this router, in order to
+fetch 6 variables.
+
+<p>
+Next, Cricket turns over control to the SNMP fetcher. The fetcher is
+trying to turn an SNMP URL into a measurement. The SNMP URL for the
+data on the engineering-router is
+<tt>snmp://public@engineering-router:161/cpu1min</tt>. But you've
+probably already noticed that the only thing the fetcher seems to have
+to go on is the <tt>ds-source</tt> tag, which has a <tt>%snmp%</tt>
+where we exptected to find the community string, hostname and port.
+
+<p>
+How does Cricket manufacture the whole SNMP URL for this target?
+
+<h3>Explaining expansion</h3>
+
+<p>
+Immediately after Cricket makes the working dictionary for a target it
+is working on, it fully expands the target with respect to
+itself. Likewise, when Cricket fetches a dictionary like the
+<tt>cpu1min</tt> datasource dictionary, it is also expanded with
+respect to the target dictionary. By the time the SNMP
+fetcher is looking for the contents of the <tt>ds-source</tt> tag, it
+has already been expanded to the correct value.
+
+<p>
+Let's unwind the expansions that contributed to changing <tt>%snmp%</tt>
+into <tt>public@engineering-router:161</tt>.
+
+<blockquote><pre>  From sample-config/Defaults
+    snmp-community      = public
+    snmp-port           = 161
+    snmp                = %snmp-community%@%snmp-host%:%snmp-port%
+
+  From sample-config/routers/Defaults
+    router              = %auto-target-name%
+    snmp-host           = %router%
+</pre></blockquote>
+
+<p>
+You can see that one level about the leaf, the <tt>snmp-host</tt> tag
+gets set (via the <tt>router</tt> tag) to the name of the current
+target. Tags starting with <tt>auto-</tt> are provided to you by
+Cricket. There are a number of these automatic tags which are
+discussed below. The rest of the <tt>snmp</tt> tag is filled in by
+defaults inherited from all the way up at the top of the config tree.
+
+<p>
+This is a good example of the power of the config tree. If you were
+asked to monitor a new piece of network hardware which had a slightly
+different community string, you could put a <tt>snmp-community</tt>
+tag in the target's dictionary and override the one normally inherited
+from above. Alternatively, if you need to change the community string
+on 1000 devices simultaenously, you could do so by simply changing it
+at the root, then allowing the change to filter down to each of the
+1000 targets in your config tree.
+
+<p>
+<hr>
+
+<p>
+<a href="http://cricket.sourceforge.net">Cricket</a>
+version !!VERSION!!, released !!RELDATE!!.
+
+<p>
+Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+the <a href="gpl.html">GNU General Public License</a>.
+
+</body>
+</html>

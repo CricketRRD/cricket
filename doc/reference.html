@@ -1,275 +1,48 @@
 <html>
-	<head>
-		<title>The Cricket Reference Guide</title>
-	</head>
-<body bgcolor=white>
+  <head>
+    <title>The Cricket Reference Guide</title>
+  </head>
+<body>
 
 <h1>The Cricket Reference Guide</h1>
 
-<i>Version 0.72</i>
-
-<blockquote>
-<strong>
-Cricket: a configuration, polling and data display wrapper for RRD
-files
 <p>
-Copyright (C) 1998 Jeff R. Allen and WebTV Networks, Inc.
+This section is the definitive reference for each and every tag that
+Cricket knows about. Use this section as a reference when you need to
+know the exact format for something, or the exact behavior of a
+certain tag.
+
+<h2>File Format</h2>
+
 <p>
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of
-the License, or (at your option) any later version.
-<p>
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-<p>
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-</strong>
-</blockquote>
-
-<h2>Introduction</h2>
-
-Cricket was designed to solve several weaknesses WebTV
-found in MRTG when we tried to use it with thousands of targets, and
-for many different purposes (8 different applications, and
-counting). We found that the more we customized the MRTG config file,
-the larger and more unwieldy it got. We found that we were making
-mistakes due to the complexity, and then we wrote scripts to write the
-configs for us, and using these scripts,
-we made mistakes in a faster, more automated
-manner. Something needed to be done.<p>
-
-Cricket uses a hierarchical configuration system, thus a complete set of
-Cricket config files is called a &quot;config tree&quot;. Configuration
-information that will be used again and again can be stored high in
-the tree, and inherited by all the leaves. More specific information
-can be stored closer to where it is used, but still in one place
-(instead of each place it is used). All the way down to the leaves of
-the tree, information from higher up can be overridden. Files are
-grouped into directories and processed in a predictable order within
-those directories. As a directory is processed, the state of the
-system is saved and restored. In this way, changes made to the
-defaults in a sub-tree do not affect a sibling sub-tree.<p>
-
-<h2> Understanding the config tree </h2>
-
-Understanding the config tree is critical to understanding
-how to use and modify Cricket. Everything Cricket knows
-it learns from the config tree. That includes things like which variables
-to fetch for a certain type of device, how to fetch those variables,
-which devices to talk to, and what type of device they all are.
-The inheritance property of the config tree applies equally
-to all types of data, making it possible to make a concise
-description of a large, complicated set of monitored devices.
-<p>
-
-In this section, we will take a guided tour of the sample config tree
-that ships with Cricket. It would be a very good idea to read this section
-with a window open that you can use to explore the sample config tree.
-<p>
-
-The first thing to notice about the config tree is that every
-directory has a file in it called "Defaults". This file is not strictly
-speaking necessary, but you will find it in nearly every level
-of every config tree. It's purpose is to hold settings that will
-apply to the entire subtree that it sits on top of. Thus, when
-you look at the file named <tt>sample-config/Defaults</tt>, it's
-important to realize that unless those values get overridden
-later, they will be used throughout the entire config tree.
-When Cricket goes to process a directory, it processes the Defaults
-file first (if it exists), then processes each of the directories,
-and finally processes the files in alphabetical order.
-When processing a directory, it saves the current configuration
-before entering it, and restores the configuration after leaving
-the directory. Note that Cricket does not save and restore the
-configuration when processing files; one file could make a change to
-the defaults that another file in the same directory can see.
-For the time being, consider this a feature. It can be useful, as
-long as you are expecting it to behave that way.
-<p>
-
-Scroll through the root Defaults file and take a look at
-the sections. You'll see that each chunk of the file
-begins with a certain word (like "target", or "oid"). After
-that word, they differ somewhat, but generally what a
-chunk does is define some tag/value pairs, and assign them
-to some key name. For instance, the tag <tt>rrd-datafile</tt> gets
-set to "%dataDir%/%auto-target-name%.rrd".
-<p>
-
-That's great, you say, but what are the percent signs
-about? This brings us to expansion.
-Before a dictionary is used, it is expanded. This means
-that variables which are referenced with the "%tag%"
-syntax are replaced with their actual values. If the value
-also has a variable in it, it is also expanded. (There is no
-check for loops so don't accidentally make one!)
-This is a very powerful feature which makes complicated
-configurations boil down to a few simple config lines.
-<p>
-
-For instance, the example I chose above sets the tag
-<tt>rrd-datafile</tt> to a proper filename made
-up of the data directory, the target name, and the
-extension ".rrd". But you'll notice that <tt>dataDir</tt>
-is itself defined in terms of some other tags. As long
-as all the tags eventually map to some text, the expansion
-process turns this mess into a complete pathname. If
-a tag is not defined, but it referenced via an expansion,
-then Cricket will log a warning, but it will attempt to
-continue to use the partially expanded string. This behavior
-is characteristic of Perl programs and my programs in particular:
-they will attempt to muddle along, and will only really give up
-when they cannot do their job. This philosophy may let you
-sleep through the night if something breaks, but Cricket
-can still limp through it. Of course, if you are expecting Cricket
-to be one of those fascist programs that coredumps unless everything
-is perfect, you'll be surprised by this behavior.
-<p>
-
-The tags that Cricket uses to get it's configuration are
-listed below in the reference section, one at a time with a
-description. All other tags that appear in the dictionaries in
-a config tree are either in use by expansions, or ignored. For
-instance, nowhere in the reference section will you find <tt>dataDir</tt>
-mentioned. That is simply a tag that exists to make the definition
-<tt>rrd-datafile</tt> easier to read. You can add as many of your own tags
-as you want; it's all up to how you want to setup your config tree.
-<p>
-
-After Cricket expands a string, it scans the string for substrings
-surrounded by curly braces (<tt>{like this}</tt>). These substrings
-are passed to Perl's <tt>eval()</tt> function, which means you
-can do arbitrary math and other nifty trickery between curly braces.
-Some day I'll add more examples for how you might use this, but
-for now all I'm telling you is that it's there. You have to figure out
-how to use it.
-<p>
-
-Now, let us take a digression for a second to talk about targets,
-target types, and datasources. A datasource is something you want
-to graph. For instance, "router inlet temperature", or "inbound octets
-per second". Datasources that all relate to the same type of device
-are grouped together into a target type. A target is a distinct
-device from which you will be collecting data. Every target has a
-target type, which is how Cricket knows what data to fetch, and how to
-fetch it. This is all described in much
-more detail below, but for now, you already know enough to get going.
-This is because Cricket's sample config tree comes with lots of predefined
-target types that will let you look at common things on your network.
-<p>
-
-To see this stuff in action, go into the <tt>sample-config/routers</tt>
-directory and take a look at the Defaults file. What this file is doing
-is setting things up so that if you create a target of type "Cisco-7200-Router",
-Cricket will know what data to fetch. As you can see by the different
-target types defined in this file, not all routers are created equal.
-Some can return temperature, some can't.
-<p>
-
-Now, let's check out a target definition. Note that we've set a number
-of tags in the root Defaults file and in the subtree Defaults file related
-to the target named <tt>--default--</tt>. This special target is never
-used to fetch data. Instead, it is used as kind of a skeleton for all
-future targets that are created in the subtree. 
-<p>
-
-<i> The following is some stuff I intend to integrate soon... </i>
-<p>
-
-<blockquote>
-		<dl>
-
-		<dt>Dictionaries</dt>
-	
-		<dd> Cricket configuration information is stored in one of
-		several dictionaries. For instance, everything related to a
-		target is stored in the target dictionary. Within most
-		dictionaries, the data is gathered according to some key. Each
-		key has a set of tag/value pairs. Cricket expects to find
-		certain tags to be able to do it's work. All other tags are
-		yours to play with -- you can use them to make your config
-		tree more readable, or to make it more powerful. See expansion
-		for more information on what you can do with tags.
-		</dd>
-
-		<dt>Defaults</dt>
-
-		<dd>Each time Cricket goes to process a directory, it will
-		process the Defaults file first. Each time Cricket goes to make
-		a new dictionary key, it will populate it from the
-		<tt>--default--</tt> key first. Using these two facts, you can
-		simplify configuration by setting repeated things in the
-		<tt>--default--</tt> dictionary in the Defaults file. From that place
-		in the tree on down, those variables will be available to you
-		for your use. Thus, by setting <tt>target-type</tt> once in the
-		<tt>--default--</tt> entry, the <tt>target-type tag</tt>
-		will be set for all the targets in that directory and all the
-		other targets below that point.
-
-		<dt>Auto Variables</dd>
-
-		<dd>These variables are provided to you by Cricket to make it
-		easier for you to write simple, portable configuration
-		trees. For example, it's possible to explicitly set the
-		location of all of your RRD files, but it's easier to rely on
-		the auto-target-path variable to set them all correctly for
-		you. All automatic variables start with 'auto-'.
-
-		<dt>View</dt>
-
-		<dd>A view lets you look at a slice of data collected from a
-		target. This solves the problem of what to do when you collect
-		both temperature measurements, which range from 0 to 100, and
-		available memory measurements which could be as high as
-		several megabytes. Using views, we can isolate the temperature
-		data on a graph of it's own, so that the temperature
-		measurement is not a tiny flat line at the bottom of the
-		memory-dominated graph.
-	</dl>
-</blockquote>
-
-<h2> Reference Section </h2>
-
-The stuff in this section is the meat of the configuration
-information. If I have done a good job of designing Cricket to be easy
-to pick up and if I wrote a good summary above, you should be able to
-start adjusting the config files to fit your needs already. Use this
-section as a reference when you need to know the exact format for
-something, or the exact behavior of a certain tag.
-
-<h3>File Format</h3>
-
-<p>Cricket config files are simple text files arranged into a
-tree-shaped set of files called a <i>Config Tree</i>. They are
-processed by a Perl module called ConfigTree.pm. This setup would make
-it possible to use one config tree for Cricket and other clients of
-ConfigTree.pm. At this time, there are no other programs that use the
-config tree design, but there may be in the future. It was set up this
-way because the config tree will grow to contain an accurate picture
-of your network; it makes sense to try to leverage that information to
-other network administration tools. The overriding philosophy here is
+Cricket config files are simple text files arranged into a tree-shaped
+set of files called a <i>Config Tree</i>. They are processed by a Perl
+module called ConfigTree.pm. This setup would make it possible to use
+one config tree for Cricket and other clients of ConfigTree.pm. At
+this time, there are no other programs that use the config tree
+design, but there may be in the future. It was set up this way because
+the config tree will grow to contain an accurate picture of your
+network; it makes sense to try to leverage that information to other
+network administration tools. The overriding philosophy here is
 duplicated information is bad: it is hard to maintain, and it invites
-silly mistakes.</p>
+silly mistakes.
 
-<p>The Cricket config tree is 100% incompatible with MRTG configuration
+<p>
+The Cricket config tree is 100% incompatible with MRTG configuration
 files. There are not even any plans to write a converter, though one
 could probably be written. When you choose to use Cricket, it's a very
 good idea to approach your config from a fresh perspective, to take
-maximum advantage of Cricket's features.</p>
+maximum advantage of Cricket's features.
 
-<p>The comment character for Cricket is &quot;#&quot;. If a
-&quot;#&quot; is found at the beginning of the line (or is preceded
-only by whitespace) then the &quot;#&quot; and everything after it
-will be deleted. Completely blank lines are discarded from the input
-too.</p>
+<p>
+The comment character for Cricket is &quot;#&quot;. If a &quot;#&quot;
+is found at the beginning of the line (or is preceded only by
+whitespace) then the &quot;#&quot; and everything after it will be
+deleted. Completely blank lines are discarded from the input too.
 
-<p>The fundamental unit of a config file is a chunk. A chunk is made
-up of one line which begins in column one, and one or more lines which
+<p>
+The fundamental unit of a config file is a chunk. A chunk is made up
+of one line which begins in column one, and one or more lines which
 have whitespace before them. In this way, you can continue a long line
 to another line by simply inserting a newline and some
 whitespace. When it is glued back together internally, the newline and
@@ -279,111 +52,142 @@ beginning. This word (called the &quot;token&quot; by the code) tells
 ConfigTree.pm what kind of chunk it is dealing with, and what kind of
 parser to use.  If it is an unknown token, ConfigTree.pm can be told
 to ignore it. By default, unknown chunks cause a warning, but not a
-fatal error. Clients of ConfigTree.pm can control this;
-Cricket chooses to ignore unknown chunks.</p>
+fatal error. Clients of ConfigTree.pm can control this; Cricket
+chooses to ignore unknown chunks.
 
-<p>As mentioned above, ConfigTree.pm comes with several kinds of
-parsers (and others can be added dynamically later). The next section
-describes the kinds of chunks that Cricket uses. That section will refer
-to this list of parser types. On first reading, you should skip this
-list and learn about the chunks first. Or, scan the following sections
-to learn about the syntax of each parser type. </p>
+<h3>Text Parser</h3>
 
-<h4>Text Parser</h4>
-
-<p>This parser is used in cases where free-text is useful, for
+<p>
+This parser is used in cases where free-text is useful, for
 instance in the HTML dictionary. The first two tokens are parsed out,
 and they serve as the chunk type, and the key. Everything after these
-first two tokens is considered the value.</p>
+first two tokens is considered the value.
 
-<h4>Simple Parser</h4>
+<h3>Simple Parser</h3>
 
-<p>This parser is used for simple mappings, like the OID mapping. An
-example of a valid OID line is:</p>
+<p>
+This parser is used for simple mappings, like the OID mapping. An
+example of a valid OID line is:
 
-<center>
-<table valign="center" border="1" cellpadding="3">
-  <tr>
-    <td width="100%"><tt>oid	ifInOctets	1.3.6.1.2.1.2.2.1.10
-    </td>
-  </tr>
-</table>
-</center>
+<p>
+<blockquote><pre>oid	ifInOctets	1.3.6.1.2.1.2.2.1.10</pre></blockquote>
 
 <p>The format is a token, another token (called the key;
 <tt>ifInOctets</tt> in this case), and finally the value. The value
 can have whitespace in it, but only if it is surrounded by double
-quotes (&quot;). If you want to embed a quote in a value, put a
-backslash in front of it.</p>
+quotes (&quot;). Embedded quotes are not yet supported.
 
-<h4>Tag/Value Parser</h4>
+<h3>Tag/Value Parser</h3>
 
-<p>This is the most useful, and most commonly used parser. Here's an
-example of a Tag/Value chunk:</p>
+<p>
+This is the most useful, and most commonly used parser. Here's an
+example of a Tag/Value chunk:
 
-<center>
-<table valign="center" border="1" cellpadding="3">
-		<tr>
-		<td width="100%">
-<pre>
-graph   ifInOctets
+<blockquote><pre>graph   ifInOctets
     color       =   dark-green
     draw-as     =   AREA
     legend      =   "Average bits in"
     y-axis      =   "bits per second"
-    scale       =   8,*
-</pre>
-</td>
-</tr>
-</table>
-</center>
+    scale       =   8,*</pre></blockquote>
 
-<p>Like the others, it parses out two tokens, the chunk type and the
+<p>
+Like the others, it parses out two tokens, the chunk type and the
 key. After this, it parses a series of tag/value pairs separated by
 whitespace and the equals sign (&quot;=&quot;). The values must be
 surrounded by quotes to embed whitespace, like the Simple
-Parser. Depending on the kind of data, you may or may not be allowed
-to repeat tags.</p>
+Parser. If you repeat a tag, only the second occurrence will be used.
 
-<h4>General</h4>
+<h3>Miscellaneous</h3>
 
-<p>All tokens and keys are case-insensitive. The tags in a tag/value
+<p>
+All tokens and keys are case-insensitive. The tags in a tag/value
 chunk are also case insensitive. The values will have their case
 preserved when they are used by the system.
 
-<p> For some tags, you can put Perl expressions into the value.
-(<tt>inst-names</tt> is one such tag) However, double quotes
-are often useful in Perl expressions. That's problematic, since
-at present there is no way to put quotes into values. 
-Backslashing the quotes does not work, so don't try it and
-pull your hair out and blame me for your baldness. Instead,
-you should use single quotes. Thus it might look something
-like this:
+<p>
+Tag names can have numbers, letters, the period symbol, the dash, and
+the underscore. Avoid using other punctuation, since those symbols are
+used by Cricket internally.
 
+<p>
+OID tags are more limited, to conform with the SNMP spec. A tag in an
+OID dictionary can be made up of numbers and letters. Dashes are not
+alowed.
+
+<p>
+Target names should consist of letters, numbers, dashes and
+underscores. Do not put slashes in them, since they end up being used
+as parts of filenames.
+
+<p>Inside of double quotes, on the right side of an equals sign, anything goes, with the exception of the double quote itself. There is currently no way to include the double quote in a string.
+
+<p>
+Avoid choosing names that begin and end with two dashes (like
+<tt>--default--</tt>). Criecket uses some names like this internally,
+and future additions will make use of these names.
+
+<p>
+The following table shows which tokens are parsed with which parsers:
+
+<p>
 <center>
-<table valign=center border=1 cellpadding=3>
-<tr><td width=100%>
-<pre>
-inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet', 
-                 'Port 3 FDDI', 'Port 6 FDDI', 
-                 'Port 7 Ethernet' , 'Port 9 Ethernet', 
-                 '', '')" 
-</pre>
-</td></tr>
+<table width=50% border>
+  <tr>
+    <th>Token<th>Parser
+  <tr>
+    <td>target<td>Tag/Value
+  <tr>
+    <td>datasource<td>Tag/Value
+  <tr>
+    <td>targetType<td>Tag/Value
+  <tr>
+    <td>graph<td>Tag/Value
+  <tr>
+    <td>color<td>Simple
+  <tr>
+    <td>oid<td>Simple
+  <tr>
+    <td>html<td>Text
+  <tr>
+    <td>event<td>Tag/Value
+  <tr>
+    <td>rra<td>Simple
 </table>
 </center>
 
-<h3> Dictionary Reference </h3>
+<p> For some tags, you can put Perl expressions into the value.
+(<tt>inst-names</tt> is one such tag) However, double quotes are often
+useful in Perl expressions. That's problematic, since at present there
+is no way to put quotes into values.  Instead, you should use single
+quotes. Thus it might look something like this:
 
-<!-- XXX -->
-<i>
-In this section, I will explain what every tag does for every
-dictionary. I'll try to work on that during vacation. (Now, don't
-you feel sorry for me and want to donate patches?)
-</i>
+<blockquote><pre>inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet', 
+                 'Port 3 FDDI', 'Port 6 FDDI', 
+                 'Port 7 Ethernet' , 'Port 9 Ethernet')"</pre></blockquote>
 
-<a name="targetdict">
-<h4> The Target Dictionary </h4>
+<h2> Dictionary Reference </h2>
+
+<p>
+In this section are detailed lists of every tag you will find
+in every dictionary.
+
+<p>
+Jump directly to:
+
+<ul>
+  <li><a href="#target">target</a>
+  <li><a href="#datasource">datasource</a>
+  <li><a href="#targettype">targetType</a>
+  <li><a href="#graph">graph</a>
+  <li><a href="#color">color</a>
+  <li><a href="#oid">oid</a>
+  <li><a href="#html">html</a>
+  <li><a href="#event">event</a>
+  <li><a href="#rra">rra</a>
+</ul>
+
+<a name="target">
+<h3> The Target Dictionary </h3>
 </a>
 
 For each target known to Cricket, there is a target dictionary. The
@@ -473,18 +277,20 @@ to the graph in the form of a vertical rule.
 This is the SNMP instance number. Cricket only really needs this value
 to be set correctly if <tt>%inst%</tt> shows up in the ds-source tag
 of the datasources you are collecting. If <tt>inst</tt>
-is set, Cricket will attempt to evaluate it as a Perl expression.<p>
+is set, Cricket will attempt to evaluate it as a Perl expression.
 
+<p>
 <font color=red>Note</font>: there's no protection against
 side-effects from this expression, so to avoid a security problem from
 an inst like <tt>unlink('/etc/motd');</tt> you should make certain
-your config tree is only writable by you.  <p>
+your config tree is only writable by you.
 
+<p>
 The result of evaluating the instance is examined to see whether it is
 a mapped instance, a scalar, or a vector. If it starts with "map(", it
 is a mapped instance.  The instance mapping algorithm is used to
 derive an instance number from the rest of the data in the target (see
-<a href="#instmap">Instance Mapping</a> below for more information on
+<a href="inst-mapping.html">Instance Mapping</a> for more information on
 this), then the target is processed as though the instance number had
 been a scalar all along.<p>
 
@@ -877,7 +683,9 @@ interface via the HTML dictionary.  <p>
 
 </dl>
 
-<h4> The Datasource Dictionary </h4>
+<a name="datasource">
+<h3> The Datasource Dictionary </h3>
+</a>
 
 This dictionary tells Cricket everything it needs to know about
 individual datasources. A datasource is a single variable about a
@@ -1139,7 +947,9 @@ dictionary.
 
 </dl>
 
-<h4> The TargetType Dictionary </h4>
+<a name="targettype">
+<h3> The TargetType Dictionary </h3>
+</a>
 
 The TargetType dictionary tells Cricket which datasources
 to gather together for a certain kind of target. Unlike
@@ -1168,7 +978,9 @@ several views by separating them by commas.
 <p>
 </dl>
 
-<h4>The Graph Dictionary</h4>
+<a name="graph">
+<h3>The Graph Dictionary</h3>
+</a>
 
 The graph dictionary controls how individual variables are displayed
 when it comes time to graph them. The graph dictionary is structured
@@ -1350,7 +1162,7 @@ datasources on the graph.
 Use the <tt>color</tt> tag to explicitly control the color of the datasource
 as it appears both on the graph, and in the HTML summary. If this is left
 unset, then Cricket will automatically choose colors according to the
-<tt>--order--</tt> key in the <a href="#colordict">color dictionary</a>. 
+<tt>--order--</tt> key in the <a href="#color">color dictionary</a>. 
 If you choose to set it, either set it to one of the color names in the color
 dictionary, or set it to an HTML-style color specification without the
 pound sign. For instance, to make a datasource's line red, set color to
@@ -1509,8 +1321,8 @@ See <tt>y-max</tt> above.
 
 </dl>
 
-<a name="colordict">
-<h4>The Color Dictionary</h4>
+<a name="color">
+<h3>The Color Dictionary</h3>
 </a>
 
 The color dictionary is used to configure Cricket's auto-color
@@ -1529,8 +1341,8 @@ For an example of a correctly configured color dictionary, see the
 Defaults file in the root of the sample config tree.
 <p>
 
-<a name="oiddict">
-<h4>The OID Dictionary</h4>
+<a name="oid">
+<h3>The OID Dictionary</h3>
 </a>
 
 The OID dictionary is a convenient place to put OID's to make the
@@ -1547,8 +1359,8 @@ are case insensitive, must start with a letter, and can
 otherwise consist of letters and numbers.
 <p>
 
-<a name="htmldict">
-<h4>The HTML Dictionary</h4>
+<a name="html">
+<h3>The HTML Dictionary</h3>
 </a>
 
 The HTML dictionary holds components of the UI that is
@@ -1656,8 +1468,8 @@ put a company logo on each page.
 <p>
 </dl>
 
-<a name="eventdict">
-<h4>The Event Dictionary</h4>
+<a name="event">
+<h3>The Event Dictionary</h3>
 </a>
 
 This dictionary holds information related to <i>events</i>. An
@@ -1676,7 +1488,7 @@ Each event should have the following tags set:
 <dd>
 
 The color of the event. This should be the name of a color in the
-<a href="#colordict">color dictionary</a>.
+<a href="#color">color dictionary</a>.
 <p>
 
 <dt><tt>date</tt><p>
@@ -1693,570 +1505,44 @@ This is the text that will show up in the legend on the graph.
 <p>
 </dl>
 
-<h3> Tools and Utilities </h3>
-
-<i> In this unfinished section, I intend to talk about
-how to use each of the tools from the command line. </i>
-<p>
-
-In this section, each script's functions and arguments
-are discussed. There is a set of common arguments that
-some of the scripts accept. Here are the common arguments:
-<p>
-
-<dl>
-<dt><tt>-logLevel</tt><p>
-<dd>Default value: <i>info</i> (except grapher.cgi, where it defaults to
-	<i>warn</i>)<p>
-
-The possible values are "error", "warn", "info", or "debug". Each
-setting includes the output created by any of the preceding
-settings. All diagnostic output goes to the standard error stream.
-<p>
-
-<dt><tt>-base</tt><p>
-<dd>Default value: <i>$HOME/cricket-config</i><p>
-
-You can use this setting to use a different config tree. Experience
-shows, however, that it's simplest to just accept the defaults
-and install Cricket in an account of its own.
-<p>
-</dl>
-
-Here's a brief description of each program, and what arguments it takes.
-<p>
-
-<dl>
-<dt><tt>collector</tt><p>
-<dd>
-Accepts common arguments, plus <tt>-convert</tt>.<p>
-
-Collector is the script that runs every few minutes from cron
-in order to traverse the config tree, fetch data, and enter it
-into the RRD files. It's also used interactively to test configurations,
-and to convert old-style RRD files to RRD 1.x.x files.
-<p>
-
-The collector will process only the subtrees listed on the command line,
-unless there are none, in which case it will process the entire config
-tree. This feature is limited, however, to only the highest lever
-subtrees. For example, in the sample-config tree, you could only
-restrict collector to the "routers" subtree, no lower.
-These limits must be specified with the same path prefix as the
-config tree base is specified. Because the base defaults to a full
-path, you must also use full paths for the subtree limits. In
-addition, a subtree limit will not work correctly if there
-is a trailing slash on it.
-<p>
-
-When given the <tt>-convert</tt> option, the collector will attempt
-to upgrade old-style files it comes across to the new style. After
-the conversion is made, it will fetch and update the data values also.
-If it cannot complete the conversion, the update will harmlessly
-fail. If collector comes across a file that is already in the
-new format, it will skip the conversion, but fetch the data and
-update RRD files with the new data.
-<p>
-
-Except during conversion and testing, collector is usually run
-from collect-subtrees, which takes care of creating the huge
-command lines collector sometimes needs, and does other housekeeping.
-When testing a new subtree of the config-tree, you can use
-a command like "~/cricket/collector -logLevel debug
-/test-tree". Once you are certain the subtree
-is functioning correctly, you can add it to the collect-subtrees config
-file.
-<p>
-
-<dt><tt>grapher.cgi</tt><p>
-<dd>
-Accepts common arguments.<p>
-
-The grapher is almost never run from the command line, so
-options parsing is basically a moot point. The CGI script
-should get run by the web server automatically in response
-to accesses to files that end in CGI. Consult your web server
-documentation to find out how to make it work like this.
-<p>
-
-Because it's not generally possible to control the command line
-of grapher.cgi, it's critical that it either defaults to the
-correct base directory, or that it has the base directory
-hardcoded internally to it. The default base directory is
-$HOME/cricket-config. However, $HOME will only be set right
-if Cricket can guess it's username from it's URL. If there's
-any doubt, you should hard code the base directory by editing the
-first few lines of grapher.cgi.
-<p>
-
-<dt><tt>configure</tt><p>
-<dd>
-Accepts no arguments at this time.<p>
-
-This is basically a placeholder for when Cricket is more
-complicated (say it ain't so!) and requires an autoconf-generated
-configure script. At this point, it can point all the Cricket
-scripts at your Perl install, which is very helpful for sites
-which do not have Perl installed in a standard location.
-<p>
-
-<dt><tt>util/convert-file</tt>
-<dd>
-Accepts common options, but it has no need for <tt>-base</tt>.
-<p>
-
-This script will do the same kind of conversion "collector -convert"
-will do, but does it on single file at a time. You can give it
-several files on the command line, and it will attempt to convert
-each in turn.
-<p>
-</dl>
-
-<h2>Creating Custom Target Types</h2>
-
-<p>Cricket gives you complete control over the contents and layout of
-your RRD files. This means that if you are going to be doing any
-serious target-type hacking, you need to understand the following
-concepts: </p>
-	
-	<blockquote>
-	  <dl>
-		<dt>Round Robin Array (RRA)</dt>
-
-		<dd>This is where data is stored in an RRD. There
-		is one RRA for each scale of data, for example 5 minute
-		samples, 30 minute samples, and 2 hour samples. The
-		same data is in each RRA, except it is sampled at a
-		different rate. If an RRA can hold 12 samples and it
-		is updated every 5 minutes, then it holds data spanning back
-		one hour. The 13th sample will overwrite the 1st sample.
-		
-		<dt>Data Source</dt>
-
-		<dd>A data source is one line on a graph, or
-		  one column of data if you think of the RRD as a tabular
-		  listing of data. One RRD can have many datasources in
-		  it. All up them must be updated with new data at once. Not
-		  all of them need to be graphed at once (see the information
-		  about datasource "views" below).
-		</dd>
-		
-		<dt>Target</dt>
-		
-		<dd>A device that we are keeping stats on is a target. There
-		is one RRD file on disk for every target. You can think of
-		each target as a leaf on the config tree.
-		</dd>
-
-		<dt>Target Type</dt>
-
-		<dd>The type of the target determines what kinds of data
-		sources and RRA's makes up the target. When Cricket goes to
-		update a target, it uses the target type to figure out what
-		data to fetch about the target, and how to fetch it.
-		</dd>
-
-		<dt>Data Source Source (ds-source)</dt>
-
-		<dd>This is the rather unfortunate name for the attribute of a
-		data source that tells Cricket precisely where to fetch the data
-		from, and which data to fetch. Encoded in the ds-source is the
-		retrieval method (via SNMP or running a program right now) and
-		a description of the data we want.</dd>
-
-  </dl>
-</blockquote>
-
-Now, with all those terms under your belt, you'll understand what I
-mean when I say that using the datasource, RRA, and targetType
-dictionaries, you can completely control the kind, source, and
-quantity of data you store. The RRA's in the sample-config reproduce
-MRTG 2.x's data format precisely, and that configuration has proven to
-work well for most needs. If you are going to be using Cricket for the
-jobs it comes ready to do, you'll simply need to copy the
-sample-config tree and make minor changes to the targets it specifies.
-<p>
-
-If you need to customize Cricket to talk to other things, then you'll be
-following the following general steps:
-
-<blockquote>
-		<b>1.</b> Create entries in the datasource dictionary that tell
-		Cricket how to fetch your new measurement. If you are using
-		SNMP, you'll probably want to add an entry to the OID
-		dictionary in the same subtree, to make your datasource entry
-		readable. For instance, say we wanted to use Cricket to talk via
-		SNMP to an agent running on a Unix machine, and fetch the load
-		average. We would add the OID for the load average to the OID
-		table, then add a new entry (named "load-average") to the
-		datasource dictionary that described this new datasource.
-		<p>
-
-		<b>2.</b> Create a targetType entry to tell Cricket what
-		datasources make up your new target-type. Assuming the RRA
-		definitions from the <tt>--default--</tt> entry are right, you only
-		need to add set the "ds" tag for this entry. For the load average
-		example, we'd put "ds=load-average" into a targetType entry
-		named "unix-machine".
-		<p>
-
-		<b>3.</b> Create a new target who's target-type tag is set to
-		the targetType you created in the last step. If you are using
-		SNMP to talk to the host, you need to make certain the
-		variable snmp-host is set (since it contributes to the snmp
-		variable, which in turn is required in SNMP ds-sources). You
-		could set the snmp-host tag explicitly for every tag, but that
-		would be a pain. Instead, you could choose your target names
-		to be hostnames, then use the auto-target-name to set
-		snmp-host correctly all the time, by adding a line like
-		snmp-host = %auto-target-name% to the --default-- entry for
-		that sub-tree. If you have a rare case in your system where
-		the target name is not the name you want to send SNMP packets
-		to, then you could override the default snmp-host by setting
-		snmp-host directly for that one target.
-		<p>
-
-		<b>4.</b> Run the collector on your new subtree, using the
-		"-loglevel debug" option. This will tell you exactly what
-		Cricket thinks things are set to when it tries to fetch your
-		data, as well as what exactly happened when it went to fetch
-		the data.
-</blockquote>
-
-<p> If you come up with an interesting configuration, please send it
-in to <a href="mailto:jra@corp.webtv.net">me</a> so that I can
-integrate it into the sample-configs tree for future versions.
-
-<p> If you need to add a new kind of data gathering subroutine, you'll
-want to read the code to <tt>snmp.pm</tt> very carefully and make a
-module like it to collect your data. It's not too hard, but it might
-not be worth the effort -- consider using a simple Perl script to let
-you fetch the data via the <tt>exec</tt> method. See the
-<tt>http-performance</tt> sub-tree for an example of how to do this.
-</p>
-
-<a name="instmap">
-<h2> Instance Mapping </h2>
-
-Cricket has a nifty feature called instance mapping. Basically
-it's meant to take the busywork out of monitoring SNMP devices.
-In this section, I'll tell you far more than you ever wanted to know
-about it.
-<p>
-
-<h3> The Problem </h3>
-
-In the SNMP world, when something is stored in a table, each
-table row has a number. These numbers, called instance numbers,
-are used to reference the rows. Since routers typically
-have lots of interfaces, they are stored in a table, indexed
-by these instance numbers. I can ask a router to give me
-the traffic measurements from row number 4, and it will know
-what I mean and go do it. However, when we humans think about router
-interfaces, we don't think about interface numbers. We think
-about some other identifier for the row, like the interface name
-or the IP address. 
-<p>
-
-Interface mapping lets you configure Cricket to talk to devices
-based on one of the other keys in this table. The mapping
-part comes in when Cricket turns the key you give it into an
-instance number. It does this in an efficient way, which is
-guaranteed to be right no matter what kind of row re-arranging
-goes on on the router. (It seems cruel, but they are allowed
-to re-arrange their rows at any time. This would presumably
-<b>not</b> be part of what makes SNMP "simple".)
-<p>
-
-<h3> What does this mean to me? </h3>
-
-Nothing, as long as you are using the sample
-config tree's router-interface subtree. It comes ready to
-automatically do interface mapping using the interface's
-name as a key. When you use <tt>listInterfaces</tt> to make
-an interfaces file, it will set the "interface-name" tag for
-you, and Cricket will use that to do the instance mapping
-automatically.
-<p>
-
-On the other hand, if you want to setup Cricket to use
-a different key (say, the IP address, or maybe the
-human-readable descriptions Cisco routers support), or to
-monitor something else via SNMP that lives in tables,
-then you need to read on and understand the <tt>map</tt> dictionary,
-and how it is used to control the interface mapping algorithm.
-<p>
-
-<h3> The Icky Details </h3>
-
-When Cricket comes across an instance number which looks
-like <tt>map(interface-name)</tt>, then it knows that
-instead of using a hard-coded instance number, or an instance
-set, it will be using the instance mapping code to find the
-instance number. It uses the part inside the parenthesis ("interface-name"
-in the case above) to find an entry in the <tt>map</tt> dictionary
-that it can use to help map the given key to an instance number.
-<p>
-
-There are two interesting tags in a <tt>map</tt> entry that
-control this process. The first is the <tt>baseOID</tt>, which
-tells Cricket which column of which table it is going to be
-looking through to find the match. For the interface-name map,
-this is set to "ifDescr". Cricket will look up the name "ifDescr"
-in the OID table, and will use the resulting OID as the
-base-oid for an SNMP walk of the table. The other interesting
-tag is <tt>match</tt>, which is a string that the fetched
-column will be compared to. This string is expanded with respect
-to the target dictionary, so you can use the "%tag%" syntax
-there. In the sample config, we compare the ifDescr column
-of the interface table to "%interface-name%", which gets expanded
-to the current value of the the tag <tt>interface-name</tt>
-in the current target. If the string starts and ends with the slash
-character, then it is used as a 
-Perl regular expression and
-a case-insensitive RE match is done,
-instead of a simple string match. Use this
-feature only when necessary. A string match is preferable, since it
-has less overhead.
-<p>
-
-The system is efficient and accurate. It uses an RRD metafile
-to store the last-used index (avoiding gratuitous table-scans)
-and uses an internal cache to minimize table-scans, should they
-be necessary. It is accurate because every time Cricket fetches
-data using a cached instance number, it also fetches the key
-in the same packet. If the key no longer matches, then the cache
-is invalidated, a table-scan is done to map the instance number,
-and the data is re-fetched using the new instance number.
-The maximum cost of this system is one table-scan per host anytime
-an instance changes, and one extra variable fetched per target.
-<p>
-
-Instance mapping is only enabled when the <tt>inst</tt> tag
-starts with "map(". This means that hard-coded instances and
-instance ranges are still completely supported, if you are 
-not ready to use the instance mapping feature.
-<p>
-
-<h3> The Ickiest Details </h3>
-
-The SNMP queries done by the instance mapping algorithm
-are implemented semi-independently from the rest of Cricket's
-datasource management code. This is partly because it was
-easier to implement that way, and partly because instance
-mapping is an intrinsically SNMP-thing, and it probably will
-never make sense to talk about using instance mapping
-with an exec datasource.
-<p>
-
-When it comes time to do a table scan, the instance mapping
-code uses the tag named <tt>snmp</tt> from the current target to
-find the community string, host, and port for the SNMP transaction.
-As discussed above, the snmp tag, by convention, has the
-community string, host, and port in it in a format ready to
-plug into SNMP ds-sources. Thus, even if you've come up
-with a different way to encode community string, host, and port
-into your datasources, you still need to have a tag named
-snmp for the instance mapping code to use.
-<p>
-
-The moral of the story is to try very hard to not mess
-with the sample-config tree. (The quote "Though this be madness,
-let there be a method in it." comes to mind...)
-It's setup the way it is
-for a reason, and though you may be able to make it more
-efficient in some ways, you won't end up with a config tree
-that is as flexible and broadly-applicable. Thus, I might do
-something later which breaks your config tree without meaning
-to do so. And I won't feel very sorry about it, now that you
-know better.
-<p>
-
-<h2> Cricket's Family Tree </h2>
-
-Cricket did not spring, fully formed, from my fingers late one
-night. Granted, most of it did come about late at night, but
-that's just the way I work. Cricket is the result of using and
-in some cases being limited by MRTG, all the while getting more
-and more addicted to it.
-<p>
-
-In January 1998, Tobias Oetiker released some of the first versions of
-the RRD tool. I took a look at this work and immediately recognized
-that half of my problems with MRTG would be solved by switching to
-using RRD as the backend, instead of rateup, the old backend for MRTG.
-RRD was designed to be much more flexible and much higher performance
-than rateup.  However, RRD did not promise to make any dent at all in
-the complexity of our MRTG configuration, nor was it immediately
-obvious how we could extend MRTG to take advantage of RRD's new
-flexibility.  <p>
-
-During the Spring of 1998, Tobias continued to work on RRD, but little
-work was being done to integrate it into a future version of
-MRTG. There are only so many hours in a day, afterall, and Tobias does
-need to earn a living too. I kept thinking about the problems facing
-WebTV, and how we could best put to use the really neat RRD tool while
-solving our config file (and, to a lesser extent, parallelization)
-problems. The answer was the config tree. After writing a small proof
-of concept, I sold my bosses on paying a contractor (Emmett Hogan)
-from Global Networking and Computing
-(<a href="http://www.gnac.com">http://www.gnac.com</a>) to
-implement the design for an RRD frontend using the config tree idea.
-This project was to be a six week job, starting around July, 1998.
-This new frontend for RRD came to be called Super MRTG, or SMRTG.  <p>
-
-As is often (almost always?) the case, it was very hard to predict how
-much time would actually be required to do the job. During Emmett's
-work, we learned a bunch more about how we wanted the final system to
-work. Emmett's finished product was still not ready to replace MRTG
-here at WebTV, and we were not ready to release it under the GPL. I
-took over SMRTG and added the features we needed to put it into
-production at WebTV. I also released a few versions of SMRTG to the
-MRTG-developers mailing list for review.  <p>
-
-About this point a number of things happened. First, I realized that I
-was really unhappy with the name SMRTG for several reasons. It was too
-cumbersone, the project is only tangentially about routers at this
-point, and there was not a line of MRTG code in SMRTG -- it only
-<i>looked</i> the same. Thus, we needed a new name. I called it
-Cricket because it popped into mind. It's short and catchy, and there
-seems to be no other piece of network management software called
-Cricket. (There was a really cool piece of graphing software for the
-Mac called Cricket Graph, which might have tickled my subconscious.)
-<p>
-
-Also, Tobias and I talked about Cricket's, RRD's, and MRTG's futures.
-We agreed that Cricket and RRD made good partners, but that RRD is
-useful on it's own too. (Thus, RRD and Cricket will be distributed
-separately for the forseeable future.)  We also agreed that it made no
-sense for him to duplicate my effort on the frontend, so it's unlikely
-there will ever be a version of MRTG that uses RRD as it's
-backend. Instead, we will try to help people convert to using Cricket
-if they need the performance of RRD. (And who doesn't!) As you can see
-from this history, Cricket would not exist if it wasn't for MRTG and
-RRD, two of Tobias' ultra-cool inventions.  I am deeply indebted to
-that giant for letting me stand on his shoulders.  <p>
-
-Today, in January 1999, Cricket is installed at WebTV Networks and is
-monitoring over 4500 targets, with over 10 different target types
-represented. Cricket takes data from SNMP, shell scripts, and files.
-During the 1998 Holiday season, Cricket gave us unprecedented
-visibility into the health of the WebTV Service. It has paid for
-itself, and we genuinely hope it will be as productive at your site.
-<p>
-
-<h2> Using Cricket with mod_perl </h2>
-
-<tt>mod_perl</tt> is an Apache module that allows you to run
-Perl scripts inside of Apache without forking a new process for
-each one. This saves lots of time, since Perl only needs to parse
-the script once and can execute it a number of times.
-<p>
-
-As of version 0.68, Cricket can run under <tt>mod_perl</tt>.
-Typically, no special code needs to be added to scripts to make
-them work in the mod_perl environment, but Cricket's
-lazy use of namespaces required some fixup work. Mea culpa.
-That work has been done now, and going forward, I intend
-to make sure Cricket works under mod_perl.
-<p>
-
-If you'd like to use Cricket under mod_perl, you need to
-first fetch and install Apache with the mod_perl module.
-Cricket has only been tested so far with Apache 1.3.6 and mod_perl
-1.19. The best way to build and install Apache and mod_perl is to
-fetch both packages, uncompress and untar them into one directory,
-then go into the mod_perl directory first and follow the directions
-in the <tt>INSTALL.apaci</tt> file.
-<p>
-
-Once you have an installation of Apache with mod_perl installed,
-you need to add lines like the following to your httpd.conf file:
-<p>
-<center>
-<table valign="center" border="1" cellpadding="3">
-<tr>
-<td width="100%">
-<pre>
-&lt;Files *.cgi&gt;
-    SetHandler perl-script
-    PerlHandler Apache::Registry
-    Options ExecCGI
-&lt;/Files&gt;</pre>
-</td>
-</tr>
-</table>
-</center>
-<p>
-
-These lines tell your webserver that whenever it sees
-a file ending in .cgi, it should let the embeded Perl interpreter
-run it. This, of course, is problematic if you have some .cgi
-files on your webserver that cannot be run by Perl. In that
-case, you should use a more restrictive specification
-than "*.cgi" to limit the scope of the directives to files
-in the Cricket user's home directory.
-<p>
-
-There seems to be a bug which causes Apache to fail to find
-a library file in some cases. Confusingly, this tends to happen
-when it's trying to handle a URL that points to an image, resulting
-in missing images. This is strange, since serving up images should
-not require the Perl interpreter.
-You can fix this by setting the <tt>PERL5LIB</tt>
-environment variable to the Cricket library directory before starting
-the Apache webserver.
-<p>
-
-If you are going to be editing the library files (i.e. to add a new
-feature), you'll want to definately add the "PerlInitHandler
-Apache::StatINC" directive to your config file. This will make mod_perl
-check library timestamps and reload/reparse them when necessary.
-You should not run a production server with this enabled, since it
-does some extra work each time a library is used, which could be
-avoided. If you are not using the StatINC module, you will need to
-restart your server anytime you change a library file, or else the
-changes will not be picked up.
-<p>
-
-<h2> Stuff and bother... </h2>
-
-<p>Since I am running out of time, here's a quick listing of which
-parsers each kind of data uses:
-
-<ul>
-  <li>TagValue:&nbsp;&nbsp;&nbsp; target, targetType, dataSource, graph</li>
-  <li>Simple:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; color, oid</li>
-  <li>Text:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; html</li>
-</ul>
-
-<p>Since I am still running short on time, here's a listing of
-valid characters in various names. If you break these rules, you will
-get strange, confusing, undocumented behavior. Please don't do this,
-since it will result in very unhappy e-mail to me. If you'd like to
-help make Cricket more resistant to these types of errors, go for it,
-and send me a patch!
-
-	 <ul>
-	  <li> In general: numbers, letters, period, dashes. Stay away
-	  from "%", "/", ":", and ",", which are used in various ways
-	  internally.
-
-	  <li> OID: all numbers and letters, and no dashes.
-
-	  <li> target names: all numbers and letters. Dashes are OK, but
-	  they must not have slashes in them.
-
-	  <li> inside of double quotes, on the right side of an equals
-	  sign, anything goes. (Except a quote, of course, but you can put
-	  one into the quote by backslashing it.)
-	</ul>
+<a name="rra">
+<h3>The RRA Dictionary</h3>
+</a>
 
 <p>
-Also, avoid choosing names that begin and end with two dashes (like
-'--default--'). Future additions to the system will use names like
-this.
+The RRA dictionary holds parameters used by Cricket when it is setting
+up a new RRD file. These parameters control how much data RRD stores,
+and on what schedule it consolidates high resolution data into lower
+resolution data.
 
+<p>
+The RRA dictionary that ships with Cricket in the
+sample config tree will rollup and retain data using the same schedule
+that MRTG 2.x has used for years. This has proven satisfactory for
+most users. If you change the polling rate from 5 minutes, this
+dictionary needs to be edited. Likewise, if you want to keep history
+farther back in time, you'll need to edit these entries.
+
+<p>
+Because this table is only used when a new RRD is being created,
+you would need to delete any existing datafile, losing all of the data
+in it, before a change to the RRA dictionary takes effect.
+
+<p>
+For more information on the format of these dictionary entries, read
+the RRD Tool documentation on the "create" command.
+
+<p>
+<hr>
+
+<p>
+<a href="http://cricket.sourceforge.net">Cricket</a>
+version !!VERSION!!, released !!RELDATE!!.
+
+<p>
+Copyright (C) 1998-2000 !!COPYRIGHT!!. Cricket is released under
+the <a href="gpl.html">GNU General Public License</a>.
 
 </body>
 </html>
+
