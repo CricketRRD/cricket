@@ -477,7 +477,7 @@ sub retrieveData {
         @results = ();
     }
 
-    if ($gLogFullPath) {
+    if ($Common::global::gLogFullPath) {
         my $tpath = $target->{'auto-target-path'};
         Info("Retrieved data for $tpath/$tname: ", join(",", @results));
         Info("Some data is missing for $tpath/$tname.") if ($missingData);
