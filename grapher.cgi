@@ -1566,8 +1566,8 @@ sub doGraph {
                             "Failures $legend";
                     }
                     if ($hwParam eq "confidence" || $hwParam eq "all") {
-                        push @defs, "DEF:hw$ct=$rrd:ds$ct:HWPREDICT";
-                        push @defs, "DEF:dev$ct=$rrd:ds$ct:DEVPREDICT";
+                        push @defs, "DEF:hw$ct=$rrd:$dsidx:HWPREDICT";
+                        push @defs, "DEF:dev$ct=$rrd:$dsidx:DEVPREDICT";
                         my $cbscale = graphParam($gRef,'confidence-band-scale',2);
                         push @cdefs, "CDEF:upper$ct=hw$ct,dev$ct,$cbscale,*,+";
                         push @cdefs, "CDEF:lower$ct=hw$ct,dev$ct,$cbscale,*,-";
@@ -1860,6 +1860,7 @@ sub doGraph {
 
     if (my $error = RRDs::error) {
         Warn("Unable to create graph: $error\n");
+        Warn("rrd graph: ".join(' ', @args)."\n");
     }
 
     my($wh) = graphParam($gRefDef, 'width-hint', undef);
