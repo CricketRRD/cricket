@@ -18,25 +18,28 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-package Common::Options;
+package Common::global;
 
-use Getopt::Long;
-use Common::Log;
+BEGIN {
+	# Set defaults for things not picked up from cricket-config.pl
+	$gCricketHome ||= $ENV{'HOME'}; 
+	$gConfigRoot ||= $gCricketHome . "/cricket-config";
+	if ($gConfigRoot !~ m#^/#) {
+		$gConfigRoot = "$gCricketHome/$gConfigRoot";
+	}
+	if ($^O eq 'MSWin32') {
+		$gCacheDir ||= "$ENV{'TEMP'}\\cricket-cache"
+			if (defined($ENV{'TEMP'}));
+		$gCacheDir ||= "c:\temp\cricket-cache";
+	} else {
+		$gCacheDir ||= "$ENV{'TMPDIR'}/cricket-cache"
+			if (defined($ENV{'TMPDIR'}));
+		$gCacheDir ||= "/tmp/cricket-cache";
+	}
 
-sub commonOptions {
-	# default to 'info' unless there's a environment variable
-	# or a commandline arg
-	my($logLevel, $base);
-	$logLevel = $Common::global::gLogLevel if $Common::global::gLogLevel;
-	$logLevel = $ENV{'CRICKET_LOG_LEVEL'} if $ENV{'CRICKET_LOG_LEVEL'};
-	$logLevel ||= "info";
-
-	GetOptions( "loglevel:s" => \$logLevel, 
-				"base:s" => \$base, @_);
-
-	$Common::global::gConfigRoot = $base if $base;
-	Common::Log::setLevel($logLevel);
+	if (!defined($isCollector)) {
+		$isCollector = 0;
+	}
 }
 
 1;
-

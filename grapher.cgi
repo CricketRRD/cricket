@@ -27,19 +27,14 @@ BEGIN {
 	# be prepended. Special care is taken to set $HOME right,
 	# even when running as user nobody (see fixHome for info).
 
-	$Common::global::gConfigRoot = 'cricket-config'; 	# i.e. $HOME/config
+	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+	eval "require '$programdir/cricket-conf.pl'";
+	eval "require '/usr/local/etc/cricket-conf.pl'"
+					unless $Common::global::gInstallRoot;
+	$Common::global::gInstallRoot ||= $programdir;
+	$Common::global::gCricketHome ||= $ENV{"HOME"};
 
-	# This magic attempts to guess the install directory based
-	# on how the script was called. If it fails for you, just
-	# hardcode it.
-
-	$Common::global::gInstallRoot = (($0 =~ m:^(.*/):)[0] || './') . '.';
-
-	# cached images are stored here... there will be no more than
-	# 5 minutes worth of images, so it won't take too much space.
-	# If you leave it unset, the default (/tmp or c:\temp) will probably
-	# be OK.
-	# $gCacheDir = "/path/to/cache";
+	$Common::global::gConfigRoot ||= 'cricket-config'; 	# i.e. $HOME/config
 }
 
 use lib "$Common::global::gInstallRoot/lib";
@@ -53,6 +48,7 @@ use RRD::File;
 use ConfigTree::Cache;
 
 use Common::Version;
+use Common::global;
 use Common::Log;
 use Common::Options;
 use Common::Util;
@@ -79,7 +75,6 @@ $gQ = new CGI;
 
 fixHome($gQ);
 initConst();
-initOS();
 $gColorInit = 0;
 
 $Common::global::gCT = new ConfigTree::Cache;
@@ -1083,30 +1078,6 @@ sub makeDSMap {
 	return %dsmap;
 }
 
-# set the cache dir if necessary, and fix up the ConfigRoot if
-# we are not on Win32 (where home is undefined)
-
-sub initOS {
-	if (Common::Util::isWin32()) {
-		if (! defined($gCacheDir)) {
-			$gCacheDir = 'c:\temp\cricket-cache';
-			$gCacheDir = "$ENV{'TEMP'}\\cricket-cache"
-				if (defined($ENV{'TEMP'}));
-		}
-	} else {
-		if (! defined($gCacheDir)) {
-			$gCacheDir = '/tmp/cricket-cache';
-			$gCacheDir = "$ENV{'TMPDIR'}/cricket-cache"
-				if (defined($ENV{'TMPDIR'}));
-		}
-
-		if ($Common::global::gConfigRoot !~ m#^/#) {
-			$Common::global::gConfigRoot =
-				"$ENV{'HOME'}/$Common::global::gConfigRoot";
-		}
-	}
-}
-
 sub initConst {
 	$kMinute = 60;          #  60 seconds/min
 	$kHour   = 60 * $kMinute;#  60 minutes/hr
@@ -1208,7 +1179,7 @@ sub doGraph {
 	if (defined($imageName)) {
 		$mtime = (stat($imageName))[9];
 	} else {
-		$imageName = "$gCacheDir/cricket.$$.$type";
+		$imageName = "$Common::global::gCacheDir/cricket.$$.$type";
 		$needUnlink++;
 	}
 
@@ -1663,9 +1634,9 @@ sub doGraph {
 		Error("No graph to make?");
 	}
 
-	if (! -d $gCacheDir) {
-		mkdir($gCacheDir, 0777);
-		chmod(0777, $gCacheDir);
+	if (! -d $Common::global::gCacheDir) {
+		mkdir($Common::global::gCacheDir, 0777);
+		chmod(0777, $Common::global::gCacheDir);
 	}
 
 	# this sets -b based on the value of the bytes parameter
@@ -2014,7 +1985,7 @@ sub generateImageName {
 	}
 	my($hash) = unpack("H8", $md5->digest());
 
-	return "$gCacheDir/cricket-$hash.$type";
+	return "$Common::global::gCacheDir/cricket-$hash.$type";
 }
 
 sub byFirstVal {
@@ -2027,26 +1998,31 @@ sub byFirstVal {
 # looks like: http://www/~cricket/grapher.cgi. If this doesn't apply
 # to your installation, then you might want to simply uncomment the
 # brute force method, below.
+# Note that effective with the 1.0.3 release of Cricket, the preferred
+# method is to add gCricketHome to cricket-conf.pl and put that in the
+# same directory as the CGI script (or in /usr/local/etc/cricket-conf.pl).
 
 sub fixHome {
 
 	# brute force:
-	# $ENV{'HOME'} = '/path/to/cricket/home';
+	# $gCricketHome = '/path/to/cricket/home';
 	# return;
+
+	return if defined($gCricketHome);
 
 	my($sname) = $gQ->script_name();
 	if ($sname =~ /\/~([^\/]*)\//) {
 		my($username) = $1;
 		my($home) = (getpwnam($username))[7];
 		if ($home) {
-			$ENV{'HOME'} = $home;
+			$gCricketHome = $home;
 		} else {
 			Warn("Could not find a home directory for user $username." .
-					"\$HOME is probably not set right.");
+				"gCricketHome is probably not set right.");
 		}
 	} else {
 		Warn("Could not find a username in SCRIPT_NAME. " .
-			"\$HOME is probably not set right.");
+			"gCricketHome is probably not set right.");
 	}
 }
 

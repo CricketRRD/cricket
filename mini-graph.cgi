@@ -23,21 +23,19 @@ BEGIN {
 	# This magic attempts to guess the install directory based
 	# on how the script was called. If it fails for you, just
 	# hardcode it.
-
-	$gInstallRoot = (($0 =~ m:^(.*/):)[0] || './') . '.';
-
-	# cached images are stored here... there will be no more than
-	# 5 minutes worth of images, so it won't take too much space.
-	# If you leave it unset, the default (/tmp or c:\temp) will probably
-	# be OK.
-	# $gCacheDir = "/path/to/cache";
+	my $programdir = (($0 =~ m:^(.*/):)[0] || "./") . ".";
+	eval "require '$programdir/cricket-conf.pl'";
+	eval "require '/usr/local/etc/cricket-conf.pl'"
+					unless $Common::global::gInstallRoot;
+	$Common::global::gInstallRoot ||= $programdir;
 }
 
-use lib "$gInstallRoot/lib";
+use lib "$Common::global::gInstallRoot/lib";
 
 use CGI qw(fatalsToBrowser);
 use Digest::MD5;
 
+use Common::global;
 use Common::Log;
 use Common::Util;
 Common::Log::setLevel('warn');
@@ -48,27 +46,7 @@ $gPollingInterval = 5 * 60;     # defaults to 5 minutes
 
 $main::gQ = new CGI;
 
-initOS();
 doGraph();
-
-# set the cache dir if necessary, and fix up the ConfigRoot if
-# we are not on Win32 (where home is undefined)
-
-sub initOS {
-	if ($^O eq 'MSWin32') {
-		if (! defined($main::gCacheDir)) {
-			$main::gCacheDir = 'c:\temp\cricket-cache';
-			$main::gCacheDir = "$ENV{'TEMP'}\\cricket-cache"
-				if (defined($ENV{'TEMP'}));
-		}
-	} else {
-		if (! defined($main::gCacheDir)) {
-			$main::gCacheDir = '/tmp/cricket-cache';
-			$main::gCacheDir = "$ENV{'TMPDIR'}/cricket-cache"
-				if (defined($ENV{'TMPDIR'}));
-		}
-	}
-}
 
 sub doGraph {
 	my($imageName) = generateImageName($main::gQ);
@@ -83,9 +61,9 @@ sub doGraph {
 	if (!defined($mtime) || ((time() - $mtime) > $main::gPollingInterval)) {
 		# this request is actually going to need work... pass it on
 		if (Common::Util::isWin32()) {
-		   exec("perl $gInstallRoot/grapher.cgi");
+		   exec("perl $Common::global::gInstallRoot/grapher.cgi");
 		} else {
-		   exec("$gInstallRoot/grapher.cgi");
+		   exec("$Common::global::gInstallRoot/grapher.cgi");
 		}
 	} else {
 		Debug("Cached image exists. Using that.");
@@ -145,6 +123,6 @@ sub generateImageName {
 	}
 	my($hash) = unpack("H8", $md5->digest());
 
-	return "$main::gCacheDir/cricket-$hash.gif";
+	return "$Common::global::gCacheDir/cricket-$hash.gif";
 }
 
