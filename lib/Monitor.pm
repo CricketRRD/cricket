@@ -312,7 +312,7 @@ sub getDSNum {
 	my($Counter) = 0;
 	my(%dsMap) = map { $_ => $Counter++ } split(/\s*,\s*/,$ttRef->{'ds'});
 	
-	return $dsMap{$dsName};
+	return $dsMap{lc($dsName)};
 }
 
 # Subroutines to handle alarms
