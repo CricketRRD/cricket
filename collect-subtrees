@@ -37,11 +37,12 @@ use Getopt::Long;
 use strict;
 
 my $gMailTo;
-my $gSubtree;
+my $gDebug = 1;
 my $gCF = "$Common::global::gInstallRoot/subtree-sets";
 
 GetOptions( "cf=s" => \$gCF,
 			"mail|m=s" => \$gMailTo,
+			"debug|d" => \$gDebug,
 		);
 
 my $gLogDir = "$ENV{'HOME'}/log";
@@ -83,7 +84,6 @@ while (<S>) {
 	} else {
 		my($subtree) = $_;
 		$subtree =~ s/^\s*//;
-		$gSubtree = $subtree;
 		if (! defined($gCurSet)) {
 			warn("No set lines found. Ignoring subtree $subtree.\n");
 		} else {
@@ -101,6 +101,7 @@ if ($#ARGV == -1) {
 foreach my $s (@ARGV) {
 	my($subtreeRef) = $gSets{$s};
 	my(@output) = ();
+	my($debugFlag) = "";
 	if (! defined($subtreeRef)) {
 		print STDERR "$0: unknown subtree name: $s\n";
 		next;
@@ -124,7 +125,9 @@ foreach my $s (@ARGV) {
 	if(-f $timelogfile && -s $timelogfile >=  50000 && $subtreeTimes == 1) {
 		rename $timelogfile, "$timelogfile.old"
 	}
-	my $args = "-base $gBase " . join(" ", @{$subtreeRef});
+
+	$debugFlag = "-loglevel debug" if ($gDebug == 1);
+	my $args = "$debugFlag -base $gBase " . join(" ", @{$subtreeRef});
 
 	system("$Common::global::gInstallRoot/collector $args > $logfile 2>&1");
 
@@ -188,7 +191,7 @@ foreach my $s (@ARGV) {
 		}
 
 		if(defined($mOut)) {
-			mailHist(@mHist);
+			mailHist($s, @mHist);
 		}
 	} else {
 		warn("Could not scan logfile $logfile for errors: $!\n");
@@ -227,12 +230,12 @@ sub isWin32 {
 }
 
 sub mailHist {
-	my @output = @_;
+	my ($subtree, @output) = @_;
 
 	if($#output > 0) {
-		my $subject = "output from subtree " . $gSubtree;
+		my $subject = "output from subtree " . $subtree;
 
-		open(MAIL, "|$gMailer -s \"$subject\"" . $gSubtree . " $gMailTo") ||
+		open(MAIL, "|$gMailer -s \"$subject\" $gMailTo") ||
 			die "Couldn't run $gMailer to send subtree output: $!\n";
 		print MAIL @output;
 		close(MAIL);
