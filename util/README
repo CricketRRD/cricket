@@ -52,6 +52,18 @@ rrd-tune:
 		changes to rrd-min, rrd-max, or rrd-heartbeat stick
 		if you make them after the RRD files already exist.
 
+rrdTuneAberrant.cgi:
+
+		A CGI script meant to be invoked from a web browser that
+		invokes the rrdtool tune aberrant-reset option for the specified
+		target and ds (datasource):
+		rrdTuneAberrant.cgi?target=%2switch-1%2Fport_2&ds=ifOutOctets
+		The argument target should be the complete config tree path.
+		An inst argument can be used to specify the instance number
+		when appropriate.
+		Using this script may require the set user-id bit to be enabled:
+		chmod 4755 rrdTuneAberrant.cgi
+
 relocate-perl:
 
 		Used during install to fix the location of Perl in the
