@@ -54,8 +54,8 @@ sub monValue {
         return 1;
     }
 
-    if ($value =~ /^NaN/)  {
-        Info("Skipping: Last value from datafile was NaN.");
+    if ($value =~ /^NaN|^nan/)  {
+        Info("Skipping: Last value from datafile was $value.");
         return 1;
     }
 
@@ -459,7 +459,8 @@ sub Alarm {
                                $type,
                                $threshold,
                                $name,
-                               $ds);
+                               $ds,
+                               $val);
     } elsif ($alarmType eq 'FILE') {
         $self->LogToFile($alarmArgs->[0],'ADD',$name,$ds);
     } else {
@@ -500,7 +501,8 @@ sub Clear {
                                $type,
                                $threshold,
                                $name,
-                               $ds );
+                               $ds,
+                               $val);
     } elsif ($alarmType eq 'FILE') {
         $self->LogToFile($alarmArgs->[0],'CLEAR',$name,$ds);
     } else {
@@ -510,7 +512,7 @@ sub Clear {
 
 # Attempt to send an alarm trap for a given target
 sub sendMonitorTrap {
-    my($self,$target,$spec,$type,$threshold,$name,$ds) = @_;
+    my($self,$target,$spec,$type,$threshold,$name,$ds,$val) = @_;
 
     my $to = $target -> {'trap-address'};
     if (!defined($to)) {
@@ -550,6 +552,7 @@ sub sendMonitorTrap {
             push(@VarBinds, "${OID_Prefix}.8", 'string', $1);
         }
     }
+    push(@VarBinds, "${OID_Prefix}.9", 'string', $val);
 
     Info("Trap Sent to $to:\n ". join(' -- ',@VarBinds));
     snmpUtils::trap2($to,$spec,@VarBinds);
@@ -562,24 +565,28 @@ sub LogToFile {
 
     return unless ($action eq 'ADD' || $action eq 'CLEAR');
 
-    # open for read or create if missing (so we open for append)
+    # try to open for read first and hunt for duplicate lines
+    my $bFound = 0;
+
+    if (open(INFILE, "$filePath")) {
+        $targetLine = $targetName . " " . $dataSourceName;
+        while (<INFILE>) {
+            chomp;
+            if ($_ eq $targetLine) {
+                $bFound = 1;
+                # nothing to add
+                last if ($action eq 'ADD');
+            } else {
+                push (@lines, $_) if ($action eq 'CLEAR');
+            }
+        }
+    }
+
     unless (open(INFILE, "+>>$filePath")) {
         Info("Failed to open file $filePath");
         return;
     }
 
-    my $bFound = 0;
-    $targetLine = $targetName . " " . $dataSourceName;
-    while (<INFILE>) {
-        chomp;
-        if ($_ eq $targetLine) {
-            $bFound = 1;
-            # nothing to add
-            last if ($action eq 'ADD');
-        } else {
-            push (@lines, $_) if ($action eq 'CLEAR');
-        }
-    }
 
     # append the new line to the end of the file
     if ($action eq 'ADD' && $bFound == 0) {

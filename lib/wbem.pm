@@ -26,7 +26,8 @@
 use Common::Log;
 use Win32::OLE;
 use Win32::OLE::Enum;
-use Win32::OLE::Const 'Microsoft WMI Scripting V1.1 Library';
+# V.* reg exp should match verion 1.1 (Win2K) or 1.2 (WinXP)
+use Win32::OLE::Const 'Microsoft WMI Scripting V.* Library';
 
 $main::gDSFetch{'wbem'} = \&wbemFetch;
 

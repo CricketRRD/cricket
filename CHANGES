@@ -1,5 +1,12 @@
 New features, fixes in version 1.0.4
 
+	Fix to loading WMI Scripting constants library in wbem.pm.
+	Should allow using WMI on WinXP.
+
+	Minor fixes to Monitor.pm: detection of NaN/nan, LogToFile
+	duplicate line detection, and new SNMP VarBind (9) to send
+	value in trap. [patch #592165, #592163] 
+
 	An experimental new feature allows you to use the Cricket
 	target name as the rrd datasource name. Some caveats apply:
 	 - if you use COMPUTE datasources, you will have to manually
