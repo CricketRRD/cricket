@@ -14,6 +14,10 @@ contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
 
+	Albert Herranz Martin
+		Provided the solution for instance names that look
+		like floats to Perl
+
 	Clifton Royston
 		updated listInterfaces with boatloads of new
 		functionality
@@ -131,7 +135,7 @@ contributed ideas, patches, and/or debugging info:
 	Kirby Krueger <kirbyk@corp.webtv.net>
 		test-url script maintenance
 
-	Bryce Jasmer <kirbyk@corp.webtv.net>
+	Bryce Jasmer <jasmerb@microsoft.com>
 		expansion bug catcher
 
 	Jeff Jensen <jpj@corp.webtv.net>
