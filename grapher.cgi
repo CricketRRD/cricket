@@ -1327,6 +1327,7 @@ sub doGraph {
     my(%scaled);
     my(@target_pass_args);
     my(@gprints) = ();
+    my($lasttime) = "unknown";
 
     # prepare a dsmap, using the target and targettype dicts
     # we do this outside the loop to keep the DS map from expanding
@@ -1360,7 +1361,7 @@ sub doGraph {
         # Then pick up the values
         # things we pick up form the target dict
         my($rrd) = $targRef->{'rrd-datafile'};
-        my($lasttime) = scalar(localtime(RRDs::last($rrd)));
+        $lasttime = scalar(localtime(RRDs::last($rrd)));
 
         # use the dslist to create a set of defs/cdefs
 
@@ -1753,6 +1754,11 @@ sub doGraph {
     }
 
     if (isTrue($useGprint)) {
+        my $title = $tname;
+        if (defined($targRef->{'display-name'})) {
+            $title = $targRef->{'display-name'};
+        }
+        unshift @gprints, "--title", $title;
         unshift @gprints, "COMMENT:\\s", "COMMENT:\\s";
         push @gprints, "COMMENT:\\s", "COMMENT:Last updated at $lasttime",
     } else {
