@@ -124,7 +124,7 @@ sub checkTargetInstance {
 
     my($m) = new Monitor;
     my($rrd) = new RRD::File( -file=>$target->{'rrd-datafile'} );
-    if (!$rrd->open() || !$rrd->loadHeader()) {
+    if (!$rrd->open()) {
         Info("Couldn't open RRD File for $name, skipping this target.");
         return;
     }
