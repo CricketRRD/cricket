@@ -62,3 +62,10 @@ $gLogFullPath=0;
 #       values contained in the chassis target. It is currently
 #       limited to searching for a value in the snmp-host and display-name tags.
 $gEnableSearch=1;
+
+# For users of monitoring thresholds. This variable defines how to treat
+# conditions where a threshold is tested against an unavailable value or
+# a database lookup error.
+# Set to 1, and it will treat unvailable values (or NaNs) as alarms.
+# Set to 0 or undefined it will not treat NaNs as alarms. 
+$gEnableNoValueAlarms = 0;

@@ -32,6 +32,14 @@ $Common::global::gMonitorTable{'exact'} = \&monExact;
 $Common::global::gMonitorTable{'failures'} = \&monFailures;
 $Common::global::gMonitorTable{'quotient'} = \&monQuotient;
 
+# NaN Alarm processing
+# Return value of nanErr = 1 is not an alarm or threshold pass
+# Return value of nanErr = 0 is an alarm or threshold failure
+my $nanErr = 1;
+if ($Common::global::gEnableNoValueAlarms) {
+    $nanErr = ($Common::global::gEnableNoValueAlarms) ? 0 : 1;
+}
+
 sub new {
     my($package) = @_;
     my $self = { };
@@ -55,11 +63,7 @@ sub monValue {
         return 1;
     }
 
-    if (isNaN($value))  {
-        Info("Monitor: Last $ds value from $target->{'rrd-datafile'} was " .
-             "$value.");
-        return 1;
-    }
+    return ($nanErr, 'NaN') if isNaN($value);
 
     $min = shift(@Thresholds);
     $min = 'n' if (! defined($min));
@@ -172,9 +176,10 @@ sub monRelation {
              "$target->{'rrd-datafile'}.");
         return 1;
     }
+    return ($nanErr, 'NaN') if isNaN($value);
 
     my($cmp_value) = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return (1,'NaN') if isNaN($cmp_value);
+    return ($nanErr,'NaN') if isNaN($cmp_value);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -219,6 +224,7 @@ sub monExact {
              "$target->{'rrd-datafile'}.");
         return 1;
     }
+    return ($nanErr,'NaN') if isNaN($value);
 
     return $exact eq $value ? 0 : 1;
 }
@@ -270,7 +276,7 @@ sub monFailures {
         return 1;
     }
     # FAILURES array stores a 1 for a failure (so should return 0)
-    return 1 if isNaN($ret);
+    return (1,'NaN') if isNaN($ret);
     return !($ret);
 }
 
@@ -312,9 +318,10 @@ sub monQuotient {
              "$target->{'rrd-datafile'}.");
         return 1;
     }
+    return ($nanErr,'NaN') if isNaN($value);
 
     my $cmp_value = $self -> FetchComparisonValue($target,$ds,$cmp_name,$cmp_ds,$cmp_time);
-    return 1 if isNaN($cmp_value);
+    return ($nanErr,'NaN') if isNaN($cmp_value);
 
     my($difference) = abs($cmp_value - $value);
     $thresh = abs($thresh); # differences are always positive
@@ -454,12 +461,6 @@ sub dispatchAlarm {
     my ($args, $action) = @_;
 
     my ($target, $ds, $val) = ($$args[1], $$args[3], $$args[8]);
-
-    if (defined($val) && isNaN($val)) {
-        Info("Monitor: NaN in last $ds value for target: " .
-             "$target->{'auto-target-path'} $target->{'auto-target-name'}.");
-        return (0,'NaN');
-    }
 
     my $alarmType       = $$args[6];
 
