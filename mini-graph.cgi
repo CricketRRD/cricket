@@ -40,6 +40,9 @@ use Common::Log;
 use Common::Util;
 Common::Log::setLevel('warn');
 
+# Set a safe path. Necessary for set[ug]id operation.
+$ENV{PATH} = "/bin:/usr/bin";
+
 # cache cleaning params
 #
 $gPollingInterval = 5 * 60;     # defaults to 5 minutes

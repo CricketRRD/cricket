@@ -57,6 +57,9 @@ use Common::Util;
 use Common::Map;
 use Common::HandleTarget;
 
+# Set a safe path. Necessary for set[ug]id operation.
+$ENV{PATH} = "/bin:/usr/bin";
+
 my $gLongDSName = $Common::global::gLongDSName;
 
 # default to warn. You might want to change this to 'debug' when
@@ -1272,6 +1275,11 @@ sub doGraph {
     } else {
         $imageName = "$Common::global::gCacheDir/cricket.$$.$type";
         $needUnlink++;
+    }
+
+    # Untaint $imageName.
+    if ($imageName =~ m,^($Common::global::gCacheDir/[^/]+)$,) {
+        $imageName = $1;
     }
 
     if (!defined($mtime) || ((time() - $mtime) > $gPollingInterval)) {
