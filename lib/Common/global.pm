@@ -85,6 +85,12 @@ BEGIN {
     if (!defined($gLogFullPath)) {
         $gLogFullPath = 0;
     }
+    if (!defined($gSubtreeTimes)) {
+        $gSubtreeTimes = 0;
+    }
+    if (!defined($gMailer)) {
+        $gMailer = '/bin/mailx';
+    }
 }
 
 1;

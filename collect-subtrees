@@ -62,12 +62,6 @@ my $gCurSet;
 my $mOut = 0; $mOut = 1 if(defined($gMailTo));
 my ($gSets, %gSets, @gSets);
 
-# Change this to = 1 if you want to get collection length statistics.
-my $subtreeTimes = 0;
-
-# Change this to your local mailer if you don't have /bin/mailx!
-my $gMailer = '/bin/mailx';
-
 open(S, "<$gCF") ||
     die("Could not read $gCF file.\n");
 
@@ -145,8 +139,10 @@ foreach my $s (@ARGV) {
     rollLogs($s);
     my $logfile = "$gLogDir/$s.0";
     my $timelogfile = "$gLogDir/$s.times";
-    if(-f $timelogfile && -s $timelogfile >=  50000 && $subtreeTimes == 1) {
-        rename $timelogfile, "$timelogfile.old";
+    if ($Common::global::gSubtreeTimes == 1) {
+        if(-f $timelogfile && -s $timelogfile >=  50000) {
+            rename $timelogfile, "$timelogfile.old";
+        }
     }
 
     $debugFlag = "-loglevel debug" if ($gDebug == 1);
@@ -163,7 +159,10 @@ foreach my $s (@ARGV) {
     # so that cron sends them to the admin.
 
     if (open(L, "<$logfile")) {
-        (open(TL, ">>$timelogfile") || print STDERR "Couldn't open $timelogfile: $!") unless (!$subtreeTimes == 1);
+        if ($Common::global::gSubtreeTimes == 1) {
+            open TL, ">>$timelogfile"
+              or print STDERR "Couldn't open $timelogfile: $!\n";
+        }
         my $lastWasError;
         my $skipLine;
 
@@ -208,7 +207,7 @@ foreach my $s (@ARGV) {
         }
         close(L);
 
-        if ($subtreeTimes == 1) {
+        if ($Common::global::gSubtreeTimes == 1) {
             print TL $hist[$#hist];
             close(TL);
         }
@@ -257,8 +256,8 @@ sub mailHist {
     if($#output > 0) {
         my $subject = "output from subtree " . $subtree;
 
-        open(MAIL, "|$gMailer -s \"$subject\" $gMailTo") ||
-            die "Couldn't run $gMailer to send subtree output: $!\n";
+        open(MAIL, "|$Common::global::gMailer -s \"$subject\" $gMailTo")
+          or die "Couldn't run $Common::global::gMailer to send subtree output: $!\n";
         print MAIL @output;
         close(MAIL);
     }

@@ -1,3 +1,9 @@
+New features, fixes in version 1.0.6 (TBD)
+
+  The configuration variables $subtreeSets and $gMailer from collect-subtrees
+  have now been exorcized in favor of $gSubtreeSets and $gMailer, respectively,
+  in cricket-conf.pl. [Bug #847413]
+
 New features, fixes in version 1.0.5
 
 	Cricket 1.0.5 is essentially a minor bugfix release.
