@@ -19,8 +19,18 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+BEGIN {
+   # this script lives in the util subdirectory
+   my $programdir = (($0 =~ m:^(.*/)util:)[0] || "../") . ".";
+   eval "require '$programdir/cricket-conf.pl'";
+   eval "require '/usr/local/etc/cricket-conf.pl'"
+                 unless $Common::global::gInstallRoot;
+   $Common::global::gInstallRoot ||= $programdir;
+}
+
 use strict;
-use lib "$ENV{HOME}/cricket/lib";
+use lib "$Common::global::gInstallRoot/lib";
+use Common::global;
 
 use HTTP::Date; 
 use RRDs;
@@ -32,13 +42,12 @@ my $tnum    = 0;
 my $when    = 0;
 my $now		= time();
 
-if (! -f "$ENV{HOME}/cricket-logs/$subtree.times") {
-	die "Couldn't find $ENV{HOME}/cricket-logs/$subtree.times.\n";
+if (! -f "$Common::global::gCricketHome/cricket-logs/$subtree.times") {
+	die "Couldn't find $Common::global::gCricketHome/cricket-logs/$subtree.times.\n";
 } else {
-	@output = `/bin/tail -1 $ENV{"HOME"}/cricket-logs/$subtree.times 2>&1`;
+	@output = `tail -1 $Common::global::gCricketHome/cricket-logs/$subtree.times 2>&1`;
 	if ($?) {
-		die "Error tailing $ENV{HOME}/cricket-logs/$subtree.times: $?\n";
-	}
+		die "Error tailing $Common::global::gCricketHome/cricket-logs/$subtree.times: $?\n"; }
 }
 
 if ($output[0] =~ /\[(.*?)\]\s+Processed\s+([0-9]+)\s+targets\s+in\s+(.*)\.$/) {
@@ -56,9 +65,15 @@ if ($output[0] =~ /\[(.*?)\]\s+Processed\s+([0-9]+)\s+targets\s+in\s+(.*)\.$/) {
 	die "Bad line in $subtree.times: $output[0]";
 }
 
+if ($when ne 'N') {
 printf("%d\@%s\n", $dur, $when);
 printf("%d\@%s\n", $tnum, $when);
 printf("%.2f\@%s\n", $tnum/$dur, $when);
+} else {
+printf("%d\n", $dur);
+printf("%d\n", $tnum);
+printf("%.2f\n", $tnum/$dur);
+}
 
 exit(0);
 
