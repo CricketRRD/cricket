@@ -1,6 +1,24 @@
 New features, fixes in version 1.0.4
 
-    Support for package qualification in func data source fetching
+	Added new META monitor thresholds action [Patch #821255].
+
+	Added support for sparc64-netbsd from Edwin Mons [Patch #803408].
+
+	Documented the "use-gprint" target option [Bug #667178].
+
+	Documented the "show-path" target option [Bug #667179].
+
+	Added support for optionally logging the full path to a datasource
+	in collector output. By setting $gLogFullPath=1 in cricket-sonf.pl
+	you will get e.g. "Switches/Cat4000/core/FastEthernet0_1" instead
+	of just "FastEthernet0_1" in your logs.
+
+	Added a new "hidden" tag to the "target" dictionary. When this is
+	set to a true value the target will be skipped by the grapher to
+	enable you to display the data combined in an "mtarget" instead.
+	[Patch #697737]
+
+	Support for package qualification in func data source fetching
 	(patch #772097).
 
 	Support for RRD version 0003 files on some architectures; the
@@ -81,22 +99,6 @@ New features, fixes in version 1.0.4
 	misinterpreted by the graphing code.
 
 	Updated getFormat.c from John Woolner [Patch #454472].
-
-        Added support for sparc64-netbsd from Edwin Mons [Patch #803408].
-
-        Documented the "use-gprint" target option [Bug #667178].
-
-        Documented the "show-path" target option [Bug #667179].
-
-        Added support for optionally logging the full path to a datasource
-        in collector output. By setting $gLogFullPath=1 in cricket-sonf.pl
-        you will get e.g. "Switches/Cat4000/core/FastEthernet0_1" instead
-        of just "FastEthernet0_1" in your logs.
-
-        Added a new "hidden" tag to the "target" dictionary. When this is
-        set to a true value the target will be skipped by the grapher to
-        enable you to display the data combined in an "mtarget" instead.
-        [Patch #697737]
 
 New features, fixes in version 1.0.3
 
