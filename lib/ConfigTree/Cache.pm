@@ -63,6 +63,7 @@ sub init {
     if ($useSlurp) {
         ($dbh) = tie %db2, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
         %db = %db2;
+	untie(%db2);
     } else {
         ($dbh) = tie %db, 'DB_File', $file, O_RDONLY, 0644, $DB_BTREE;
     }

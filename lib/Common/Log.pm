@@ -20,6 +20,7 @@
 
 package Common::Log;
 require Exporter;
+
 @ISA = qw(Exporter);
 
 @EXPORT = qw(Debug Warn Info Die Error LogMonitor isDebug);
@@ -49,7 +50,11 @@ sub Log {
     if ($level <= $gCurLogLevel) {
         my($time) = timeStr(time());
         my($stuff) = $time . $severity;
-        print STDERR "[$stuff] $msg\n";
+	if(defined($main::th)) {
+	       	print STDERR "[$stuff] ($main::th) $msg\n";
+	} else {
+	       	print STDERR "[$stuff] $msg\n";
+	}	
     }
 }
 

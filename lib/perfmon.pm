@@ -167,7 +167,8 @@ sub perfmonFetch {
 
         $myobject = lc($myobject);
 
-        $perflib= new Win32::PerfLib($server) if ($count++ == 0);
+        $perflib = new Win32::PerfLib($server) if ($count++ == 0);
+	#if(!($perflib)) { return; }
         $perflib->GetObjectList($rcounter->{$server}->{$myobject}, $pr1);
         $perflib->Close() if ($count >= $num_fetch);
 
@@ -238,7 +239,7 @@ sub perfmonFetch {
         }
 
         if($matches > 1) {
-            Warn("More than one matches for datasource line: $ilRef. Only last instance will be used!");
+            Debug("More than one matches for datasource line: $ilRef. Only last instance will be used!");
         }
 
         if($matches < 1) {
