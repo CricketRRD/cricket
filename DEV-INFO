@@ -1,0 +1,91 @@
+Information for developers
+==========================
+
+
+This file is of interest to all people who will ever make or suggest
+a change to Cricket. A lot of time is spent on maintaining Cricket, and
+following the guidelines given here will result in more time being
+spent on Cricket and less time on the mechanics of maintenance. Even if
+not everything applies to you, please at least skim over it.
+
+Coding guidelines
+-----------------
+
+ - No hard tabs.
+ - virtual tabs at every four spaces.
+ - "K&R" style braces, e.g.
+        if ($foo) {
+            &bar($foo);
+        } else {
+            &baz($foo);
+        }
+ - No trailing whitespace allowed.
+ - No CRLF's as line terminators allowed.
+ - Code to fit in 80 column lines where possible.
+ - Indentation of split lines loosely following the default Emacs style, e.g.
+        Common::VeryLongFunctionWithLotsOfArgs($foo, $bar, "abdefg",
+                                               "defghij");
+
+I'd like to stress the "loosely", as sometimes Emacs comes out
+quite ugly, or guesses wrong from time to time.
+
+The Emacs magic appended to each file is:
+
+# Local Variables:
+# mode: perl
+# indent-tabs-mode: nil
+# tab-width: 4
+# perl-indent-level: 4
+# End:
+
+Of course, you are free to use any editor you like (and matter of fact,
+if you're using Emacs, you'd better look out for its quirks).
+
+Rationale: most of this is the old "When In Rome, Do As The Romans Do"
+paradigm.
+
+
+Guidelines for sending diffs
+----------------------------
+
+If you want to send a diff to the mailing list or to the Sourceforge
+bug or patch tracker, please keep this in mind:
+
+ - Plain diff is unsafe to use. Send "diff -c2" output, or if that
+   results in an ugly diff, "diff -u" format (and if you elect to use
+   "-u", remember that not everyone will be able to apply your patch).
+ - Try to diff against a reliable source. "cvs diff" is preferred,
+   but a good alternative is to unpack an unmodified copy of Cricket
+   in ../orig/cricket-x.x.x, so that you can use
+	diff -rc2 ../orig/cricket-1.0.2 .
+   to produce a complete diff
+ - Do not include unnecessary comments like your initials in the code.
+   CVS does a great job of recording who changed what, and the
+   developers have a good track record of acknowledging contributors. And
+   explaining Perl syntax, that's what the Perl books are for (unless
+   the issue really is counterintuitive, but that's pretty rare).
+ - Always mention what the diff does, what circumstances may be relevant,
+   and what version of the code it applies to.
+
+
+Guidelines for CVS commits
+--------------------------
+
+When committing code to CVS, please follow these guidelines:
+
+ - Always run a "cvs diff|more" before you commit, and make sure your
+   commit does not commit stuff you didn't intend to commit. If necessary,
+   make notes of the diff output so that you know what to put in the
+   log message.
+ - Avoid committing unrelated changes, if at all possible. If necessary,
+   commit in two passes (for example, white space policing first, then
+   functionality).
+ - Give a meaningful log message. When committing multiple files,
+   tell what you did to each file and why. Try to indicate even small
+   changes like whitespace policing or fixing typos.
+
+Rationale: The commit messages are important later on, so keep the person
+who has to track problems later in mind when you commit. Nothing is more
+disrupting than having to run "cvs diff" on each revision to find out
+which commit introduced certain code or wording, especially if the log
+message seems to indicate this file wasn't affected at all by the commit.
