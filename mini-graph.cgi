@@ -34,6 +34,7 @@ use lib "$Common::global::gInstallRoot/lib";
 
 use CGI qw(fatalsToBrowser);
 use Digest::MD5;
+use HTTP::Date;
 
 use Common::global;
 use Common::Log;
@@ -102,7 +103,14 @@ sub tryPng {
 sub sprayPng {
     my($png) = @_;
 
-    print $main::gQ->header('image/png');
+    my $mtime   = (stat($png))[9];
+    my $expires = $mtime + $gPollingInterval;
+ 
+    print $main::gQ->header(
+                            -type           => 'image/png',
+                            'Last-Modified' => time2str($mtime),
+                            -expires        => time2str($expires),
+                           );
 
     if (! tryPng($png)) {
         Warn("Could not open $png: $!");
@@ -125,7 +133,6 @@ sub generateImageName {
     $md5->add(urlTarget($q));
 
     foreach $param ($q->param()) {
-        next if ($param eq 'rand');
         next if ($param eq 'target');
         if ($param eq 'cache') {
             if (lc($q->param($param)) eq 'no') {

@@ -44,6 +44,7 @@ use lib "$Common::global::gInstallRoot/lib";
 use CGI qw(fatalsToBrowser);
 use RRDs 1.000101;
 use Digest::MD5;
+use HTTP::Date;
 
 use RPN;
 use RRD::File;
@@ -577,11 +578,6 @@ sub doHTMLPage {
                     }
                     $gQ->param('range', $range);
                     $gQ->param('hw',$hwParam) if (defined($hwParam));
-
-                    # this parameter is to trick Netscape into
-                    # always asking the CGI for the image, instead
-                    # of trying to cache it inappropriately
-                    $gQ->param('rand', int(rand(1000)));
 
                     # pass thru the value of the cache param, if given
                     $gQ->param('cache', $cache) if (defined($cache));
@@ -1982,11 +1978,17 @@ sub sprayPic {
         }
     }
 
-    if ($pic =~ /png$/i) {
-        print $gQ->header('image/png');
-    } else {
-        print $gQ->header('image/gif');
-    }
+    # Get the last modified of the image and calculate when it expires.
+    my $mtime   = (stat($pic))[9];
+    my $expires = $mtime + $gPollingInterval;
+
+    # Find correct MIME type, output HTTP header, and send the image.
+    my $type = ($pic =~ /png$/i ? 'image/png' : 'image/gif');
+    print $gQ->header(
+                      -type           => $type,
+                      'Last-Modified' => time2str($mtime),
+                      -expires        => time2str($expires),
+                      );
     print $picData;
 
     return 1;
@@ -2209,7 +2211,6 @@ sub generateImageName {
     $md5->add(urlTarget($q));
 
     foreach $param ($q->param()) {
-        next if ($param eq 'rand');
         next if ($param eq 'target');
         if ($param eq 'cache') {
             if (lc($q->param($param)) eq 'no') {
