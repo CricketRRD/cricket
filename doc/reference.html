@@ -578,6 +578,30 @@ When using instance mapping, the <tt>snmp</tt> tag is used directly,
 so it must be present, even if you are using another convention to get
 the data into the ds-source tags.  <p>
 
+<dt><tt>snmp-uptime</tt><p>
+<dd>Default value: <i>none</i><p>
+
+If an <tt>snmp-uptime</tt> tag is specified, <tt>collector</tt> will
+retrieve the specified SNMP object and interpret it as the remote
+device uptime. If the uptime is less than the <tt>rrd-poll-interval</tt>,
+Cricket will assume the device has been rebooted and will ignore the
+previous value of any <tt>COUNTER</tt>s on the device (effectively
+instructing RRD to just store the value as a baseline for the next sample).
+This tag should only be used if you <i>must</i> use <tt>COUNTER</tt>
+rather than <tt>DERIVE</tt> as the datatype for your data, because
+checking the uptime will not protect you against a host of other
+causes for spurious counter wraps. Use at your own risk, most users
+should just use the <tt>DERIVE</tt> datatype for counters.
+
+<p>Example: <tt>snmp-uptime = 1.3.6.1.2.1.1.3.0
+</tt>
+<p>This example shows how to use the system.sysUptime object to
+determine the device uptime. This tag only makes sense in the
+<tt>target --default--</tt> stanza, because specifying it will affect
+all collected counters. <p>
+
+If not specified, Cricket will not monitor device uptime for reboots. <p>
+
 <dt><tt>summary-loc</tt><p>
 <dd>Default value: <i>top</i><p>
 
