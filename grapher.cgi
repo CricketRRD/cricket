@@ -44,7 +44,7 @@ BEGIN {
 
 use lib "$Common::global::gInstallRoot/lib";
 
-use CGI qw(fatalsToBrowser);
+use CGI 2.42 qw(fatalsToBrowser);
 use RRDs 1.000101;
 use MD5;
 
@@ -201,7 +201,7 @@ sub doHTMLPage {
 				}
 
 				$gQ->param('inst', $inst);
-				my($me) = $gQ->self_url();
+				my($me) = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
 
 				my($link) = "<a href=\"$me\">$text</a> ";
 
@@ -456,7 +456,7 @@ sub doHTMLPage {
                         if (defined($view))  {
                             $gQ->param('view', $view);
                         }
-                        $linkurl = $gQ->self_url();
+                        $linkurl = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
  
                         print "<a href=\"$linkurl\">";
  
@@ -539,7 +539,7 @@ sub doHTMLPage {
 					# pass thru the value of the cache param, if given
 					$gQ->param('cache', $cache) if (defined($cache));
 
-					my($me) = $gQ->self_url();
+					my($me) = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
 					if (! $ENV{'MOD_PERL'}) {
 						$me =~ s/grapher\.cgi/mini-graph\.cgi/;
 					}
@@ -729,7 +729,7 @@ sub doHTMLPage {
 						
                         # put it in just long enough to get a URL out
                         $gQ->param('view', $vname);
-                        my($me) = $gQ->self_url();
+                        my($me) = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
                         $gQ->delete('view');
 						
 						$links .= "<a href=\"$me\">[&nbsp;$vname&nbsp;]</a>\n";
@@ -738,7 +738,7 @@ sub doHTMLPage {
 					print "<tr><td>$itemName<br>" .
 						"&nbsp;&nbsp;&nbsp;\n$links</td>\n";
 				} else {
-					my($me) = $gQ->self_url();
+					my($me) = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
 
 					my($link) = "<a href=\"$me\">$itemName</a>";
 					print "<tr><td>$link</td>\n";
@@ -769,7 +769,7 @@ sub doHTMLPage {
 				$newTarg =~ s#^\/\/#\/#;
 
 				$gQ->param('target', $newTarg);
-				my($me) = $gQ->self_url();
+				my($me) = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
 
 				my($link) = "<a href=\"$me\">$item</a>";
 				print "<tr><td>$link</td><td>$desc</td></tr>\n";
@@ -1925,7 +1925,7 @@ sub makeNavLinks {
 	my($i) = 0;
 	foreach $r (@r) {
 		$gQ->param('ranges', $r[$i]);
-		my($me) = $gQ->self_url();
+		my($me) = $gQ->url(-relative=>1,-query=>1,-path_info=>1);
 		push @links, "<a href=\"$me\">$rName[$i]</a>" .
 			"&nbsp;&nbsp;&nbsp;";
 		$i++;
