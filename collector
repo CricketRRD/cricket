@@ -240,7 +240,7 @@ sub localHandleTargetInstance {
 			my $ds = 0;
 			foreach my $val (@data2) {
 				my @time = localtime();
-				my $timestamp = ($time[4] + 1) . "-" . ($time[3] + 1) . "-" . ($time[5] + 1900) . " $time[2]:$time[1]";
+				my $timestamp = ($time[4] + 1) . "-" . ($time[3]) . "-" . ($time[5] + 1900) . " $time[2]:$time[1]";
 
 				my $null = $dbh->do("use cricket; insert into CricketData (targetPath, targetName, ds, value, timestamp) values ('$tpath', '$tname', '$ds', '$val', '$timestamp')");
 				$ds++;
