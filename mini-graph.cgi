@@ -44,6 +44,12 @@ Common::Log::setLevel('warn');
 #
 $gPollingInterval = 5 * 60;     # defaults to 5 minutes
 
+$Common::global::gUrlStyle ||= "classic";
+my $gUsePathInfo = 0;
+if ($Common::global::gUrlStyle eq "pathinfo") {
+    $gUsePathInfo = 1;
+}
+
 $main::gQ = new CGI;
 
 doGraph();
