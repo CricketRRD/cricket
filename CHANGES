@@ -1,5 +1,15 @@
 New features, fixes in version 1.1.x (?):
 
+	The SNMP code now has intelligence built in to quickly
+	skip a device that is down or otherwise doesn't respond.
+	After two successive timeouts from the same host in one
+	collector run, that host is considered down and subsequent
+	targets on that device will be marked 'U' without checking. 
+	This avoids the syndrome where one device with a lot of
+	targets can significantly slow down your collection
+	process. If you need, you can increase MAXTRIES in
+	lib/snmpUtils.pm .
+
 	The top level Defaults now sets rrd-min to 0 rather than
 	undef. The default rrd-ds-type now is DERIVE instead of
 	COUNTER. These changes prevent spikes in graphs. For the

@@ -13,6 +13,14 @@ WebTV gets new stuff for free in return. So I am indebted to these
 contributors for making this project possible. These folks
 contributed ideas, patches, and/or debugging info:
 
+	Mike Fisher
+		contributed the dead device detection
+
+	Bert Driehuis <driehuis@playbeing.org>
+		pushed to get DERIVE the distributed standard
+		contributed snmp-uptime
+		various minor bugfixes	
+
 	Shannon Reis <sreis@fastlane.net>
 		contributed a fix for annoying y-min/y-max behavior
 		contributed the nifty avg/max reporting, and added
