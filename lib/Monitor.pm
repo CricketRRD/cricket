@@ -434,88 +434,132 @@ sub getDSNum {
 
 # Subroutines to handle alarms
 
+sub dispatchAlarm {
+# order of arguments: $self, $target, $name, $ds, $type, $threshold,
+#                     $alarmType, $alarmArgs, $val
+    my ($args, $action) = @_;
+                             
+    my ($target, $ds, $val) = ($$args[1], $$args[3], $$args[8]);
+
+    if (defined($val) && $val =~ /^nan/i) {
+        Info("NaN in last value for target: $target->{'auto-target-path'} $target->{'auto-target-name'} for $ds.");
+        return (0,'NaN');
+    }
+
+    my $alarmType       = $$args[6];
+
+    my %dispatch = (
+        EXEC => \&alarmExec,
+        FILE => \&alarmFile,
+        FUNC => \&alarmFunc,
+        MAIL => \&alarmMail,
+        SNMP => \&alarmSnmp,
+    );
+
+    my $alarm = $dispatch{$alarmType};
+
+    unless (defined($alarm)) { Warn("Unknown alarm: $alarmType"); return; }
+
+    my $return = $alarm->($args, $action);
+    return;
+};
+
+
 # Process alarm action
 sub Alarm {
-    my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs,$val) = @_;
+# order of arguments: $self, $target, $name, $ds, $type, $threshold,
+#                     $alarmType, $alarmArgs, $val
+    my $action = 'ADD';
 
-    if ($alarmType eq 'EXEC') {
-        system($alarmArgs->[0]);
-        Info("Triggered event with shell command '".$alarmArgs->[0]."' .");
-    } elsif ($alarmType eq 'MAIL') {
-        $self->sendEmail(
-                         'alarm',
-                         $alarmArgs,
-                         $type,
-                         $threshold,
-                         $name,
-                         $ds,
-                         $val,
-                         $target->{'inst'});
-    } elsif ($alarmType eq 'FUNC') {
-        if (defined $main::gMonFuncEnabled) {
+    my $return = \&dispatchAlarm(\@_, $action);
+    return;
+};
+
+# Action to clear an alarm
+sub Clear {
+# order of arguments: $self, $target, $name, $ds, $type, $threshold,
+#                     $alarmType, $alarmArgs, $val
+    my $action = 'CLEAR';
+    
+    my $return = \&dispatchAlarm(\@_, $action);
+    return;
+};
+
+sub alarmExec {
+    my ($args, $action) = @_;
+    my $alarmArgs       = $$args[7];
+    system($alarmArgs->[0]);
+                            
+    if ($action eq 'ADD') {
+        Info("Triggered event with system command '".$alarmArgs->[0]."' .");
+    }
+
+    else {
+        Info("Cleared event with shell command '".$alarmArgs->[1]."' .");
+    }
+    
+    return;
+};
+
+sub alarmFile {
+    my ($args, $action)  = @_;
+    my ($self, $target)    = ($$args[0], $$args[1]);
+    my ($name, $ds)        = ($$args[2], $$args[3]);
+    my ($type, $threshold) = ($$args[4], $$args[5]);
+    my ($alarmArgs, $val)  = ($$args[7], $$args[8]);
+        
+    $self->LogToFile($alarmArgs, $action, $name, $ds, $val);
+    return;
+};
+
+sub alarmFunc {
+    my ($args, $action) = @_;
+    my $alarmArgs       = $$args[7];
+                                    
+    if (defined $main::gMonFuncEnabled) {
+
+        if ($action eq 'ADD') {
             eval($alarmArgs->[0]);
             Info("Triggered event with FUNC '".$alarmArgs->[0]."' .");
-        } else {
-            Warn("Exec monitor $threshold triggered, but executable alarms are not enabled.");
         }
-    } elsif ($alarmType eq 'SNMP') {
-        my($Specific_Trap_Type) = 4; # Violation Trap
-        $self->sendMonitorTrap(
-                               $target,
-                               $Specific_Trap_Type,
-                               $type,
-                               $threshold,
-                               $name,
-                               $ds,
-                               $val);
-    } elsif ($alarmType eq 'FILE') {
-        $self->LogToFile($alarmArgs->[0],'ADD',$name,$ds);
-    } else {
-        Warn("Alarm Type $alarmType is not known.");
-    }
-}
 
-# Action to clear an alarm, you can change this to do whatever you need
-# Default is to send a trap
-sub Clear {
-    my($self,$target,$name,$ds,$type,$threshold,$alarmType,$alarmArgs,$val) = @_;
-
-    if ($alarmType eq 'EXEC') {
-        system($alarmArgs->[1]) ;
-        Info("Cleared event with shell command '".$alarmArgs->[1]."' .");
-    } elsif ($alarmType eq 'MAIL') {
-        $self->sendEmail(
-                         'clear',
-                         $alarmArgs,
-                         $type,
-                         $threshold,
-                         $name,
-                         $ds,
-                         $val,
-                         $target->{'inst'});
-    } elsif ($alarmType eq 'FUNC') {
-        if (defined $main::gMonFuncEnabled) {
+        elsif ($action eq 'CLEAR') {
             eval($alarmArgs->[1]);
             Info("Cleared event with FUNC '".$alarmArgs->[1]."' .");
-        } else {
-            Warn("Exec monitor $threshold triggered, but executable alarms are not enabled.");
         }
-    } elsif ($alarmType eq 'SNMP') {
-        my($Specific_Trap_Type) = 5; # Clear Trap
-        $self->sendMonitorTrap(
-                               $target,
-                               $Specific_Trap_Type,
-                               $type,
-                               $threshold,
-                               $name,
-                               $ds,
-                               $val);
-    } elsif ($alarmType eq 'FILE') {
-        $self->LogToFile($alarmArgs->[0],'CLEAR',$name,$ds);
-    } else {
-        Warn("Alarm Type $alarmType is not known.");
+
     }
-}
+
+    else {
+        Warn("Exec triggered, but executable alarms are not enabled.");
+    }
+
+    return;
+};
+
+sub alarmMail {
+    my ($args, $action)    = @_;
+    my ($self, $target)    = ($$args[0], $$args[1]);
+    my ($name, $ds)        = ($$args[2], $$args[3]);
+    my ($type, $threshold) = ($$args[4], $$args[5]);
+    my ($alarmArgs, $val)  = ($$args[7], $$args[8]);
+    $self->sendEmail( $action, $alarmArgs, $type, $threshold,
+                      $name, $ds, $val, $target->{'inst'} );
+    return;
+};
+
+sub alarmSnmp {
+    my ($args, $action)    = @_;
+    my ($self, $target)    = ($$args[0], $$args[1]);
+    my ($name, $ds)        = ($$args[2], $$args[3]);
+    my ($type, $threshold) = ($$args[4], $$args[5]);
+    my ($val)              = ($$args[8]);
+
+    my $Specific_Trap_Type = $action eq 'ADD' ? 4 : 5;
+    $self->sendMonitorTrap( $target, $Specific_Trap_Type, $type,
+                            $threshold, $name, $ds, $val );
+    return;
+};
 
 # Attempt to send an alarm trap for a given target
 sub sendMonitorTrap {
@@ -615,7 +659,6 @@ sub LogToFile {
         Info("$targetName $dataSourceName already deleted from file $filePath");
         return;
     }
-
     # need to print out @lines, which excludes the $targetLine
     # overwrite old file
     unless (open(OUTFILE, ">$filePath")) {
