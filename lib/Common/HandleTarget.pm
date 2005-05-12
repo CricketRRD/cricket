@@ -155,7 +155,7 @@ sub checkTargetInstance {
         # restore escaped commas
         $Threshold =~ s/\0/,/g ;
 	#Cleanup newlines as they break meta files
-        $Threshold =~ s/[\n\r]+$// ; 
+        $Threshold =~ s/[\n\r]+$//g ; 
 
         my($span) = 0;
         my($spanlength);
