@@ -158,6 +158,7 @@ sub checkTargetInstance {
         my($spanlength);
 
         my($ds,$type,$args) = split(/\s*:\s*/, $Threshold, 3);
+        $args =~ s/[\s\n\r]+$// ; #Cleanup newlines as they break meta files
         ($args, $spanlength) = split(/:SPAN:/, $args, 2) if ($args =~ /SPAN/);
         if (defined ($spanlength) && $spanlength =~ /\d+/ ){
             $span = 1;
