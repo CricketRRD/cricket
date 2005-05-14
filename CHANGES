@@ -1,5 +1,8 @@
 New features, fixes in version 1.0.6 (TBD)
 
+  $gInstallRoot is now propogated to the environment during collector
+  runs for the benefit of "exec" datasources.
+
   Removed call to fixNum() in snmp.pm routine snmpFetch. This addresses
   Bug #974877.
 

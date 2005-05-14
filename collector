@@ -59,6 +59,12 @@ my $starttime = time();
 # to commented out.
 # use func;
 
+
+#
+# Propogate some usefull variables to the environment.
+# (exec datasources make use use these)
+$ENV{gInstallRoot} = $Common::global::gInstallRoot;
+
 Common::Options::commonOptions(
                  "skipMonitor" => \$Common::global::gSkipMonitor);
 
