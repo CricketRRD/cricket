@@ -12,7 +12,7 @@ New features, fixes in version 1.0.6 (TBD)
 
   Added two new HOWTOs, cricket-nt.html and polling-rate.html, which
   explain how to get Cricket running on Windows NT and how to change the
-  polling rate, respectively. See the doc/HOWTO/ direectory.
+  polling rate, respectively. See the doc/HOWTO/ directory.
   [Patch #205966] / [Patch #818057]
 
   Added a target's "short-desc" string to the page title. [Bug #213706]
