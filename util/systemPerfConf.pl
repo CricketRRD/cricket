@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 # Host config file generator for Cricket, based on work by
 # James Moore <jam@afn.org> and Grimshaw Stuart

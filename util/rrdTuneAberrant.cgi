@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -wT
+#!/usr/bin/perl -wT
 # -*- perl -*-
 
 # Cricket: a configuration, polling and data display wrapper for RRD files
