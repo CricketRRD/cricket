@@ -137,7 +137,8 @@ sub isTrue {
 }
 
 sub isNaN {
-    return ($_[0] =~ /^NaN/i);
+    return 0 unless defined $_[0]; # False-but-defined.
+    return $_[0] =~ /^NaN/i;
 }
 
 sub Eval {
