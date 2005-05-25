@@ -183,6 +183,7 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
         <li><a href="#target">target</a></li>
         <li><a href="#datasource">datasource</a></li>
         <li><a href="#targettype">targetType</a></li>
+        <li><a href="#monitortype">monitorType</a></li>
         <li><a href="#graph">graph</a></li>
         <li><a href="#view">view</a></li>
         <li><a href="#color">color</a></li>
@@ -392,6 +393,17 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
             <p>
               Monitor thresholds are discussed in detail in <a
               href="monitor-thresholds.html">this document</a>.
+            </p>
+          </dd>
+          <dt><tt>monitor-type</tt></dt>
+          <dd>Default-value: <i>none</i>
+            <p>
+              A monitor-type refers to monitor-thresholds templates
+	      defined using the monitorType dictionnary. This is used
+	      to define monitor-thresholds once in common monitorType
+	      items. These are then referenced within a target using
+	      the monitor-type tag/value. where the value is the name
+	      of the monitorType you wish to apply.
             </p>
           </dd>
           <dt><tt>mtargets</tt></dt>
@@ -1209,6 +1221,27 @@ thing_2 blue 222
               Also like <tt>rrd-max</tt>, if <tt>rrd-min</tt> appears in the
               target dictionary, it will override the <tt>rrd-min</tt> in
               the datasource dictionary.
+            </p>
+          </dd>
+        </dl>
+      </div>
+
+      <div id="monitortype">
+        <h3>The monitorType Dictionary</h3>
+        <p>
+          The monitorType dictionary tells Cricket which monitor thresholds to
+          apply for a certain kind of target.
+        </p>
+        <dl>
+          <dt><tt>monitor-thresholds</tt></dt>
+          <dd>Default value: <i>none</i>
+            <p>
+              The <tt>monitor-thresholds</tt> tag tells Cricket about
+	      a variable it will be adding to a target. The value of
+	      the tag must be a quote enclosed comma-separated list of
+              monitor thresholds. 
+              Defining monitor thresholds are discussed in detail in <a
+              href="monitor-thresholds.html">this document</a>.
             </p>
           </dd>
         </dl>

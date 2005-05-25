@@ -133,6 +133,16 @@ target router-chassis
     "cpu1min : value : n : 60 : META : router-cpu : yellow,
      cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
      mem5minUsed : quotient : &gt;60pct : : processorRam: META"
+
+target router-chassis
+  persistent-alarms  = false
+  monitor-type = router-chassis
+
+monitorType router-chassis
+    monitor-thresholds = 
+    "cpu1min : value : n : 60 : META : router-cpu : yellow,
+     cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
+     mem5minUsed : quotient : &gt;60pct : : processorRam: META"
       </code>
       <p class="note">
         Note: Make sure to include spaces or tabs leading each line related
@@ -258,6 +268,26 @@ target router-chassis
             action, this is by design, read the Actions section for details on
             how to use this and other actions.
           </li>
+        </ul>
+        <code class="block">
+target router-chassis
+  persistent-alarms = false
+  monitor-type = router-chassis
+
+monitorType router-chassis
+    monitor-thresholds = 
+    "cpu1min : value : n : 60 : META : router-cpu : yellow,
+     cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
+     mem5minUsed : quotient : &gt;60pct : : processorRam: META"
+         </code>
+         <p>
+          This is a variation on the third target, &ldquo;<code>router-chassis</code>&rdquo;,
+          has a no monitor thresholds. Instead it references a monitor-type. iThe monitor type holds the definitions for the monitor-thresholds. Which is similar in concept to a target-type. This way you only have to maintain your monitor-types instead of having to maintain possibly hundreds of target monitor-thresholds.
+        </p>
+        <ul>
+          <li> 
+          Existing monitor-threshold rules apply to what can be defined in a monitorType. This construct is referenced within Handletarget.pm when processing monitor-thresholds for a given target.
+	  </li>
         </ul>
       </div>
     <div>
