@@ -115,14 +115,23 @@ sub handleTargetInstance {
 
 sub checkTargetInstance {
     my($name,$target) = @_;
-
+    my($mtRef);
     # expand it wrt itself
     ConfigTree::Cache::expandHash($target, $target, \&Warn);
 
-    if (! $target->{'monitor-thresholds'}) {
+    if (! $target->{'monitor-thresholds'} && ! $target->{'monitor-type'}) {
         return;
     }
-
+    # If defined monitor-type, fetch the definitions for this type.
+    if ($target->{'monitor-type'}) {
+        my($mtype) = lc($target->{'monitor-type'});
+        $mtRef = $main::gCT->configHash($name, 'monitortype', $mtype, $target);
+        if (! $mtRef) {
+            Warn("Unknown monitor-type type: $mtype.");
+            return;
+        }
+    }
+    
     my($m) = new Monitor;
     my($rrd) = new RRD::File( -file=>$target->{'rrd-datafile'} );
     if (!$rrd->open()) {
@@ -132,10 +141,20 @@ sub checkTargetInstance {
 
     my $rrdpollinterval = $target->{'rrd-poll-interval'};
     my $time = time();
-    # Convert backslashed commas to \0's ;
-    my $ThresholdString = $target->{'monitor-thresholds'};
-    $ThresholdString =~ s/\\,/\0/g ;
-    my(@ThresholdStrings) = split(/\s*,\s*/, $ThresholdString );
+    # Convert backslashed commas to \0's for any monitor-thresholds
+    my(@ThresholdStrings);
+    # Add defined thresholds to list of thresholds for target
+    if ($target->{'monitor-thresholds'}) {
+        my $ThresholdString = $target->{'monitor-thresholds'};
+        $ThresholdString =~ s/\\,/\0/g ;
+        @ThresholdStrings = split(/\s*,\s*/, $ThresholdString );
+    }
+    # Add monitor-type thresholds to list of thresholds for target
+    if ($mtRef->{'monitor-thresholds'}) {
+        my $ThresholdString = $mtRef->{'monitor-thresholds'};
+        $ThresholdString =~ s/\\,/\0/g ;
+        push(@ThresholdStrings, split(/\s*,\s*/, $ThresholdString ));
+    }
 
     my($Threshold);
     # General monitor threshold format:
@@ -155,8 +174,7 @@ sub checkTargetInstance {
         # restore escaped commas
         $Threshold =~ s/\0/,/g ;
 	#Cleanup newlines as they break meta files
-        $Threshold =~ s/[\n\r]+$//g ; 
-
+	$Threshold =~ s/[\n\r]+$//g ;
         my($span) = 0;
         my($spanlength);
 
