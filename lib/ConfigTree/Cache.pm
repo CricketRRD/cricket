@@ -56,7 +56,7 @@ sub init {
 
     $Common::global::gDbAccess ||= "slurp";
     if (($Common::global::gDbAccess eq "slurp") &&
-        ($Common::global::isCollector == 1)) {
+        (defined($Common::global::isCollector) && $Common::global::isCollector == 1)) {
             $useSlurp = 1;
     }
 
