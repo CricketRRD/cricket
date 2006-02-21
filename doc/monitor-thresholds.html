@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
@@ -23,22 +24,24 @@
       In Cricket, the alert mechanism is called a <dfn>Monitor
       Threshold</dfn>. Monitor thresholds are set (or enabled) for specific
       data sources through the &ldquo;<code>monitor-thresholds</code>&rdquo;
-      target dictionary tag. After the data collection pass, Cricket processes
-      each monitor threshold by retrieving the most recent value of a data
+      <a href="reference.html#target">target</a> dictionary tag. After the data
+      collection pass, Cricket processes each monitor threshold by retrieving
+      the most recent value of a data
       source from the RRD file and applying some criteria specific to the
       monitor threshold type. This criteria generates either a pass or fail
-      condition. Depending on the setting of the persistent-alarms tag for the
-      target, Cricket executes a specified action.
+      condition. Depending on the setting of the
+      &ldquo;<code>persistent-alarms</code>&rdquo; tag for the target, Cricket
+      executes a specified action.
     </p>
     <p>
       Note that the most recent value of a data source from the RRD file will
-      not necessarily agree with the most recent value fetched from by the
-      collector because RRDtool interpolates. For those familiar with RRD tool
-      internals, the &ldquo;most recent value&rdquo; is retreived from the
+      not necessarily agree with the most recent value fetched by the
+      collector because RRDtool interpolates. For those familiar with RRDtool
+      internals, the &ldquo;most recent value&rdquo; is retrieved from the
       first RRA in the file with a consolidation function of
       &ldquo;<code>AVERAGE</code>&rdquo;. The order of RRAs in the file is
-      specified by the &ldquo;<code>rra</code>&rdquo; tag in the targetType
-      dictionary.
+      specified by the &ldquo;<code>rra</code>&rdquo; tag in the <a
+      href="reference.html#targettype">targetType</a> dictionary.
     </p>
     <p>
       Note that a monitor threshold configured for a multi-instance
@@ -52,21 +55,21 @@
       <h2>Syntax</h2>
       <code class="block">
 monitor-thresholds = "&lt;monitor-threshold> [, &lt;monitor-threshold> ...]"
+monitor-threshold = <img src="monitor.gif" width="791" height="41" alt="Syntax of a monitor-threshold"/>
       </code>
-      <p><img src="monitor.gif" width="791" height="41"></p>
       <dl> 
-        <dt><var>data source</dt>
-        <dd>A data source defined for the target; Case sensitive.</p>
+        <dt><var>data source</var></dt>
+        <dd>A data source defined for the target; Case sensitive.</dd>
         <dt><var>monitor type</var></dt>
         <dd>
           <p>One of the six supported types:</p>
           <ul class="inline">
-            <li>exact</li>
-            <li>value</li>
-            <li>relation</li>
-            <li>hunt</li>
-            <li>quotient</li>
-            <li>failures</li>
+            <li><a href="#exact">exact</a></li>
+            <li><a href="#value">value</a></li>
+            <li><a href="#relation">relation</a></li>
+            <li><a href="#hunt">hunt</a></li>
+            <li><a href="#quotient">quotient</a></li>
+            <li><a href="#failures">failures</a></li>
           </ul>
           <p>Case insensitive.</p>
         </dd>
@@ -79,12 +82,12 @@ monitor-thresholds = "&lt;monitor-threshold> [, &lt;monitor-threshold> ...]"
         <dd>
           <p>One of six supported actions:</p>
           <ul class="inline">
-            <li>SNMP</li>
-            <li>MAIL</li>
-            <li>EXEC</li>
-            <li>FUNC</li>
-            <li>META</li>
-            <li>FILE</li>
+            <li><a href="#SNMP">SNMP</a></li>
+            <li><a href="#MAIL">MAIL</a></li>
+            <li><a href="#FILE">FILE</a></li>
+            <li><a href="#EXEC">EXEC</a></li>
+            <li><a href="#FUNC">FUNC</a></li>
+            <li><a href="#META">META</a></li>
           </ul>
           <p>Case insensitive.</p>
         </dd>
@@ -99,18 +102,19 @@ monitor-thresholds = "&lt;monitor-threshold> [, &lt;monitor-threshold> ...]"
         </dd>
         <dt>span-length</dt>
         <dd>
-          Number of time spans a thresholds should fail before triggering
-          an action. Number.
+          Number of time spans a threshold should fail before triggering
+          an action. Number. See <a href="#span">Monitoring Span</a>.
         </dd>
       </dl>
+    </div>
 
-      <div>
-        <h2>Format Examples</h2>
-        <p>
-          Please consider these as examples on using monitor thresholds,
-          not best practices.
-        </p>
-        <code class="block">
+    <div>
+      <h2>Format Examples</h2>
+      <p>
+        Please consider these as examples of using monitor thresholds,
+        not best practices.
+      </p>
+      <code class="block">
 target --default--
   mail-pgm          = /usr/bin/mailx
   trap-address      = 127.0.0.1
@@ -149,7 +153,7 @@ monitorType router-chassis
         to a target as above. Or Cricket will not process the line.
       </p>
       <div>
-        <h2>Explaining the Examples </h2>
+        <h3>Explaining the Examples</h3>
           <code class="block">
 target network-link-1
   monitor-thresholds =
@@ -168,7 +172,7 @@ target network-link-1
             &ldquo;<code>ifInOctets</code>&rdquo;, exceeds 2Mbps (2.000.000
             bits / 8 = 250.000 octets). It is important to note that all
             entries defined in the &ldquo;<code>--default--</code>&rdquo;
-            section will be inhereted by each target. In this case,
+            section will be inherited by each target. In this case,
             &ldquo;<code>persistent-alarms = true</code>&rdquo;, has a direct
             impact when the action will be executed.
           </li>
@@ -179,7 +183,7 @@ target network-link-1
             replaced at runtime with it's real value. 
           </li>
           <li> 
-            The third monitor threshold, checks to see if the current
+            The third monitor threshold checks to see if the current
             bandwidth, &ldquo;<code>ifInOctets</code>&rdquo;, has a value that
             is within 10% of the value recorded for the last interval (300
             seconds ago; assuming an
@@ -190,7 +194,7 @@ target network-link-1
             more than 10% over the interval, it invokes &ldquo;<code>mailx</code>&rdquo;
             to send a mail message to &ldquo;<code>me@mydomain.com</code>&rdquo;
             (note the escaped backslash and escaped &ldquo;<code>@</code>&rdquo;).
-            This action will also be executed everytime the threshold is
+            This action will also be executed every time the threshold is
             crossed due to the inherited
             &ldquo;<code>persistent-alarms</code>&rdquo;.
           </li>
@@ -279,19 +283,26 @@ monitorType router-chassis
     "cpu1min : value : n : 60 : META : router-cpu : yellow,
      cpu1min : value : n : 90 : META : router-cpu : red : SPAN : 3,
      mem5minUsed : quotient : &gt;60pct : : processorRam: META"
-         </code>
-         <p>
-          This is a variation on the third target, &ldquo;<code>router-chassis</code>&rdquo;,
-          has a no monitor thresholds. Instead it references a monitor-type. iThe monitor type holds the definitions for the monitor-thresholds. Which is similar in concept to a target-type. This way you only have to maintain your monitor-types instead of having to maintain possibly hundreds of target monitor-thresholds.
+        </code>
+        <p>
+	  This is a variation on the third target,
+	  &ldquo;<code>router-chassis</code>&rdquo;, has a no monitor
+	  thresholds.&nbsp; Instead it references a monitor-type. The monitor
+	  type holds the definitions for the monitor-thresholds, which is
+	  similar in concept to a target-type. This way you only have to
+	  maintain your monitor-types instead of having to maintain possibly
+	  hundreds of target monitor-thresholds.
         </p>
         <ul>
           <li> 
-          Existing monitor-threshold rules apply to what can be defined in a monitorType. This construct is referenced within Handletarget.pm when processing monitor-thresholds for a given target.
+	    Existing monitor-threshold rules apply to what can be defined in a
+	    monitorType. This construct is referenced within HandleTarget.pm
+	    when processing monitor-thresholds for a given target.
 	  </li>
         </ul>
       </div>
-    <div>
-</div>
+    </div>
+
     <div>
       <h2>Persistent Alarms</h2>
       <p>
@@ -330,7 +341,7 @@ monitorType router-chassis
         monitor threshold.
       </p>
       <div>
-        <h3>&ldquo;<code>exact</code>&rdquo;</h3>
+        <h3 id="exact">&ldquo;<code>exact</code>&rdquo;</h3>
         <p>
           These monitors are the simplest to use and configure, and allow you
           to monitor a datasource for an exact match. This is useful in cases
@@ -353,7 +364,7 @@ dsTempAlarm : exact : 1 : &lt;ACTION&gt; : [&hellip;]
         </code>
       </div>
       <div>
-        <h3>&ldquo;<code>value</code>&rdquo;</h3>
+        <h3 id="value">&ldquo;<code>value</code>&rdquo;</h3>
         <p>
           The next simplest monitor type, value monitor thresholds take two
           arguments, a minimum and maximum value. If the data source strays
@@ -368,7 +379,7 @@ temperature : value : 30 :     90 : &lt;ACTION&gt; : [&hellip;]
       </div>
 
       <div>
-        <h3>&ldquo;<code>relation</code>&rdquo;</h3>
+        <h3 id="relation">&ldquo;<code>relation</code>&rdquo;</h3>
         <p>
           Relation monitor thresholds are very flexible. A relation monitor
           considers the difference between two data sources (possibly from
@@ -422,7 +433,7 @@ temperature : value : 30 :     90 : &lt;ACTION&gt; : [&hellip;]
         </ol>
       </div>
       <div>
-        <h3>&ldquo;<code>quotient</code>&rdquo;</h3>
+        <h3 id="quotient">&ldquo;<code>quotient</code>&rdquo;</h3>
         <p>
           Quotient monitor thresholds are similar to relation monitor
           thresholds, except that they consider the quotient of two data
@@ -470,7 +481,7 @@ temperature : value : 30 :     90 : &lt;ACTION&gt; : [&hellip;]
         </ol>
       </div>
       <div>
-        <h3>&ldquo;<code>hunt</code>&rdquo;</h3>
+        <h3 id="hunt">&ldquo;<code>hunt</code>&rdquo;</h3>
         <p>
           The hunt monitor threshold is designed for the situation where the
           data source serves as an overflow for another data source; that is,
@@ -504,7 +515,7 @@ temperature : value : 30 :     90 : &lt;ACTION&gt; : [&hellip;]
         </ol>
       </div>
       <div>
-        <h3>&ldquo;<code>failures</code>&rdquo;</h3>
+        <h3 id="failures">&ldquo;<code>failures</code>&rdquo;</h3>
         <p>
           The failures monitor threshold is integrated with aberrant behavior
           detection in RRDtool. This monitor checks the
@@ -523,7 +534,7 @@ temperature : value : 30 :     90 : &lt;ACTION&gt; : [&hellip;]
           upper bound.
         </p>
       </div>
-    <div>
+    </div>
 
     <div>
       <h2>Alarm Actions</h2>
@@ -534,148 +545,186 @@ temperature : value : 30 :     90 : &lt;ACTION&gt; : [&hellip;]
         as a colon-delimited list following the action tag in
         the monitor threshold specification.
       </p>
-      <p>
-        SNMP: Generating a SNMP trap is the default action if
-        the action tag is omitted from a monitor threshold
-        specification. To support this default and for backwards
-        compatibility, the action SNMP does not use the action
-        arguments field in the monitor threshold specification.
-        The SNMP action instead requires the attribute
-        trap-address to be set for target. The traps Cricket
-        sends are marked with the enterprise OID
-        ".1.3.6.1.4.1.2595.1.1".&nbsp; The generic type is 6 and
-        specific type is 4 for failure (violation) of the
-        monitor threshold criteria and 5 for success (recall the
-        trap is cleared on the first success after one or more
-        failures).&nbsp; There are currently nine varbinds: the
-        monitor type,&nbsp; the monitor threshold string, the
-        target name, data source name, cricket user name (set to
-        "cricket" on Win32 platforms), instance number (to
-        distinguish targets with multiple instances), instance name,
-        contact name (based on the html dictionary entry contact-name),
-        and data value. These
-        varbinds are set (and could be customized) in the
-        sendMonitorTrap() subroutine in Monitor.pm.
-      </p>
-      <p>
-        MAIL: This action sends email to a specified address via
-        a Berkeley mailx compatible mail program. The first
-        action argument is the program to invoke to send email.
-        It is assumed that this program is compatible with
-        Berkeley mailx. That is, the program accepts piped input
-        as the message body, and supports a "-s" command flag to
-        specify the subject.&nbsp; If you don't have such a
-        program on your system, you may wish to customize the
-        code in the sendEmail() subroutine in Monitor.pm to
-        utilize your email program. The second action argument
-        is the recipient's email address. Note that as in the
-        example, you may need to escape special characters. Both
-        arguments are required. The mail message body includes
-        the following information: the monitor type, the monitor
-        threshold string, the target name, data source name, the
-        value of the data source retrieved from the RRD file,
-        and the instance number (to distinguish targets with
-        multiple instances). To change the contents of the
-        message, customize the sendEmail() subroutine in
-        Monitor.pm.
-      </p>
-      <p>
-        FILE: This action appends and deletes entries (lines)
-        from a file. When the monitor threshold criteria first
-        fails, a line containing details in a space-delimited
-        format is appended to the file specified as the action
-        argument (the FILE action has only one argument).
-        Subsequent failures do not add multiple lines to the
-        file. The FILE action essentially ignores
-        persistent-alarms = true (though some overhead is
-        incurred to detect duplicate lines, so persistent-alarms
-        should be set to false when possible for targets using
-        the FILE action). When the monitor threshold passes
-        again after one or more failures, the line is deleted
-        from the file.&nbsp; The line details include the target
-        name and the data source name. To include other details,
-        customize the LogToFile() subroutine in Monitor.pm.
-      </p>
-      <p>
-        EXEC: This action executes a shell command or script.
-        The first action argument is the shell command or script
-        to execute when the monitor threshold criteria fails.
-        The second action argument is the shell command or
-        script to execute when the monitor threshold passes
-        again after one or more failures. The EXEC action
-        provides a mechanism by which automated corrective
-        action can be taken.
-      </p>
-      <p>
-        FUNC: This action is similar to EXEC, except that a perl
-        subroutine defined in the Cricket scope is executed. The
-        first action argument is the function invoked when the
-        monitor threshold criteria fails. The second action
-        argument is the function invoked when the monitor
-        threshold passes again after one or more failures.&nbsp;
-        To use this action, you must first modify the entry in
-        the func.pm module to set the global variable
-        gMonFuncEnabled. Using this action requires
-        customization (you must write the subroutines). While
-        this mechanism provides complete flexibility in handling
-        special cases, the invoked subroutines cannot easily
-        accept arguments (this can be done, but the argument
-        list must be included by name in the action arguments
-        which can quickly become unwieldy). If your function
-        requires access to arguments available in the Alarm()
-        and Clear() functions, you might consider adding a new
-        action tag (and sharing your work with the Cricket
-        community).
-      </p>
-      
-  <p> META: This action is meant to be used to shared threshold monitoring event 
-    data with other external systems. This action does nothing. In the sense, 
-    that no external action is initiated. There is no mail sent, no SNMP trap 
-    generated or any other specific action. What it does is let cricket know the 
-    fact that an alarm has been generated or cleared. Cricket stores all active 
-    alarms in an internal format call meta files. These files are stored in the 
-    cricket-data directory along side each target.rrd file that has monitor-thresholds 
-    defined for it. The meta files store alarm data for all Action types.The monitor-threshold 
-    line itself and other data is stored in the meta file. Arguments are arbitrary.</p>
-  <p>Using this action requires customization (you must write the external interface 
-    script). The most common uses for this are for sharing event data with event 
-    management systems such as NetCool, BigBrother and others. Event management 
-    systems often support SNMP, proprietary agents or APIs. This permits a flexible 
-    way of interacting with these systems with something other than an SNMP trap.</p>
-  <p>To provide this, your external script must load the config-tree in memory, 
-    query it for active alarms and configured monitoring thresholds and send messages 
-    in the appropriate format to the event manager. An example script is provided 
-    in the util directory of the Cricket distribution, metaQuery.pl. Note that 
-    this is not to be mistaken with real time monitoring, as you have to wait 
-    for the collector run to be finished before querying the config-tree or else 
-    risk missing a new alarm until the next query.</p>
-  <div>
-    <p></p>
+      <div>
+        <h3 id="SNMP">&ldquo;<code>SNMP</code>&rdquo;</h3>
+	<p>
+          Generating a SNMP trap is the default action if
+          the action tag is omitted from a monitor threshold
+          specification. To support this default and for backwards
+          compatibility, the action SNMP does not use the action
+          arguments field in the monitor threshold specification.
+          The SNMP action instead requires the attribute
+	  &ldquo;<code>trap-address</code>&rdquo; to be set for target. The
+	  traps Cricket sends are marked with the enterprise OID
+          ".1.3.6.1.4.1.2595.1.1".&nbsp; The generic type is 6 and
+          specific type is 4 for failure (violation) of the
+          monitor threshold criteria and 5 for success (recall the
+          trap is cleared on the first success after one or more
+          failures).&nbsp; There are currently nine varbinds: the
+          monitor type,&nbsp; the monitor threshold string, the
+          target name, data source name, cricket user name (set to
+          "cricket" on Win32 platforms), instance number (to
+          distinguish targets with multiple instances), instance name,
+          contact name (based on the html dictionary entry contact-name),
+	  and data value. These varbinds are set (and could be customized) in
+	  the sendMonitorTrap() subroutine in Monitor.pm.
+        </p>
+      </div>
+
+      <div>
+        <h3 id="MAIL">&ldquo;<code>MAIL</code>&rdquo;</h3>
+        <p>
+          This action sends email to a specified address via
+          a Berkeley mailx compatible mail program. The first
+          action argument is the program to invoke to send email.
+          It is assumed that this program is compatible with
+          Berkeley mailx. That is, the program accepts piped input
+          as the message body, and supports a "-s" command flag to
+          specify the subject.&nbsp; If you don't have such a
+          program on your system, you may wish to customize the
+          code in the sendEmail() subroutine in Monitor.pm to
+          utilize your email program. The second action argument
+          is the recipient's email address. Note that as in the
+          example, you may need to escape special characters. Both
+          arguments are required. The mail message body includes
+          the following information: the monitor type, the monitor
+          threshold string, the target name, data source name, the
+          value of the data source retrieved from the RRD file,
+          and the instance number (to distinguish targets with
+          multiple instances). To change the contents of the
+          message, customize the sendEmail() subroutine in
+          Monitor.pm.
+        </p>
+      </div>
+
+      <div>
+        <h3 id="FILE">&ldquo;<code>FILE</code>&rdquo;</h3>
+        <p>
+          This action appends and deletes entries (lines)
+          from a file. When the monitor threshold criteria first
+	  fails, a line containing details in a space-delimited
+	  format is appended to the file specified as the action
+	  argument (the FILE action has only one argument).
+	  Subsequent failures do not add multiple lines to the
+          file. The FILE action essentially ignores
+          persistent-alarms = true (though some overhead is
+          incurred to detect duplicate lines, so persistent-alarms
+          should be set to false when possible for targets using
+          the FILE action). When the monitor threshold passes
+          again after one or more failures, the line is deleted
+          from the file.&nbsp; The line details include the target
+          name and the data source name. To include other details,
+          customize the LogToFile() subroutine in Monitor.pm.
+        </p>
+      </div>
+
+      <div>
+        <h3 id="EXEC">&ldquo;<code>EXEC</code>&rdquo;</h3>
+        <p>
+          This action executes a shell command or script.
+          The first action argument is the shell command or script
+          to execute when the monitor threshold criteria fails.
+          The second action argument is the shell command or
+          script to execute when the monitor threshold passes
+          again after one or more failures. The EXEC action
+          provides a mechanism by which automated corrective
+          action can be taken.
+        </p>
+      </div>
+
+      <div>
+        <h3 id="FUNC">&ldquo;<code>FUNC</code>&rdquo;</h3>
+        <p>
+          This action is similar to EXEC, except that a perl
+          subroutine defined in the Cricket scope is executed. The
+          first action argument is the function invoked when the
+          monitor threshold criteria fails. The second action
+          argument is the function invoked when the monitor
+          threshold passes again after one or more failures.&nbsp;
+          To use this action, you must first modify the entry in
+          the func.pm module to set the global variable
+          gMonFuncEnabled. Using this action requires
+          customization (you must write the subroutines). While
+          this mechanism provides complete flexibility in handling
+          special cases, the invoked subroutines cannot easily
+          accept arguments (this can be done, but the argument
+          list must be included by name in the action arguments
+          which can quickly become unwieldy). If your function
+          requires access to arguments available in the Alarm()
+          and Clear() functions, you might consider adding a new
+          action tag (and sharing your work with the Cricket
+          community).
+        </p>
+      </div>
+
+      <div>
+        <h3 id="META">&ldquo;<code>META</code>&rdquo;</h3>
+        <p>
+	  This action is meant to be used to shared threshold monitoring event
+	  data with other external systems. This action does nothing. In the
+	  sense, that no external action is initiated. There is no mail sent,
+	  no SNMP trap generated or any other specific action. What it does is
+	  let cricket know the fact that an alarm has been generated or
+	  cleared. Cricket stores all active alarms in meta files. These files
+	  are stored in the cricket-data directory along side each target.rrd
+	  file that has monitor-thresholds defined for it. The meta files store
+	  alarm data for all Action types.The monitor-threshold line itself and
+	  other data is stored in the meta file. Arguments are arbitrary.
+	</p>
+        <p>
+	  Using this action requires customization (you must write the external
+	  interface script). The most common uses for this are for sharing
+	  event data with event management systems such as NetCool, BigBrother
+	  and others. Event management systems often support SNMP, proprietary
+	  agents or APIs. This permits a flexible way of interacting with these
+	  systems with something other than an SNMP trap.
+	</p>
+        <p>
+	  To provide this, your external script must load the config-tree in
+	  memory, query it for active alarms and configured monitoring
+	  thresholds and send messages in the appropriate format to the event
+	  manager. An example script is provided in the util directory of the
+	  Cricket distribution, metaQuery.pl. Note that this is not to be
+	  mistaken with real time monitoring, as you have to wait for the
+	  collector run to be finished before querying the config-tree or else
+	  risk missing a new alarm until the next query.
+	</p>
+      </div>
   </div>
+
   <div> 
-    <h2>Monitoring Span</h2>
-    <p> Cricket monitoring thresholds can be extended to look for consecutive 
-      threshold failures. The SPAN keyword will require a threshold to be crossed 
-      an arbitrary number of consecutive times before triggering an alarm. The 
-      keyword SPAN and a span-length value are required to enable this action. 
-      At the first threshold verification that passes, the alarm will be cleared. 
-      Threshold crosses that have not been promoted to alarms are stored in the 
-      meta file associated with the monitored target. Using the following meta 
-      file format:</p>
-    <p>&lt;monitor-threshold&gt; &lt;timestamp-of-first-failure&gt; failure lastval 
-      &lt;ds-value-at-time-of-first-failure&gt;</p>
-    <p>When the time stamp of a threshold cross is older than &lt;span-length&gt; 
-      * %rrd-poll-interval%, an alarm is generated. This option is fully compatible 
-      with the persistent-alarms option.</p>
-  </div>
-</div>
-<div>
+    <h2 id="span">Monitoring Span</h2>
+    <p>
+      Cricket monitoring thresholds can be extended to look for consecutive
+      threshold failures.&nbsp; The SPAN keyword requires a threshold to be
+      crossed an arbitrary number of consecutive times before triggering an
+      alarm.&nbsp; The keyword SPAN and a span-length value are required to
+      enable this action.&nbsp; At the first threshold verification that
+      passes, the alarm will be cleared.&nbsp; Threshold crosses that have not
+      been promoted to alarms are stored in the meta file associated with the
+      monitored target.
+    </p>
       
-  <p>&nbsp; </p>
-  <p>Questions or comments: contact <a
-        href="mailto:%20jakeb@users.sourceforge.net">Jake Brutlag</a> 
-  </p>
-    </div>
-  </body>
+    <p>
+      The meta files use the following format:
+    </p>
+    <code class="block">
+&lt;monitor-threshold&gt; &lt;timestamp-of-first-failure&gt; failure lastval &lt;ds-value-at-time-of-first-failure&gt;
+    </code>
+    <p>
+      When the time stamp of a threshold cross is older than <code
+      class="inline">&lt;span-length&gt; * %rrd-poll-interval%</code>, an alarm
+      is generated.&nbsp; This option is fully compatible with the
+      persistent-alarms option.
+    </p>
+  </div>
+
+  <div>
+    <p>
+      Questions or comments: contact <a
+      href="mailto:%20jakeb@users.sourceforge.net">Jake Brutlag</a> 
+    </p>
+  </div>
+</body>
 </html>
 

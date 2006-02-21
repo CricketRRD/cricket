@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
@@ -688,8 +689,9 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
           <dd>Default value: <i>none</i>
             <p>
               This tag sets the target type for this target. It must be one
-              of the target type names from the targetType dictionary.
-              Cricket uses the targetType to decide which variables to
+	      of the target type names from the <a
+	      href="#targettype">targetType</a> dictionary.  Cricket uses the
+	      targetType to decide which variables to
               fetch, and how much data to store in the RRD.
             </p>
           </dd>
@@ -718,7 +720,6 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
               to avoid this problem.
             </p>
           </dd>
-        </dl>
           <dt><tt>use-gprint</tt></dt>
           <dd>Default value: <i>false</i>
             <p>
@@ -1248,9 +1249,9 @@ thing_2 blue 222
       </div>
 
       <div id="targettype">
-        <h3>The TargetType Dictionary</h3>
+        <h3>The targetType Dictionary</h3>
         <p>
-          The TargetType dictionary tells Cricket which datasources to
+          The targetType dictionary tells Cricket which datasources to
           gather together for a certain kind of target. Unlike other
           dictionaries, keys in this one can occur multiple times.
         </p>
@@ -1271,15 +1272,25 @@ thing_2 blue 222
               in separate view dictionary entries on the config tree
               inheritance path of targets of this target type. This implies
               the view entries do not have to be defined in the same
-              Defaults file in which the TargetType dictionary referencing
+              Defaults file in which the targetType dictionary referencing
               them appears. However, for a cleaner, easier to read config
               tree, define view entries in the same Defaults file as the
-              TargetType dictionary that references them.
+              targetType dictionary that references them.
             </p>
             <p>
-              The pre-1.0.4 syntax of defining views with the TargetType
+              The pre-1.0.4 syntax of defining views with the targetType
               <tt>view</tt> tag is deprecated.
             </p>
+          </dd>
+          <dt><tt>rra</tt></dt>
+          <dd>Default value: <i>none</i>
+            <p>
+	      Each <tt>rra</tt> specifies a comma-delimited list of round robin
+	      archives associated with this target type. These RRAs must be
+	      defined in separate <a href="reference.html#rra">rra</a>
+	      dictionaries in the config tree.
+            </p>
+            <p>Example: <tt>rra = "5minAve, 30minAve, 2hrAve, 2hrMax, 1dayAve, 1dayMax"</tt></p>
           </dd>
         </dl>
       </div>
@@ -1303,7 +1314,7 @@ thing_2 blue 222
           for a datasource, you could specify <tt>y-max =
           %specific-y-max%</tt>, then set the tag <tt>specific-y-max</tt> on
           a per-target basis. The association between targets and graph
-          dictionary entries is controlled by the TargetType dictionary for
+          dictionary entries is controlled by the targetType dictionary for
           the apporpriate target type (because the graph dictionary names
           match datasource dictionary names).
         </p>
@@ -1565,14 +1576,14 @@ thing_2 blue 222
           is embedded are configured in the view entry and thus can vary from
           view to view. As you navigate through the Cricket Grapher the choice
           of graph pages presented for a given target are the views defined
-          for that target (via the view list in the TargetType dictionary).
+          for that target (via the view list in the targetType dictionary).
         </p>
         <p>
           The most important view tag is <tt>elements</tt>, as this tag
           specifies the list of datasources (with their associated graph
           dictionary entries) to be included in the view. The
           <tt>elements</tt> tag is the replacement for the space-delimited
-          datasource list in the TargetType dictionary view tag in older
+          datasource list in the targetType dictionary view tag in older
           (pre-1.0.4) versions of Cricket.
         </p>
         <p>
@@ -1584,7 +1595,7 @@ thing_2 blue 222
           Cricket variables in view tags (i.e. %myvar%) are expanded with
           respect to a target. The association between targets and view
           dictionary entries is controlled by the <a
-          href="#targettype">TargetType dictionary</a> for the apporpriate
+          href="#targettype">targetType</a> dictionary for the apporpriate
           target type.
         </p>
         <p>
@@ -1624,7 +1635,7 @@ elements = "ifInOctects, ifOutOctets"
               The <tt>elements</tt> tag specifies a list of datasources (with
               their associated graph dictionary entries) to be included in the
               view. These datasources are presumed to be listed in the
-              <tt>ds</tt> tag of any TargetType dictionary to which the view
+              <tt>ds</tt> tag of any targetType dictionary to which the view
               belongs. The <tt>elements</tt> tag may either be comma-delimited
               (the preference) or space-delimited (to match pre-1.0.4 syntax).
             </p>
@@ -2030,6 +2041,7 @@ html  head
           For more information on the format of these dictionary entries, read
           the RRD Tool documentation on the "create" command.
         </p>
+	<p>Example: <tt>rra 5minAve AVERAGE:0.5:1:600</tt></p>
       </div>
     </div>
 
