@@ -400,7 +400,7 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
           <dd>Default-value: <i>none</i>
             <p>
               A monitor-type refers to monitor-thresholds templates
-	      defined using the monitorType dictionnary. This is used
+	      defined using the monitorType dictionary. This is used
 	      to define monitor-thresholds once in common monitorType
 	      items. These are then referenced within a target using
 	      the monitor-type tag/value. where the value is the name
@@ -913,7 +913,7 @@ inst-names =   "('Port 1 Ethernet', 'Port 2 Ethernet',
 		  searched for the key.
                   (defaults to 1). <tt>delim</tt> is the field delimiter 
 		  (defaults to ':').  For example, if the file /tmp/box 
-		  contains the following lines with fields seperated by 
+		  contains the following lines with fields separated by 
 		  spaces:
  
                 </p>
@@ -1060,7 +1060,7 @@ thing_2 blue 222
                   Monitor WMI Counters</a> document.
                 </p>
               </dd>
-            </dl>
+             </dl>
             <p>
               Datasources are batched together and executed with as few
               network transactions or shell executions are possible. For
@@ -1168,6 +1168,14 @@ thing_2 blue 222
                   during the last polling period.
                 </p>
               </dd>
+              <dt>COMPUTE</dt>
+              <dd>
+                <p>
+                  This datasource type gets its values by applying a
+                  formula to calculate with the values from other datasources.
+                  The formula must be given in the <tt>rrd-cdef</tt> tag.
+                </p>
+              </dd>
             </dl>
             <p>
               The datasource type names are case-insensitive. They are
@@ -1224,6 +1232,22 @@ thing_2 blue 222
               the datasource dictionary.
             </p>
           </dd>
+          <dt><tt>rrd-cdef</tt></dt>
+          <dd>Default value: none
+            <p>
+              Like the other <tt>rrd-</tt>tags, this tag is passed through
+              to RRD.  It can contain a formula using the reverse polish
+              notation from rrdtool (see the documentation of rrdtool).
+            </p>
+            <p>
+              Example to remove unknown values from a datasource:
+            </p>
+            <p><tt>rrd-cdef = ds0,UN,0,ds0,IF</tt></p>
+            <p>
+              If you use long datasource names, those names have to be used
+              inside cdefs.  Otherwise, you have to use the <tt>ds<i>n</i></tt>
+              syntax and figure out the numbers by yourself.
+            </p>
         </dl>
       </div>
 
@@ -1260,7 +1284,7 @@ thing_2 blue 222
           <dd>Default value: <i>none</i>
             <p>
               Each <tt>ds</tt> tag tells Cricket about a variable it will be
-              fetching. The value of the tag must be comma-separated list of
+              fetching. The value of the tag must be a comma-separated list of
               known datasource names.
             </p>
           </dd>
@@ -1315,7 +1339,7 @@ thing_2 blue 222
           %specific-y-max%</tt>, then set the tag <tt>specific-y-max</tt> on
           a per-target basis. The association between targets and graph
           dictionary entries is controlled by the targetType dictionary for
-          the apporpriate target type (because the graph dictionary names
+          the appropriate target type (because the graph dictionary names
           match datasource dictionary names).
         </p>
         <p>
@@ -1595,7 +1619,7 @@ thing_2 blue 222
           Cricket variables in view tags (i.e. %myvar%) are expanded with
           respect to a target. The association between targets and view
           dictionary entries is controlled by the <a
-          href="#targettype">targetType</a> dictionary for the apporpriate
+          href="#targettype">targetType</a> dictionary for the appropriate
           target type.
         </p>
         <p>
