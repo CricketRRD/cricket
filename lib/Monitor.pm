@@ -526,14 +526,15 @@ sub Clear {
 sub alarmExec {
     my ($args, $action) = @_;
     my $alarmArgs       = $$args[7];
-    system($alarmArgs->[0]);
 
     if ($action eq 'ADD') {
+        system($alarmArgs->[0]);
         Info("Monitor: Triggered event with system command '".
              $alarmArgs->[0]."' .");
     }
 
     else {
+        system($alarmArgs->[1]);
         Info("Monitor: Cleared event with shell command '".
              $alarmArgs->[1]."' .");
     }
