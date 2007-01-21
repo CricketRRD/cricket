@@ -2356,6 +2356,7 @@ sub makeUrl {
     return $cgi->self_url() if $gUseSelfUrl;
     return $cgi->url(-relative=>$gUseRelativeUrl,
                      -query=>1,
+                     -rewrite=>0,
                      -path_info=>$gUsePathInfo);
 }
 
