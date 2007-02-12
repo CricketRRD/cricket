@@ -173,8 +173,11 @@ sub checkTargetInstance {
     foreach $Threshold (@ThresholdStrings) {
         # restore escaped commas
         $Threshold =~ s/\0/,/g ;
+        # hide escaped colons
+        $args =~ s/\\:/\0/g ;
         #Cleanup newlines as they break meta files
         $Threshold =~ s/[\n\r]+$//g ;
+
         my($span) = 0;
         my($spanlength);
 
@@ -184,8 +187,6 @@ sub checkTargetInstance {
             $span = 1;
         }
 
-        # hide escaped colons
-        $args =~ s/\\:/\0/g ;
         # default action type is SNMP
         my($actionType) = 'SNMP' ;
         my(@actionArgs);
