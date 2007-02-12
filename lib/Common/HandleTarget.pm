@@ -183,7 +183,7 @@ sub checkTargetInstance {
         my($span) = 0;
         my($spanlength);
 
-        my($ds,$type,$args) = split(/\s*:\s*/, $Threshold, 3);
+        my($ds,$type,$args) = split(/:/, $Threshold, 3);
         ($args, $spanlength) = split(/:SPAN:/, $args, 2) if ($args =~ /SPAN/);
         if (defined ($spanlength) && $spanlength =~ /\d+/ ){
             $span = 1;
@@ -193,17 +193,17 @@ sub checkTargetInstance {
         my($actionType) = 'SNMP' ;
         my(@actionArgs);
         # search for an action tag
-        if ( $args =~ /^(.*)\s*:\s*(FUNC|EXEC|FILE|MAIL|META)\s*:\s*(.*)$/ ) {
+        if ( $args =~ /^(.*):(FUNC|EXEC|FILE|MAIL|META):(.*)$/ ) {
             $args = $1 ;
             $actionType = $2 ;
             # restore escaped colons in the monitor args field
             $args =~ s/\0/:/g ;
             my $action_args = $3;
             # action args are colon-delimited
-            @actionArgs = split(/\s*:\s*/, $action_args);
+            @actionArgs = split(/:/, $action_args);
             # restore escaped colons in the action args field
             map { $_ =~ s/\0/:/g } @actionArgs;
-        } elsif ( $args =~ /^(.*)\s*:\s*(SNMP|META)\s*$/ ) {
+        } elsif ( $args =~ /^(.*):(SNMP|META)\s*$/ ) {
             $args = $1 ;
             $actionType = $2 ;
             # restore escaped colons
