@@ -61,8 +61,6 @@ use Common::HandleTarget;
 # Set a safe path. Necessary for set[ug]id operation.
 $ENV{PATH} = "/bin:/usr/bin";
 
-my $gLongDSName = $Common::global::gLongDSName;
-
 # default to warn. You might want to change this to 'debug' when
 # working on Cricket configs, or hacking Cricket itself.
 $log = 'warn';
@@ -81,9 +79,9 @@ $gPollingInterval = 5 * 60;     # defaults to 5 minutes
 # which makes life easier for folks using Apache "Location" access
 # restrictions. And they all have their drawbacks too. Pick one.
 $Common::global::gUrlStyle ||= "classic";
-my $gUseSelfUrl = 0;
-my $gUseRelativeUrl = 0;
-my $gUsePathInfo = 0;
+our $gUseSelfUrl = 0;
+our $gUseRelativeUrl = 0;
+our $gUsePathInfo = 0;
 if ($Common::global::gUrlStyle eq "pathinfo") {
     $gUsePathInfo = 1;
 } elsif ($Common::global::gUrlStyle eq "relative") {
