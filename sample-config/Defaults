@@ -100,6 +100,10 @@ targetType    --default--
     rra    =    "5minAve, 30minAve, 2hrAve, 2hrMax, 1dayAve, 1dayMax"
 #    rra    =    "5minAve, 30minAve, 2hrAve, 2hrMax, 1dayAve, 1dayMax, hwpredict"
 
+# List alternate views when displaying a target
+# Default: list-views = false
+# 	list-views = true
+
 # The HTML dict has bits and pieces of HTML that gets used
 # by the grapher.
 

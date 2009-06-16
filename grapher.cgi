@@ -229,8 +229,9 @@ sub doHTMLPage {
 
             # put the view into the target dict, so it's
             # there if they want to use it.
-            my($view) = lc $gQ->param('view') if defined($gQ->param('view'));
+            my $view = $gQ->param('view');
             if (defined($view)) {
+                $view = lc $view;
                 $targRef->{'auto-view'} = $view;
             }
 
@@ -321,10 +322,25 @@ sub doHTMLPage {
                     Error("Failed to get dslist from view name.");
                 }
 
+            } elsif (defined ($dslist = $gQ->param('dslist'))) {
+                # Allow arbitrary "views" to be created with dslist
+                $dslist =~ s/\s*,\s*/,/g;
             } else {
                 $dslist = $ttRef->{'ds'};
                 # squeeze out any extra spaces
                 $dslist = join(',', split(/\s*,\s*/, $dslist));
+            }
+
+            # make a list of the view URLs from the targettype
+            my @viewlinks = ();
+            if ($ttRef->{'list-views'} && $ttRef->{'view'}) {
+                foreach $v (split(/\s*,\s*/, $ttRef->{'view'})) {
+                    # Only care about the name
+                    $v =~ s/\s*:.*//;
+                    my $vurl = makeUrlView($gQ, $v);
+                    my $t = "<a href=\"$vurl\">[&nbsp;$v&nbsp;]</a>";
+                    push @viewlinks, $t;
+                }
             }
 
             # handle multi-targets... if we have a targets attribute,
@@ -408,8 +424,13 @@ sub doHTMLPage {
                     print "<p><i>Aberrant Behavior Detection:</i><p>\n",
                           join("<br>\n", @hwlinks);
                 }
-                print "</center></td>\n";
-                print "</tr></table>\n";
+                print "</center></td></tr>\n";
+                if (@viewlinks) {
+                    print "<tr><td colspan=\"2\"><b>Available views:</b>";
+                    print join (" ", @viewlinks);
+                    print "</td></tr>\n";
+                }
+                print "</table>\n";
             }
 
             if (defined($targRef->{'target-html'})) {
@@ -493,10 +514,7 @@ sub doHTMLPage {
                         $gQ->param('ranges', 'h:d:w');
                         urlTarget($gQ, $thisTarget2);
                         $gQ->param('inst', $thisInst) if (defined($thisInst));
-                        if (defined($view))  {
-                            $gQ->param('view', $view);
-                        }
-                        $linkurl = makeUrl($gQ);
+                        $linkurl = makeUrlView($gQ, $view);
 
                         print "<a href=\"$linkurl\">";
 
@@ -642,8 +660,13 @@ sub doHTMLPage {
                     print "<p><i>Aberrant Behavior Detection:</i><p>\n",
                           join("<br>\n", @hwlinks);
                 }
-                print "</center></td>\n";
-                print "</tr></table>\n";
+                print "</center></td></tr>\n";
+                if (@viewlinks) {
+                    print "<tr><td colspan=\"2\"><b>Available views:</b>";
+                    print join (" ", @viewlinks);
+                    print "</td></tr>\n";
+                }
+                print "</table>\n";
             }
         }
     } else {
@@ -797,10 +820,7 @@ sub doHTMLPage {
                         my $viewRef = $ct->configHash($name, 'view', lc $vname);
                         my $vdesc = $viewRef->{'label'};
                         $vdesc ||= $vname;
-                        # put it in just long enough to get a URL out
-                        $gQ->param('view', $vname);
-                        my($me) = makeUrl($gQ);
-                        $gQ->delete('view');
+                        my($me) = makeUrlView($gQ, $vname);
 
                         $links .= "<a href=\"$me\">[&nbsp;$vdesc&nbsp;]</a>\n";
                     }
@@ -2356,6 +2376,22 @@ sub makeUrl {
                      -query=>1,
                      -rewrite=>0,
                      -path_info=>$gUsePathInfo);
+}
+
+# Return a URL as a text string, based on the current state of the
+# $cgi object (with a specific view)
+sub makeUrlView {
+    my $cgi = shift;
+    my $view = shift;
+    my $oldview = $cgi->param('view');
+    $cgi->param('view', $view);
+    my $url = makeUrl($cgi);
+    if (defined ($oldview)) {
+        $cgi->param('view', $oldview);
+    } else {
+        $cgi->delete('view');
+    }
+    return $url;
 }
 
 # Get or set the target from the $cgi object.
