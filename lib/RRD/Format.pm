@@ -161,6 +161,16 @@ sub setArch {
         $self->{'liveHead3'} = "Q Q";
         $self->{'rraPtr'} = "Q";
         $self->{'element'} = "d";
+    } elsif ( $archname =~ /^x86_64/ ) {
+        $self->{'statHead'} = "a4 a5 x7 d Q Q Q x80";
+        $self->{'dsDef'} = "a20 a20 Q d d x56";
+        $self->{'rraDef'} = "a20 x4 Q Q d x72";
+        $self->{'liveHead'} = "Q Q";
+        $self->{'liveHead3'} = "Q Q";
+        $self->{'pdpDef'} = "a30 x2 Q d x64";
+        $self->{'cdpDef'} = "d Q x64";
+        $self->{'rraPtr'} = "Q";
+        $self->{'element'} = "d";
     } elsif ( $archname eq 'sparc64-netbsd' ) {
         $self->{'statHead'} = "a4 a5 x7 d Q Q Q x80";
         $self->{'dsDef'} = "a20 a20 Q d d x56";
