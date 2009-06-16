@@ -183,7 +183,7 @@ color   purply          FB31FB
 # it was not given colors
 color    --order--      "dark-green, blue, red, cyan, magenta, yellow,
     dark-red, dark-blue, cornflower, light-purple, pink, purple,
-    deep-blue, green, brown, black, neongrn, skyblue, orange, burntorng
+    deep-blue, green, brown, black, neongrn, skyblue, orange, burntorng,
     purply"
 
 # graph
