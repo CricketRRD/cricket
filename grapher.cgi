@@ -1523,7 +1523,10 @@ sub doGraph {
         # Then pick up the values
         # things we pick up form the target dict
         my($rrd) = $targRef->{'rrd-datafile'};
-        $lasttime = scalar(localtime(RRDs::last($rrd)));
+        if ($lasttime = scalar(localtime(RRDs::last($rrd)))) {
+            # Ensure times are properly escaped for printing in RRD commands
+            $lasttime =~ s{\:}{\\\:}g;
+        }
 
         # use the dslist to create a set of defs/cdefs
 
