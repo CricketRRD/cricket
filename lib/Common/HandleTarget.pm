@@ -174,7 +174,7 @@ sub checkTargetInstance {
         # restore escaped commas
         $Threshold =~ s/\0/,/g ;
         # hide escaped colons
-        $args =~ s/\\:/\0/g ;
+        $Threshold =~ s/\\:/\0/g ;
         # remove all spaces around colons to simplify argument processing.
         $Threshold =~ s/\s*:\s*/:/g;
         #Cleanup newlines as they break meta files
